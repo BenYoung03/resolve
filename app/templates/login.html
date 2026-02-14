@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/login.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="login">    
+    <div class="login-container">
+        <div class="header-wrapper"><h2>Login</h2></div>
+        <form action="" method="post" novalidate>
+            {{ form.hidden_tag() }}
+            {{ form.email.label }}
+            {{ form.email(class="email", placeholder="Enter Email Address")}}
+            {{ form.password.label }}
+            {{ form.password(class="password", placeholder="Enter Password")}}
+
+            <div>
+                {{ form.remember_me() }} {{ form.remember_me.label }}
+            </div>
+
+            <div class="confirm-container">
+                {{ form.submit(class="login-confirm") }}
+                <a>Don't have an account? Click here!</a> 
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,26 +1,7 @@
-<!doctype html>
-<html>
-    <head>
-        <title>Resolve</title>
-        <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&amp;display=swap" rel="stylesheet">
-        <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/home.css') }}">
-    </head>
+{% extends "base.html" %}
 
-    {% block extra_head %}{% endblock %}
-
-    <body>
-        <div class="header-container">
-            <div class="header">
-                <div class="left-header">
-                    <h1>Resolve</h1>
-                </div>
-                <div class="right-header">
-                    <a>Login</a>
-                    <a>Register</a>
-                </div>
-        </div>
-
-    {% block content %}{% endblock %}
-
-    </body>
-</html>
+{% block content %}
+<p>
+    Welcome to Resolve!
+</p>
+{% endblock %}
