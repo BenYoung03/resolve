@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/register.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="register">    
+    <div class="registration-container">
+        <div class="header-wrapper"><h2>Create Your Account</h2></div>
+        <form action="" method="post" novalidate>
+            {{ form.hidden_tag() }}
+            {{ form.email.label }}
+            {{ form.email(class="email", placeholder="Enter Email", pattern=".+@ontario\.com", title="Please provide only an Ontario email address")}}
+            {{ form.password.label }}
+            {{ form.password(class="password", placeholder="Enter Password")}}
+            {{ form.confirmPassword.label }}
+            {{ form.confirmPassword(class="confirmPassword", placeholder="Enter Password Again")}}
+
+            <div class="confirm-container">
+                {{ form.submit(class="register-confirm") }}
+                <a href="{{ url_for('login') }}">Already have an account? Click here!</a> 
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
