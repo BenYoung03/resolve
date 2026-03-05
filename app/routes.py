@@ -62,3 +62,12 @@ def register():
         return redirect(url_for('login'))
     
     return render_template('register.html', form=form)
+
+#Logout route
+@app.route('/logout')
+#If user is logged in allow them to run this route
+@login_required
+def logout():
+    # Run logout_user and redirect to home page
+    logout_user()
+    return redirect(url_for('index'))

@@ -15,8 +15,12 @@
                     <h1>Resolve</h1>
                 </div>
                 <div class="right-header">
+                    {% if current_user.is_authenticated %}
+                        <a href="/logout">Logout</a>
+                    {% else %}
                     <a href="/login">Login</a>
                     <a href="/register">Register</a>
+                    {% endif %}
                 </div>
             </div>
         </div>
