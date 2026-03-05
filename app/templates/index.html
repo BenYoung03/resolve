@@ -1,7 +1,23 @@
 {% extends "base.html" %}
 
 {% block content %}
-<p>
-    Welcome to Resolve!
-</p>
+<h1>Welcome to Resolve!</h1>
+{% if current_user.is_authenticated %}
+    {% if current_user.has_role(['Employee']) %}
+        <div>
+            <h2>Employee View</h2>
+            <p>You are signed in as an employee.</p>
+        </div>
+    {% elif current_user.has_role(['Agent', 'Admin']) %}
+        <div>
+            <h2>Agent/Admin View</h2>
+            <p>You are signed in with agent or admin access.</p>
+        </div>
+    {% else %}
+    <!-- This case should not occur -->
+        
+    {% endif %}
+{% else %}
+    <p>Please create an account or login to get started!</p>
+{% endif %}
 {% endblock %}

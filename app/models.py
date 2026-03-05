@@ -34,6 +34,11 @@ class User(db.Model, UserMixin):
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
+
+    def has_role(self, roles):
+        if isinstance(roles, str):
+            roles = [roles]
+        return self.role.name in roles
     
     def get_id(self):
         return str(self.UserID)
