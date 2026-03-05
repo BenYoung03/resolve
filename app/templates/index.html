@@ -1,12 +1,23 @@
 {% extends "base.html" %}
 
+{% block extra_head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/ticketView.css') }}">
+{% endblock %}
+
 {% block content %}
-<h1>Welcome to Resolve!</h1>
 {% if current_user.is_authenticated %}
     {% if current_user.has_role(['Employee']) %}
-        <div>
-            <h2>Employee View</h2>
-            <p>You are signed in as an employee.</p>
+        <div class="ticket-container">
+            <div class="left-menu">
+                <ul>
+                    <li><a href="#">My Tickets</a></li>
+                    <li><a href="#">Open Tickets</a></li>
+                    <li><a href="#">Closed Tickets</a></li>
+                </ul>
+            </div>
+            <div class="right-menu">
+                <button id="create-ticket">Submit a Ticket</button>
+            </div>
         </div>
     {% elif current_user.has_role(['Agent', 'Admin']) %}
         <div>
