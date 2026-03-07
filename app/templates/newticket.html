@@ -5,22 +5,26 @@
 {% endblock %}
 
 {% block content %}
-<div class="register">    
-    <div class="registration-container">
-        <div class="header-wrapper"><h2>Submit a New Ticket</h2></div>
-        <form action="" method="post" novalidate>
-            {{ form.hidden_tag() }}
-            {{ form.subject.label }}
-            {{ form.subject(class="subject", placeholder="Enter Subject")}}
-            {{ form.description.label }}
-            {{ form.description(class="description", placeholder="Describe your issue here...")}}
+<h2>Submit a New Ticket</h2>
 
-            <div class="confirm-container">
-                {{ form.submit(class="register-confirm") }}
-                <a href="{{ url_for('index') }}">Back to Dashboard</a> 
-            </div>
-        </form>
-    </div>
-</div>
+<form action="" method="post" novalidate>
+    {{ form.hidden_tag() }}
+
+    {{ form.subject.label }}
+    {{ form.subject(placeholder="Enter subject") }}
+
+    {{ form.description.label }}
+    {{ form.description(placeholder="Describe your issue here...") }}
+    
+    {{ form.category.label }}
+    {{ form.category() }}
+    
+    {{ form.priority.label }}
+    {{ form.priority() }}
+    
+    {{ form.submit() }}
+</form>
+
+<a href="{{ url_for('index') }}">Back to Dashboard</a>
 {% endblock %}
 

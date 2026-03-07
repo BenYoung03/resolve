@@ -1,7 +1,7 @@
 from app import app, db
 from flask import render_template, flash, redirect, url_for, request
 from app.forms import LoginForm, RegistrationForm, CreateTicketForm
-from app.models import User, Role
+from app.models import User, Role, Category, Status, Priority
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required
 
@@ -72,8 +72,16 @@ def logout():
     logout_user()
     return redirect(url_for('index'))
 
-@app.route('/createticket')
+@app.route('/createticket', methods=['GET', 'POST'])
 @login_required
 def create_ticket():
     form = CreateTicketForm()
+
+    form.category.choices = [(c.CategoryID, c.name) for c in Category.query.all()]
+    form.priority.choices = [(p.PriorityID, p.name) for p in Priority.query.all()]
+    if form.validate_on_submit():
+
+        flash('Ticket created successfully.')
+        return redirect(url_for('index'))
+
     return render_template('newticket.html', form=form)

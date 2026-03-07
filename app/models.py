@@ -8,26 +8,41 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 
 class Role(db.Model):
-    __tablename__ = "roles"
+    __tablename__ = "Roles"
 
     RoleID: so.Mapped[int] = so.mapped_column(primary_key=True)
     name: so.Mapped[str] = so.mapped_column(sa.String, nullable=False)
 
-    users: so.WriteOnlyMapped["User"] = so.relationship(back_populates="role")
+    users: so.Mapped[list["User"]] = so.relationship(back_populates="role")
 
     def __repr__(self):
         return f"<Role {self.name}>"
+
 
 
 class User(db.Model, UserMixin):
     __tablename__ = "User"
 
     UserID: so.Mapped[int] = so.mapped_column(primary_key=True)
-    email: so.Mapped[str] = so.mapped_column(sa.String, nullable=False, unique=True)
-    password_hash: so.Mapped[str] = so.mapped_column(sa.String, nullable=False)
-    roleId: so.Mapped[int] = so.mapped_column(sa.ForeignKey("roles.RoleID"), nullable=False)
+    email: so.Mapped[Optional[str]] = so.mapped_column(sa.String)
+    password_hash: so.Mapped[Optional[str]] = so.mapped_column(sa.String)
+    roleId: so.Mapped[int] = so.mapped_column(sa.ForeignKey("Roles.RoleID"), nullable=False)
 
     role: so.Mapped["Role"] = so.relationship(back_populates="users")
+
+    created_tickets: so.Mapped[list["Ticket"]] = so.relationship(
+        foreign_keys="Ticket.CreatedBy",
+        back_populates="creator"
+    )
+
+    assigned_tickets: so.Mapped[list["Ticket"]] = so.relationship(
+        foreign_keys="Ticket.AssignedTo",
+        back_populates="assignee"
+    )
+
+    comments: so.Mapped[list["TicketComment"]] = so.relationship(
+        back_populates="user"
+    )
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -43,52 +58,123 @@ class User(db.Model, UserMixin):
     def get_id(self):
         return str(self.UserID)
 
+    def __repr__(self):
+        return f"<User {self.email}>"
+
+
 
 class Category(db.Model):
-    __tablename__ = "Category"
+    __tablename__ = "TicketCategories"
 
-    id: so.Mapped[int] = so.mapped_column(primary_key=True)
-    name: so.Mapped[str] = so.mapped_column(sa.String, nullable=False)
-    active: so.Mapped[bool] = so.mapped_column(sa.Boolean, nullable=False, default=True)
+    CategoryID: so.Mapped[int] = so.mapped_column(primary_key=True)
+    name: so.Mapped[Optional[str]] = so.mapped_column(sa.String)
 
+    tickets: so.Mapped[list["Ticket"]] = so.relationship(back_populates="category")
 
-class Status(db.Model):
-    __tablename__ = "Status"
+    def __repr__(self):
+        return f"<Category {self.name}>"
 
-    id: so.Mapped[int] = so.mapped_column(primary_key=True)
-    name: so.Mapped[str] = so.mapped_column(sa.String, nullable=False)
 
 
 class Priority(db.Model):
-    __tablename__ = "Priority"
+    __tablename__ = "TicketPriority"
 
-    id: so.Mapped[int] = so.mapped_column(primary_key=True)
-    kind: so.Mapped[str] = so.mapped_column(sa.String, nullable=False)
+    PriorityID: so.Mapped[int] = so.mapped_column(primary_key=True)
+    name: so.Mapped[Optional[str]] = so.mapped_column(sa.String)
+
+    tickets: so.Mapped[list["Ticket"]] = so.relationship(back_populates="priority")
+
+    def __repr__(self):
+        return f"<Priority {self.name}>"
+
+
+
+class Status(db.Model):
+    __tablename__ = "TicketStatus"
+
+    StatusID: so.Mapped[int] = so.mapped_column(primary_key=True)
+    name: so.Mapped[Optional[str]] = so.mapped_column(sa.String)
+
+    tickets: so.Mapped[list["Ticket"]] = so.relationship(back_populates="status")
+
+    def __repr__(self):
+        return f"<Status {self.name}>"
+
 
 
 class Ticket(db.Model):
-    __tablename__ = "Ticket"
+    __tablename__ = "Tickets"
 
-    id: so.Mapped[int] = so.mapped_column(primary_key=True)
-    title: so.Mapped[str] = so.mapped_column(sa.String, nullable=False)
-    content: so.Mapped[str] = so.mapped_column(sa.Text, nullable=False)
+    TicketID: so.Mapped[int] = so.mapped_column(primary_key=True, autoincrement=True)
+    subject: so.Mapped[Optional[str]] = so.mapped_column(sa.String)
+    description: so.Mapped[Optional[str]] = so.mapped_column(sa.Text)
 
-    user_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("User.UserID"), nullable=False)
-    category_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("Category.id"), nullable=False)
+    CategoryID: so.Mapped[int] = so.mapped_column(
+        sa.ForeignKey("TicketCategories.CategoryID"),
+        nullable=False
+    )
+    StatusID: so.Mapped[int] = so.mapped_column(
+        sa.ForeignKey("TicketStatus.StatusID"),
+        nullable=False
+    )
+    PriorityID: so.Mapped[int] = so.mapped_column(
+        sa.ForeignKey("TicketPriority.PriorityID"),
+        nullable=False
+    )
+    CreatedBy: so.Mapped[int] = so.mapped_column(
+        sa.ForeignKey("User.UserID"),
+        nullable=False
+    )
+    AssignedTo: so.Mapped[Optional[int]] = so.mapped_column(
+        sa.ForeignKey("User.UserID"),
+        nullable=True
+    )
+    CreatedAt: so.Mapped[str] = so.mapped_column(nullable=False)
+    ClosedAt: so.Mapped[Optional[str]] = so.mapped_column(nullable=True)
 
-    status: so.Mapped[int] = so.mapped_column(sa.ForeignKey("Status.id"), nullable=False)
+    category: so.Mapped["Category"] = so.relationship(back_populates="tickets")
+    status: so.Mapped["Status"] = so.relationship(back_populates="tickets")
+    priority: so.Mapped["Priority"] = so.relationship(back_populates="tickets")
 
-    created_at: so.Mapped[datetime] = so.mapped_column(sa.DateTime, nullable=False, default=datetime.utcnow)
+    creator: so.Mapped["User"] = so.relationship(
+        foreign_keys=[CreatedBy],
+        back_populates="created_tickets"
+    )
+    assignee: so.Mapped[Optional["User"]] = so.relationship(
+        foreign_keys=[AssignedTo],
+        back_populates="assigned_tickets"
+    )
 
-    agent_id: so.Mapped[Optional[int]] = so.mapped_column(sa.ForeignKey("User.UserID"), nullable=True)
-    priority_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("Priority.id"), nullable=False)
+    comments: so.Mapped[list["TicketComment"]] = so.relationship(
+        back_populates="ticket",
+        cascade="all, delete-orphan"
+    )
+
+    def __repr__(self):
+        return f"<Ticket {self.TicketID}: {self.subject}>"
+
 
 
 class TicketComment(db.Model):
-    __tablename__ = "Ticket_Comment"
+    __tablename__ = "TicketComment"
 
-    ticket_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("Ticket.id"), nullable=False)
-    id: so.Mapped[int] = so.mapped_column(primary_key=True)
-    user_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("User.UserID"), nullable=False)
-    text: so.Mapped[str] = so.mapped_column(sa.Text, nullable=False)
-    created_at: so.Mapped[datetime] = so.mapped_column(sa.DateTime, nullable=False, default=datetime.utcnow)
+    CommentID: so.Mapped[int] = so.mapped_column(primary_key=True, autoincrement=True)
+    TicketID: so.Mapped[int] = so.mapped_column(
+        sa.ForeignKey("Tickets.TicketID"),
+        nullable=False
+    )
+    UserID: so.Mapped[int] = so.mapped_column(
+        sa.ForeignKey("User.UserID"),
+        nullable=False
+    )
+    comment: so.Mapped[str] = so.mapped_column(sa.Text, nullable=False)
+    CreatedAt: so.Mapped[str] = so.mapped_column(
+        nullable=False,
+        server_default=sa.text("CURRENT_TIMESTAMP")
+    )
+
+    ticket: so.Mapped["Ticket"] = so.relationship(back_populates="comments")
+    user: so.Mapped["User"] = so.relationship(back_populates="comments")
+
+    def __repr__(self):
+        return f"<TicketComment {self.CommentID}>"
