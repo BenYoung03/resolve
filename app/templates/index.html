@@ -55,6 +55,7 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="{{ url_for('static', filename='DataTables/datatables.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/ticketview.js') }}"></script>
 <script>
 $(document).ready(function() {
     $('#ticketTable').DataTable({
@@ -75,4 +76,11 @@ $(document).ready(function() {
     });
 });
 </script>
+
+<script>
+document.getElementById('create-ticket').addEventListener('click', function() {
+    window.location.href = "{{ url_for('create_ticket') }}";
+});
+</script>
+
 {% endblock %}
