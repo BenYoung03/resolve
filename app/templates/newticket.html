@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/newticket.css') }}">
+{% endblock %}
+
+{% block content %}
+<div class="register">    
+    <div class="registration-container">
+        <div class="header-wrapper"><h2>Submit a New Ticket</h2></div>
+        <form action="" method="post" novalidate>
+            {{ form.hidden_tag() }}
+            {{ form.subject.label }}
+            {{ form.subject(class="subject", placeholder="Enter Subject")}}
+            {{ form.description.label }}
+            {{ form.description(class="description", placeholder="Describe your issue here...")}}
+
+            <div class="confirm-container">
+                {{ form.submit(class="register-confirm") }}
+                <a href="{{ url_for('index') }}">Back to Dashboard</a> 
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

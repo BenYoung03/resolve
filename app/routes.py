@@ -1,6 +1,6 @@
 from app import app, db
 from flask import render_template, flash, redirect, url_for, request
-from app.forms import LoginForm, RegistrationForm
+from app.forms import LoginForm, RegistrationForm, CreateTicketForm
 from app.models import User, Role
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required
@@ -71,3 +71,9 @@ def logout():
     # Run logout_user and redirect to home page
     logout_user()
     return redirect(url_for('index'))
+
+@app.route('/createticket')
+@login_required
+def create_ticket():
+    form = CreateTicketForm()
+    return render_template('newticket.html', form=form)
