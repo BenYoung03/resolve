@@ -11,7 +11,7 @@
         <form action="" method="post" novalidate>
             {{ form.hidden_tag() }}
             {{ form.email.label }}
-            {{ form.email(class="email", placeholder="Enter Email", pattern=".+@ontario\.com", title="Please provide only an Ontario email address")}}
+            {{ form.email(class="email", placeholder="Enter Email", autofocus=True) }}
             {{ form.password.label }}
             {{ form.password(class="password", placeholder="Enter Password")}}
             {{ form.confirmPassword.label }}
