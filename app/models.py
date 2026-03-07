@@ -24,7 +24,6 @@ class User(db.Model, UserMixin):
 
     UserID: so.Mapped[int] = so.mapped_column(primary_key=True)
     email: so.Mapped[str] = so.mapped_column(sa.String, nullable=False, unique=True)
-    name: so.Mapped[str] = so.mapped_column(sa.String, nullable=False, server_default="")
     password_hash: so.Mapped[str] = so.mapped_column(sa.String, nullable=False)
     roleId: so.Mapped[int] = so.mapped_column(sa.ForeignKey("roles.RoleID"), nullable=False)
 

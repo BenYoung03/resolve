@@ -2,8 +2,10 @@
 <html>
     <head>
         <title>Resolve</title>
+        <link href="{{ url_for('static', filename='DataTables/datatables.min.css') }}" rel="stylesheet">
         <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&amp;display=swap" rel="stylesheet">
         <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/home.css') }}">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     </head>
 
     {% block extra_head %}{% endblock %}
@@ -40,6 +42,9 @@
     {% endwith %}
 
     {% block content %}{% endblock %}
-
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ url_for('static', filename='DataTables/datatables.min.js') }}"></script>    
+    <script src="{{ url_for('static', filename='Chosen/chosen.jquery.min.js') }}"></script>
     </body>
 </html>
