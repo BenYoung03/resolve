@@ -1,5 +1,6 @@
 from app import app, db
 from flask import render_template, flash, redirect, url_for, request
+import sqlalchemy as sa
 from app.forms import LoginForm, RegistrationForm, CreateTicketForm
 from app.models import User, Role, Category, Status, Priority, Ticket
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -9,7 +10,16 @@ from datetime import datetime
 @app.route('/')
 @app.route('/index')
 def index():
-    return render_template('index.html', title='Home')
+    tickets = (
+        db.session.scalars(
+            sa.select(Ticket)
+            .where(Ticket.CreatedBy == current_user.UserID)
+            .order_by(Ticket.CreatedAt.desc())
+        ).all()
+        if current_user.is_authenticated
+        else []
+    )
+    return render_template('index.html', title='Home', tickets=tickets)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():

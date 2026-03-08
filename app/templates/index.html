@@ -30,12 +30,20 @@
                             <th>Ticket ID</th>
                             <th>Subject</th>
                             <th>Status</th>
-                            <th>Created Date</th>
+                            <th>Created At</th>
                             <th>Assigned To</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Ticket data will be populated here -->
+                        {% for ticket in tickets %}
+                        <tr>
+                            <td>{{ ticket.ticketNumber }}</td>
+                            <td>{{ ticket.subject }}</td>
+                            <td>{{ ticket.status.name }}</td>
+                            <td>{{ ticket.CreatedAt.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td>{{ ticket.assignee.email if ticket.assignee else 'Unassigned' }}</td>
+                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
