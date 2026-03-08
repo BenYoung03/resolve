@@ -106,6 +106,7 @@ class Ticket(db.Model):
     __tablename__ = "Tickets"
 
     TicketID: so.Mapped[int] = so.mapped_column(primary_key=True, autoincrement=True)
+    ticketNumber: so.Mapped[Optional[str]] = so.mapped_column(sa.String)
     subject: so.Mapped[Optional[str]] = so.mapped_column(sa.String)
     description: so.Mapped[Optional[str]] = so.mapped_column(sa.Text)
 
@@ -129,8 +130,8 @@ class Ticket(db.Model):
         sa.ForeignKey("User.UserID"),
         nullable=True
     )
-    CreatedAt: so.Mapped[str] = so.mapped_column(nullable=False)
-    ClosedAt: so.Mapped[Optional[str]] = so.mapped_column(nullable=True)
+    CreatedAt: so.Mapped[datetime] = so.mapped_column(sa.DateTime, nullable=False)
+    ClosedAt: so.Mapped[Optional[datetime]] = so.mapped_column(sa.DateTime, nullable=True)
 
     category: so.Mapped["Category"] = so.relationship(back_populates="tickets")
     status: so.Mapped["Status"] = so.relationship(back_populates="tickets")

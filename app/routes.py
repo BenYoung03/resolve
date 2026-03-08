@@ -1,10 +1,10 @@
 from app import app, db
 from flask import render_template, flash, redirect, url_for, request
 from app.forms import LoginForm, RegistrationForm, CreateTicketForm
-from app.models import User, Role, Category, Status, Priority
+from app.models import User, Role, Category, Status, Priority, Ticket
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import login_user, logout_user, login_required
-
+from flask_login import login_user, logout_user, login_required, current_user
+from datetime import datetime
 
 @app.route('/')
 @app.route('/index')
@@ -80,8 +80,26 @@ def create_ticket():
     form.category.choices = [(c.CategoryID, c.name) for c in Category.query.all()]
     form.priority.choices = [(p.PriorityID, p.name) for p in Priority.query.all()]
     if form.validate_on_submit():
+        newTicket = Ticket(
+            subject=form.subject.data,
+            description=form.description.data,
+            CategoryID=form.category.data,
+            PriorityID=form.priority.data,
+            StatusID=1,  # Sets status to open by default
+            CreatedBy=current_user.UserID,
+            AssignedTo=None,
+            CreatedAt=datetime.utcnow(),
+            ClosedAt=None
+        )
 
-        flash('Ticket created successfully.')
+        db.session.add(newTicket)
+        db.session.flush() 
+
+        newTicket.ticketNumber = f"ID-{newTicket.TicketID:06d}"
+
+        db.session.commit()
+
+        flash(f'Ticket {newTicket.ticketNumber} created successfully.')
         return redirect(url_for('index'))
 
     return render_template('newticket.html', form=form)
