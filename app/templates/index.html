@@ -37,7 +37,7 @@
                     <tbody>
                         {% for ticket in tickets %}
                         <tr>
-                            <td>{{ ticket.ticketNumber }}</td>
+                            <td><a href="{{ url_for('view_ticket', TicketID=ticket.TicketID)}}">{{ ticket.ticketNumber }}</a></td>
                             <td>{{ ticket.subject }}</td>
                             <td>{{ ticket.status.name }}</td>
                             <td>{{ ticket.CreatedAt.strftime('%Y-%m-%d %H:%M') }}</td>

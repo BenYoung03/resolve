@@ -113,3 +113,8 @@ def create_ticket():
         return redirect(url_for('index'))
 
     return render_template('newticket.html', form=form)
+
+@app.route('/ticket/<int:TicketID>')
+@login_required
+def view_ticket(TicketID):
+    return render_template('ticketview.html', ticket_id=TicketID)
