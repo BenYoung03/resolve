@@ -104,7 +104,7 @@ def create_ticket():
             StatusID=1,  # Sets status to open by default
             CreatedBy=current_user.UserID,
             AssignedTo=None,
-            CreatedAt=datetime.utcnow(),
+            CreatedAt=datetime.now(),
             ClosedAt=None
         )
 
@@ -135,7 +135,7 @@ def view_ticket(TicketID):
             comment=addCommentForm.comment.data,
             TicketID=TicketID,
             UserID=current_user.UserID,
-            CreatedAt=datetime.utcnow()
+            CreatedAt=datetime.now()
         )
         db.session.add(newComment)
         db.session.commit()
