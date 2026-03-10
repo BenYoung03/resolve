@@ -1,0 +1,102 @@
+.ticket-container {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    padding: 20px;
+}
+
+.left-menu {
+    position: fixed;
+    top: 95px;
+    left: 0;
+    height: calc(100vh - 70px);
+    width: 20%;
+    background-color: #f8f9fa;
+    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    box-sizing: border-box;
+}
+
+.left-menu a {
+    display: block;
+    padding: 15px 10px;
+    color: #333;
+    text-decoration: none;
+    border-radius: 5px;
+    font-size: 18px;
+    text-align: left;
+}
+
+.left-menu ul {
+    margin: 0;
+    padding: 0;
+}
+
+.left-menu li:hover {
+    background-color: #ddd;
+}
+
+.left-menu li {
+    list-style: none;
+    margin-bottom: 0;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+    padding-top: 10px;
+}
+
+.left-menu li:last-child {
+    border-bottom: none;
+}
+
+.right-menu {
+    margin-left: 20%; 
+    width: 80%; 
+    box-sizing: border-box;
+    display: flex;
+    justify-content: center;
+    flex-direction: column;
+}
+
+#create-ticket {
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 30%;
+    font-size: 32px;
+}
+
+#create-ticket:hover {
+    background-color: #0056b3;
+}
+
+.ticket-buttons {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    flex-direction: column;
+    align-items: center;
+}
+
+.open-closed {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    justify-content: center;
+}
+
+.open-closed button {
+    padding: 8px 16px;
+    background-color: white;
+    color: #333;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    cursor: pointer;
+    width: 30%;
+    font-size: 24px;
+}
+
+.open-closed button:hover {
+    background-color: #e0e0e0;
+}

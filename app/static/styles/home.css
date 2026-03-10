@@ -3,14 +3,34 @@ body {
     background-color: #f0f0f0;
     color: #333;
     margin: 0;
-    padding: 20px;
+    padding: 0;
 }
 
 .header {
     display: flex;
-    justify-content: space-between;
     align-items: center;
+    justify-content: space-between;
     margin-bottom: 20px;
+}
+
+.left-header,
+.middle-header,
+.right-header {
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+.left-header {
+    justify-content: flex-start;
+}
+
+.middle-header {
+    justify-content: center;
+}
+
+.right-header {
+    justify-content: flex-end;
 }
 
 .header h1 {
@@ -36,4 +56,9 @@ body {
 .header a:hover {
     background-color: #ddd;
     border-radius: 5px;
+}
+
+.middle-header a img {
+    width: 30px;
+    height: 30px;
 }

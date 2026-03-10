@@ -1,15 +1,25 @@
 from app import app, db
 from flask import render_template, flash, redirect, url_for, request
-from app.forms import LoginForm, RegistrationForm
-from app.models import User, Role
+import sqlalchemy as sa
+from app.forms import CommentForm, LoginForm, RegistrationForm, CreateTicketForm
+from app.models import TicketComment, User, Role, Category, Status, Priority, Ticket
 from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import login_user, logout_user, login_required
-
+from flask_login import login_user, logout_user, login_required, current_user
+from datetime import datetime
 
 @app.route('/')
 @app.route('/index')
 def index():
-    return render_template('index.html', title='Home')
+    tickets = (
+        db.session.scalars(
+            sa.select(Ticket)
+            .where(Ticket.CreatedBy == current_user.UserID)
+            .order_by(Ticket.CreatedAt.desc())
+        ).all()
+        if current_user.is_authenticated
+        else []
+    )
+    return render_template('index.html', title='Home', tickets=tickets)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -39,6 +49,7 @@ def register():
 
     if form.validate_on_submit():  
         # On form submission, get the data from the form
+        username = form.username.data
         email = form.email.data
         password = form.password.data
         confirmPassword = form.confirmPassword.data
@@ -50,13 +61,18 @@ def register():
         # If register form filled in correctly, make sure user doesn't exist by finding
         # If a matching email is already in the database
         user = User.query.filter_by(email=email).first()
+        existing_username = User.query.filter_by(username=username).first()
 
         if user:
             flash('Email address already exists')
             return redirect(url_for('register'))  
+
+        if existing_username:
+            flash('Username already exists')
+            return redirect(url_for('register'))
         
         # Commit new user to database if no user already exists
-        new_user = User(email=email, password_hash=generate_password_hash(password), roleId=1)
+        new_user = User(username=username, email=email, password_hash=generate_password_hash(password), roleId=1)
         db.session.add(new_user)
         db.session.commit()
         return redirect(url_for('login'))
@@ -71,3 +87,60 @@ def logout():
     # Run logout_user and redirect to home page
     logout_user()
     return redirect(url_for('index'))
+
+@app.route('/createticket', methods=['GET', 'POST'])
+@login_required
+def create_ticket():
+    form = CreateTicketForm()
+
+    form.category.choices = [(c.CategoryID, c.name) for c in Category.query.all()]
+    form.priority.choices = [(p.PriorityID, p.name) for p in Priority.query.all()]
+    if form.validate_on_submit():
+        newTicket = Ticket(
+            subject=form.subject.data,
+            description=form.description.data,
+            CategoryID=form.category.data,
+            PriorityID=form.priority.data,
+            StatusID=1,  # Sets status to open by default
+            CreatedBy=current_user.UserID,
+            AssignedTo=None,
+            CreatedAt=datetime.utcnow(),
+            ClosedAt=None
+        )
+
+        db.session.add(newTicket)
+        db.session.flush() 
+
+        newTicket.ticketNumber = f"ID-{newTicket.TicketID:06d}"
+
+        db.session.commit()
+
+        flash(f'Ticket {newTicket.ticketNumber} created successfully.')
+        return redirect(url_for('index'))
+
+    return render_template('newticket.html', form=form)
+
+@app.route('/ticket/<int:TicketID>', methods=['GET', 'POST'])
+@login_required
+def view_ticket(TicketID):
+    addCommentForm = CommentForm()
+
+    currentTicket = db.session.scalar(sa.select(Ticket).where(Ticket.TicketID == TicketID))
+    comments = db.session.scalars(
+        sa.select(TicketComment).where(TicketComment.TicketID == TicketID).order_by(TicketComment.CreatedAt.asc())
+    ).all()
+
+    if addCommentForm.validate_on_submit():
+        newComment = TicketComment(
+            comment=addCommentForm.comment.data,
+            TicketID=TicketID,
+            UserID=current_user.UserID,
+            CreatedAt=datetime.utcnow()
+        )
+        db.session.add(newComment)
+        db.session.commit()
+        
+        return redirect(url_for('view_ticket', TicketID=TicketID))
+
+    return render_template('ticketview.html', ticket_id=TicketID, ticket=currentTicket, 
+                           comments=comments, commentForm=addCommentForm)
