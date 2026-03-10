@@ -56,3 +56,9 @@ class CreateTicketForm(FlaskForm):
 
     submit = SubmitField("Create Ticket")
     
+class CommentForm(FlaskForm):
+    comment = TextAreaField(
+        "Comment",
+        validators=[DataRequired(), Length(min=1)]
+    )
+    submit = SubmitField("Add Comment")

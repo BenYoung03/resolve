@@ -1,7 +1,7 @@
 from app import app, db
 from flask import render_template, flash, redirect, url_for, request
 import sqlalchemy as sa
-from app.forms import LoginForm, RegistrationForm, CreateTicketForm
+from app.forms import CommentForm, LoginForm, RegistrationForm, CreateTicketForm
 from app.models import TicketComment, User, Role, Category, Status, Priority, Ticket
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required, current_user
@@ -120,13 +120,27 @@ def create_ticket():
 
     return render_template('newticket.html', form=form)
 
-@app.route('/ticket/<int:TicketID>')
+@app.route('/ticket/<int:TicketID>', methods=['GET', 'POST'])
 @login_required
 def view_ticket(TicketID):
+    addCommentForm = CommentForm()
 
     currentTicket = db.session.scalar(sa.select(Ticket).where(Ticket.TicketID == TicketID))
     comments = db.session.scalars(
         sa.select(TicketComment).where(TicketComment.TicketID == TicketID).order_by(TicketComment.CreatedAt.asc())
     ).all()
 
-    return render_template('ticketview.html', ticket_id=TicketID, ticket=currentTicket, comments=comments)
+    if addCommentForm.validate_on_submit():
+        newComment = TicketComment(
+            comment=addCommentForm.comment.data,
+            TicketID=TicketID,
+            UserID=current_user.UserID,
+            CreatedAt=datetime.utcnow()
+        )
+        db.session.add(newComment)
+        db.session.commit()
+        
+        return redirect(url_for('view_ticket', TicketID=TicketID))
+
+    return render_template('ticketview.html', ticket_id=TicketID, ticket=currentTicket, 
+                           comments=comments, commentForm=addCommentForm)

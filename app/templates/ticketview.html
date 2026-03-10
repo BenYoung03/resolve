@@ -46,8 +46,8 @@
                     {% for comment in ticket.comments %}
                         <div class="comment">
                             <div class="comment-header">
-                                <span class="comment-author">{{ comment.author.username if comment.author else 'Unknown' }}</span>
-                                <span class="comment-timestamp">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') if comment.created_at else 'Unknown' }}</span>
+                                <span class="comment-author">{{ comment.user.username if comment.user else 'Unknown' }}</span>
+                                <span class="comment-timestamp">{{ comment.CreatedAt.strftime('%Y-%m-%d %H:%M') if comment.CreatedAt else 'Unknown' }}</span>
                             </div>
                             <div class="comment-body">{{ comment.content }}</div>
                         </div>
@@ -57,6 +57,13 @@
                         <p>No comments yet.</p>
                     </div>
                     {% endif %}
+                    <form action="" method="post" novalidate>
+                        {{ commentForm.hidden_tag() }}
+
+                        {{ commentForm.comment(placeholder="Add a comment...") }}
+                        
+                        {{ commentForm.submit() }}
+                    </form>
                 </div>
             </div>
             </div>

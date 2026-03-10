@@ -170,10 +170,8 @@ class TicketComment(db.Model):
         nullable=False
     )
     comment: so.Mapped[str] = so.mapped_column(sa.Text, nullable=False)
-    CreatedAt: so.Mapped[str] = so.mapped_column(
-        nullable=False,
-        server_default=sa.text("CURRENT_TIMESTAMP")
-    )
+    CreatedAt: so.Mapped[datetime] = so.mapped_column(sa.DateTime, nullable=False)
+
 
     ticket: so.Mapped["Ticket"] = so.relationship(back_populates="comments")
     user: so.Mapped["User"] = so.relationship(back_populates="comments")
