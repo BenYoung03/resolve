@@ -1,0 +1,19 @@
+{% extends "base.html" %} {% block extra_head %}
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="{{ url_for('static', filename='styles/admin_functionalities.css') }}"
+/>
+{% endblock %} {% block content %}
+<div class="admin-func-wrapper">
+  <h2>Admin Panel</h2>
+  <div class="admin-buttons">
+    <a href="{{ url_for('admin_users') }}">Users</a>
+    <a href="{{ url_for('admin_clients') }}">Clients</a>
+    <a href="{{ url_for('admin_roles') }}">Roles</a>
+    <a href="{{ url_for('admin_settings') }}">Settings</a>
+    <a href="{{ url_for('admin_profile') }}">Profile</a>
+    <a href="{{ url_for('logout') }}">Logout</a>
+  </div>
+</div>
+{% endblock %}

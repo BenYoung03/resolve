@@ -1,0 +1,158 @@
+{% extends "base.html" %} {% block extra_head %}
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="{{ url_for('static', filename='styles/admin_panel.css') }}"
+/>
+{% endblock %} {% block content %}
+<div class="panel-wrapper">
+  <div class="panel-sidebar">
+    <p><strong>Admin</strong></p>
+    <a href="{{ url_for('admin_users') }}">Users</a>
+    <a href="{{ url_for('admin_clients') }}">Clients</a>
+    <a href="{{ url_for('admin_roles') }}">Roles</a>
+    <a href="{{ url_for('admin_settings') }}">Settings</a>
+    <a href="{{ url_for('admin_profile') }}">Profile</a>
+    <a href="{{ url_for('logout') }}">Logout</a>
+  </div>
+  <div class="panel-content">
+    <div class="section-header">
+      <button
+        onclick="
+          document.getElementById('add-role-modal').style.display = 'flex'
+        "
+      >
+        Add Role
+      </button>
+      <form
+        method="post"
+        action="{{ url_for('admin_toggle_all_roles', active=0) }}"
+        style="display: inline"
+      >
+        {{ form.hidden_tag() }}
+        <button type="submit">Disable All Roles</button>
+      </form>
+      <form
+        method="post"
+        action="{{ url_for('admin_toggle_all_roles', active=1) }}"
+        style="display: inline"
+      >
+        {{ form.hidden_tag() }}
+        <button type="submit">Enable All Roles</button>
+      </form>
+    </div>
+    <div class="roles-box">
+      <h3>Roles</h3>
+      <table class="issues-table">
+        <tbody>
+          {% for role in roles %}
+          <tr>
+            <td>{{ role.name }}</td>
+            <td>{{ 'Active' if role.active else 'Inactive' }}</td>
+            <td>
+              <form
+                method="post"
+                action="{{ url_for('admin_toggle_role', role_id=role.RoleID) }}"
+                style="display: inline"
+              >
+                {{ form.hidden_tag() }}
+                <button type="submit">
+                  {{ 'Disable' if role.active else 'Enable' }}
+                </button>
+              </form>
+            </td>
+            <td>
+              <a href="{{ url_for('admin_edit_role', role_id=role.RoleID) }}"
+                >Edit</a
+              >
+            </td>
+            <td>
+              <form
+                method="post"
+                action="{{ url_for('admin_delete_role', role_id=role.RoleID) }}"
+              >
+                {{ form.hidden_tag() }}
+                <button type="submit">Delete</button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Add Role Modal - Step 1 -->
+<div id="add-role-modal" class="modal">
+  <div class="modal-content">
+    <h3>Configure Role</h3>
+    <form method="post" action="{{ url_for('admin_create_role_step1') }}">
+      {{ form.hidden_tag() }} {{ form.role_name(placeholder="Role Name") }}
+      <button type="submit">Next</button>
+      <h4>Select Permissions</h4>
+      <div class="permissions-grid">
+        <div class="perm-group">
+          <strong>Issue Management</strong>
+          <label
+            ><input type="checkbox" name="permissions" value="Create Issue" />
+            Create Issue</label
+          >
+          <label
+            ><input type="checkbox" name="permissions" value="Read Issue" />
+            Read Issue</label
+          >
+          <label
+            ><input type="checkbox" name="permissions" value="Write Issue" />
+            Write Issue</label
+          >
+          <label
+            ><input type="checkbox" name="permissions" value="Delete Issue" />
+            Delete Issue</label
+          >
+          <label
+            ><input type="checkbox" name="permissions" value="Assign Issue" />
+            Assign Issue</label
+          >
+          <label
+            ><input type="checkbox" name="permissions" value="Transfer Issue" />
+            Transfer Issue</label
+          >
+          <label
+            ><input type="checkbox" name="permissions" value="Comment Issue" />
+            Comment Issue</label
+          >
+        </div>
+        <div class="perm-group">
+          <strong>Role Management</strong>
+          <label
+            ><input type="checkbox" name="permissions" value="Create Role" />
+            Create Role</label
+          >
+          <label
+            ><input type="checkbox" name="permissions" value="Read Role" /> Read
+            Role</label
+          >
+          <label
+            ><input type="checkbox" name="permissions" value="Update Role" />
+            Update Role</label
+          >
+          <label
+            ><input type="checkbox" name="permissions" value="Delete Role" />
+            Delete Role</label
+          >
+          <label
+            ><input type="checkbox" name="permissions" value="Manage Role" />
+            Manage Role</label
+          >
+        </div>
+      </div>
+    </form>
+    <button
+      onclick="document.getElementById('add-role-modal').style.display = 'none'"
+    >
+      X
+    </button>
+  </div>
+</div>
+{% endblock %}

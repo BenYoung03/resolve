@@ -14,6 +14,7 @@ class Role(db.Model):
     name: so.Mapped[str] = so.mapped_column(sa.String, nullable=False)
 
     users: so.WriteOnlyMapped["User"] = so.relationship(back_populates="role")
+    active: so.Mapped[bool] = so.mapped_column(sa.Boolean, nullable=False, default=True)
 
     def __repr__(self):
         return f"<Role {self.name}>"
@@ -93,3 +94,15 @@ class TicketComment(db.Model):
     user_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("User.UserID"), nullable=False)
     text: so.Mapped[str] = so.mapped_column(sa.Text, nullable=False)
     created_at: so.Mapped[datetime] = so.mapped_column(sa.DateTime, nullable=False, default=datetime.utcnow)
+
+
+class Permission(db.Model):
+    __tablename__ = "Permission"
+    id: so.Mapped[int] = so.mapped_column(primary_key=True)
+    name: so.Mapped[str] = so.mapped_column(sa.String, nullable=False, unique=True)
+
+class RolePermission(db.Model):
+    __tablename__ = "RolePermission"
+    id: so.Mapped[int] = so.mapped_column(primary_key=True)
+    role_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("roles.RoleID"), nullable=False)
+    permission_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("Permission.id"), nullable=False)

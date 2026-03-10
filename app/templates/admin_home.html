@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+{% block extra_head %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/admin_home.css') }}">
+{% endblock %}
+{% block content %}
+<div class="admin-wrapper">
+
+    <div class="sidebar">
+        <div class="sidebar-section">
+            <p>Issues</p>
+            <a href="#">Open</a>
+            <a href="#">Closed</a>
+        </div>
+        <div class="sidebar-section">
+            <a href="#">New Issue [+]</a>
+        </div>
+        <div class="sidebar-section">
+            <a href="#">Dashboard</a>
+        </div>
+        <div class="sidebar-section">
+            <a href="{{ url_for('admin_panel') }}">Admin</a>
+        </div>
+    </div>
+
+    <div class="main-content">
+        <div class="top-bar">
+            <span>DASHBOARD</span>
+        </div>
+
+        <div class="create-issue-btn">
+            <a href="#">Create Issue</a>
+        </div>
+
+        <div class="stats-row">
+            <div class="stat-box">
+                <p>Open</p>
+                <p>{{ open_count }}</p>
+            </div>
+            <div class="stat-box">
+                <p>Closed</p>
+                <p>{{ closed_count }}</p>
+            </div>
+            <div class="stat-box">
+                <p>Unassigned</p>
+                <p>{{ unassigned_count }}</p>
+            </div>
+        </div>
+
+        <table class="issues-table">
+            <thead>
+                <tr>
+                    <th>Title</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Assigned To</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for issue in issues %}
+                <tr>
+                    <td>{{ issue.title }}</td>
+                    <td>{{ issue.priority }}</td>
+                    <td>{{ issue.status }}</td>
+                    <td>{{ issue.created_at.strftime('%m/%d/%Y') }}</td>
+                    <td>{{ issue.assigned_to or '' }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}
