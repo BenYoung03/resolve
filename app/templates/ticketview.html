@@ -35,6 +35,7 @@
                     <div class="user-information">
                         <div class="information-element"><strong>Created By:</strong> {{ ticket.creator.email if ticket.creator else 'Unknown' }}</div>
                         <div class="information-element"><strong>Assigned To:</strong> {{ ticket.assignee.email if ticket.assignee else 'Unassigned' }}</div>
+                        <div class="information-element"><strong>Status:</strong> {{ ticket.status.name if ticket.status else 'Unknown' }}</div>
                     </div>
                 </div>
                 <div class="description-container">
@@ -43,27 +44,50 @@
                 </div>
                 <div class="comments-container">
                     <h2>Comments</h2>
-                    {% for comment in ticket.comments %}
-                        <div class="comment">
-                            <div class="comment-header">
-                                <span class="comment-author">{{ comment.user.username if comment.user else 'Unknown' }}</span>
-                                <span class="comment-timestamp">{{ comment.CreatedAt.strftime('%Y-%m-%d %H:%M') if comment.CreatedAt else 'Unknown' }}</span>
+
+                    <div class="activity-list">
+
+                        {% for comment in ticket.comments %}
+                        <div class="activity-item">
+                            <div class="activity-avatar">
+                                {{ comment.user.email[0]|upper if comment.user and comment.user.email else 'U' }}
                             </div>
-                            <div class="comment-body">{{ comment.content }}</div>
+
+                            {% if not loop.last %}
+                            <div class="activity-line"></div>
+                            {% endif %}
+
+                            <div class="activity-content">
+                                <div class="activity-meta">
+                                    <span class="activity-date">
+                                        {{ comment.CreatedAt.strftime('%b %d, %Y, %I:%M %p') if comment.CreatedAt else 'Unknown' }}
+                                    </span>
+                                </div>
+                                <div class="activity-author">
+                                    {{ comment.user.email if comment.user else 'Unknown User' }}
+                                </div>
+                                <div class="activity-text">{{ comment.comment }}</div>
+                            </div>
                         </div>
                         {% endfor %}
-                    {% if not ticket.comments %}
-                    <div class="comment">
-                        <p>No comments yet.</p>
-                    </div>
-                    {% endif %}
-                    <form action="" method="post" novalidate>
-                        {{ commentForm.hidden_tag() }}
 
-                        {{ commentForm.comment(placeholder="Add a comment...") }}
-                        
-                        {{ commentForm.submit() }}
-                    </form>
+                        <div class="activity-item comment-form-row">
+                            <div class="activity-avatar">
+                                {{ current_user.email[0]|upper if current_user.is_authenticated and current_user.email else 'U' }}
+                            </div>
+
+                            <div class="activity-content">
+                                <form action="" method="post" novalidate class="comment-form">
+                                    {{ commentForm.hidden_tag() }}
+
+                                    <div class="comment-input-group">
+                                        {{ commentForm.comment(class="comment-input", placeholder="Add a comment...") }}
+                                        {{ commentForm.submit(class="comment-submit") }}
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             </div>
