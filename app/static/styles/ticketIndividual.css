@@ -148,11 +148,11 @@
     padding-bottom: 15px;
 }
 
-.activity-list {
+.comment-list {
     padding: 10px 0;
 }
 
-.activity-item {
+.comment-item {
     display: flex;
     align-items: flex-start;
     gap: 16px;
@@ -160,7 +160,7 @@
     position: relative;
 }
 
-.activity-avatar {
+.comment-avatar {
     width: 36px;
     height: 36px;
     min-width: 36px;
@@ -172,46 +172,44 @@
     align-items: center;
     justify-content: center;
     position: relative;
-    z-index: 2;
-    background-color: #4a90e2;
+    background-color: #2f7de1;
 }
 
-.activity-line {
+.comment-line {
     position: absolute;
     left: 37px;
     top: 50px;
     width: 2px;
     height: calc(100% - 10px);
     background-color: #d9d9d9;
-    z-index: 1;
 }
 
-.activity-content {
+.comment-content {
     flex: 1;
     min-width: 0;
 }
 
-.activity-meta {
+.comment-meta {
     margin-bottom: 4px;
     color: #555;
     font-size: 14px;
 }
 
-.activity-title {
+.comment-title {
     font-size: 16px;
     font-weight: 700;
     color: #222;
     margin-bottom: 8px;
 }
 
-.activity-author {
+.comment-author {
     font-size: 15px;
     font-weight: 700;
-    color: #1f6fb2;
+    color: #2f7de1;
     margin-bottom: 6px;
 }
 
-.activity-text {
+.comment-text {
     font-size: 15px;
     color: #333;
     line-height: 1.5;
@@ -247,11 +245,11 @@
 
 .comment-input:focus {
     outline: none;
-    border-color: #4a90e2;
+    border-color: #2f7de1;
 }
 
 .comment-submit {
-    background-color: #3b82f6;
+    background-color: #2f7de1;
     color: white;
     border: none;
     border-radius: 6px;

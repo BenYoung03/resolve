@@ -45,38 +45,38 @@
                 <div class="comments-container">
                     <h2>Comments</h2>
 
-                    <div class="activity-list">
+                    <div class="comment-list">
 
                         {% for comment in ticket.comments %}
-                        <div class="activity-item">
-                            <div class="activity-avatar">
+                        <div class="comment-item">
+                            <div class="comment-avatar">
                                 {{ comment.user.email[0]|upper if comment.user and comment.user.email else 'U' }}
                             </div>
 
                             {% if not loop.last %}
-                            <div class="activity-line"></div>
+                            <div class="comment-line"></div>
                             {% endif %}
 
-                            <div class="activity-content">
-                                <div class="activity-meta">
-                                    <span class="activity-date">
+                            <div class="comment-content">
+                                <div class="comment-meta">
+                                    <span class="comment-date">
                                         {{ comment.CreatedAt.strftime('%b %d, %Y, %I:%M %p') if comment.CreatedAt else 'Unknown' }}
                                     </span>
                                 </div>
-                                <div class="activity-author">
+                                <div class="comment-author">
                                     {{ comment.user.email if comment.user else 'Unknown User' }}
                                 </div>
-                                <div class="activity-text">{{ comment.comment }}</div>
+                                <div class="comment-text">{{ comment.comment }}</div>
                             </div>
                         </div>
                         {% endfor %}
 
-                        <div class="activity-item comment-form-row">
-                            <div class="activity-avatar">
+                        <div class="comment-item comment-form-row">
+                            <div class="comment-avatar">
                                 {{ current_user.email[0]|upper if current_user.is_authenticated and current_user.email else 'U' }}
                             </div>
 
-                            <div class="activity-content">
+                            <div class="comment-content">
                                 <form action="" method="post" novalidate class="comment-form">
                                     {{ commentForm.hidden_tag() }}
 
