@@ -30,7 +30,7 @@
                     <div class="ticket-information">
                         <div class="information-element"><strong>Priority:</strong> {{ ticket.priority.name if ticket.priority else 'Unknown' }}</div>
                         <div class="information-element"><strong>Category:</strong> {{ ticket.category.name if ticket.category else 'Unknown' }}</div>
-                        <div class="information-element"><strong>Created At:</strong> {{ ticket.CreatedAt.strftime('%Y-%m-%d %H:%M') if ticket.CreatedAt else 'Unknown' }}</div>
+                        <div class="information-element"><strong>Created At:</strong> {{ ticket.CreatedAt.strftime('%b %d, %Y, %I:%M %p') if ticket.CreatedAt else 'Unknown' }}</div>
                     </div>
                     <div class="user-information">
                         <div class="information-element"><strong>Created By:</strong> {{ ticket.creator.email if ticket.creator else 'Unknown' }}</div>
