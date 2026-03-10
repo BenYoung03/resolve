@@ -59,56 +59,6 @@ class User(db.Model, UserMixin):
     def get_id(self):
         return str(self.UserID)
 
-
-class Category(db.Model):
-    __tablename__ = "Category"
-
-    id: so.Mapped[int] = so.mapped_column(primary_key=True)
-    name: so.Mapped[str] = so.mapped_column(sa.String, nullable=False)
-    active: so.Mapped[bool] = so.mapped_column(sa.Boolean, nullable=False, default=True)
-
-
-class Status(db.Model):
-    __tablename__ = "Status"
-
-    id: so.Mapped[int] = so.mapped_column(primary_key=True)
-    name: so.Mapped[str] = so.mapped_column(sa.String, nullable=False)
-
-
-class Priority(db.Model):
-    __tablename__ = "Priority"
-
-    id: so.Mapped[int] = so.mapped_column(primary_key=True)
-    kind: so.Mapped[str] = so.mapped_column(sa.String, nullable=False)
-
-
-class Ticket(db.Model):
-    __tablename__ = "Ticket"
-
-    id: so.Mapped[int] = so.mapped_column(primary_key=True)
-    title: so.Mapped[str] = so.mapped_column(sa.String, nullable=False)
-    content: so.Mapped[str] = so.mapped_column(sa.Text, nullable=False)
-
-    user_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("User.UserID"), nullable=False)
-    category_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("Category.id"), nullable=False)
-
-    status: so.Mapped[int] = so.mapped_column(sa.ForeignKey("Status.id"), nullable=False)
-
-    created_at: so.Mapped[datetime] = so.mapped_column(sa.DateTime, nullable=False, default=datetime.utcnow)
-
-    agent_id: so.Mapped[Optional[int]] = so.mapped_column(sa.ForeignKey("User.UserID"), nullable=True)
-    priority_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("Priority.id"), nullable=False)
-
-
-class TicketComment(db.Model):
-    __tablename__ = "Ticket_Comment"
-
-    ticket_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("Ticket.id"), nullable=False)
-    id: so.Mapped[int] = so.mapped_column(primary_key=True)
-    user_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("User.UserID"), nullable=False)
-    text: so.Mapped[str] = so.mapped_column(sa.Text, nullable=False)
-    created_at: so.Mapped[datetime] = so.mapped_column(sa.DateTime, nullable=False, default=datetime.utcnow)
-
     def __repr__(self):
         return f"<User {self.username or self.email}>"
 
