@@ -24,6 +24,7 @@ class User(db.Model, UserMixin):
     __tablename__ = "User"
 
     UserID: so.Mapped[int] = so.mapped_column(primary_key=True)
+    username: so.Mapped[Optional[str]] = so.mapped_column(sa.String)
     email: so.Mapped[Optional[str]] = so.mapped_column(sa.String)
     password_hash: so.Mapped[Optional[str]] = so.mapped_column(sa.String)
     roleId: so.Mapped[int] = so.mapped_column(sa.ForeignKey("Roles.RoleID"), nullable=False)
@@ -59,7 +60,7 @@ class User(db.Model, UserMixin):
         return str(self.UserID)
 
     def __repr__(self):
-        return f"<User {self.email}>"
+        return f"<User {self.username or self.email}>"
 
 
 

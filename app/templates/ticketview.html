@@ -1,9 +1,64 @@
 {% extends "base.html" %}
 
 {% block extra_head %}
-
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/ticketIndividual.css') }}">
 {% endblock %}
 
 {% block content %}
-<h2>Ticket Details</h2>
+<div class="ticket-container">
+            <div class="left-menu">
+                <ul>
+                    <li><a href="/index">My Tickets</a></li>
+                    <li><a href="#">Open Tickets</a></li>
+                    <li><a href="#">Closed Tickets</a></li>
+                    <li><a href="/createticket">New Ticket</a></li>
+                </ul>
+            </div>
+            <div class="right-menu">
+                <div class="ticket-header">
+                    <a href="{{ url_for('index') }}">← Back to Tickets</a>
+                </div>
+                <div class="ticket-summary">
+                    <div class="ticket-summary-header">
+                        <div class="ticket-title">
+                            <h1 class="ticket-number">{{ ticket.ticketNumber }}</h1>
+                            <h2>{{ ticket.subject }}</h2>
+                        </div>
+
+                        <div id="ticket-status">{{ ticket.status.name if ticket.status else 'Unknown' }}</div>
+                    </div>
+                    <div class="ticket-information">
+                        <div class="information-element"><strong>Priority:</strong> {{ ticket.priority.name if ticket.priority else 'Unknown' }}</div>
+                        <div class="information-element"><strong>Category:</strong> {{ ticket.category.name if ticket.category else 'Unknown' }}</div>
+                        <div class="information-element"><strong>Created At:</strong> {{ ticket.CreatedAt.strftime('%Y-%m-%d %H:%M') if ticket.CreatedAt else 'Unknown' }}</div>
+                    </div>
+                    <div class="user-information">
+                        <div class="information-element"><strong>Created By:</strong> {{ ticket.creator.email if ticket.creator else 'Unknown' }}</div>
+                        <div class="information-element"><strong>Assigned To:</strong> {{ ticket.assignee.email if ticket.assignee else 'Unassigned' }}</div>
+                    </div>
+                </div>
+                <div class="description-container">
+                    <h2>Description</h2>
+                    <div class="description-text">{{ ticket.description }}</div>
+                </div>
+                <div class="comments-container">
+                    <h2>Comments</h2>
+                    {% for comment in ticket.comments %}
+                        <div class="comment">
+                            <div class="comment-header">
+                                <span class="comment-author">{{ comment.author.username if comment.author else 'Unknown' }}</span>
+                                <span class="comment-timestamp">{{ comment.created_at.strftime('%Y-%m-%d %H:%M') if comment.created_at else 'Unknown' }}</span>
+                            </div>
+                            <div class="comment-body">{{ comment.content }}</div>
+                        </div>
+                        {% endfor %}
+                    {% if not ticket.comments %}
+                    <div class="comment">
+                        <p>No comments yet.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            </div>
+        </div>
 {% endblock %}

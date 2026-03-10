@@ -16,6 +16,9 @@
                 <div class="left-header">
                     <h1>Resolve</h1>
                 </div>
+                <div class="middle-header">
+                    <a href="/"><img src="{{url_for('static', filename='img/home.png')}}"/></a>
+                </div>
                 <div class="right-header">
                     {% if current_user.is_authenticated %}
                         <a href="/logout">Logout</a>

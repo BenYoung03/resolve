@@ -10,7 +10,7 @@
         <div class="ticket-container">
             <div class="left-menu">
                 <ul>
-                    <li><a href="#">My Tickets</a></li>
+                    <li><a href="/index">My Tickets</a></li>
                     <li><a href="#">Open Tickets</a></li>
                     <li><a href="#">Closed Tickets</a></li>
                     <li><a href="/createticket">New Ticket</a></li>
@@ -24,6 +24,7 @@
                         <button id="closed-tickets">Closed Tickets</button>
                     </div>
                 </div>
+                <!--TODO: Perhaps replace ticket table with some sort of grid-box styling-->
                 <table id="ticketTable">
                     <thead>
                         <tr>
@@ -41,7 +42,7 @@
                             <td>{{ ticket.subject }}</td>
                             <td>{{ ticket.status.name }}</td>
                             <td>{{ ticket.CreatedAt.strftime('%Y-%m-%d %H:%M') }}</td>
-                            <td>{{ ticket.assignee.email if ticket.assignee else 'Unassigned' }}</td>
+                            <td>{{ ticket.assignee.username if ticket.assignee else 'Unassigned' }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
