@@ -321,3 +321,13 @@
     border-color: #2f7de1;
 }
 
+.resolution-reasoning-input,
+.resolution-reasoning-label {
+    display: none;
+}
+
+.error-message {
+    color: red;
+    font-size: 10px;
+}
+

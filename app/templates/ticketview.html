@@ -9,8 +9,8 @@
             <div class="left-menu">
                 <ul>
                     <li><a href="/index">My Tickets</a></li>
-                    <li><a href="#">Open Tickets</a></li>
-                    <li><a href="#">Closed Tickets</a></li>
+                    <li><a href="/index/open">Open Tickets</a></li>
+                    <li><a href="/index/closed">Closed Tickets</a></li>
                     <li><a href="/createticket">New Ticket</a></li>
                 </ul>
             </div>
@@ -75,7 +75,7 @@
                                 {% endfor %}
 
                                 <div class="comment-item comment-form-row">
-                                    <div class="comment-avatar {% if current_user.role.name == 'Admin' or current_user.role.name == 'Agent' %}comment-avatar-agent{% endif %}">
+                                    <div class="comment-avatar {% if current_user.has_role(['Admin', 'Agent']) %}comment-avatar-agent{% endif %}">
                                         {{ current_user.email[0]|upper if current_user.is_authenticated and current_user.email else 'U' }}
                                     </div>
 
@@ -105,11 +105,22 @@
                             {{ updateTicketForm.priority.label }} 
                             {{ updateTicketForm.priority(class="update-select") }}
 
-                            {{ updateTicketForm.status.label }} 
-                            {{ updateTicketForm.status(class="update-select") }}
-
                             {{ updateTicketForm.assignedTo.label }}
                             {{ updateTicketForm.assignedTo(class="update-select") }}
+
+                            {{ updateTicketForm.status.label }} 
+                            {{ updateTicketForm.status(class="update-select", id="status-select") }}
+
+                            {{ updateTicketForm.resolutionReasoning.label(class="resolution-reasoning-label") }}
+                            {{ updateTicketForm.resolutionReasoning(class="resolution-reasoning-input", placeholder="Enter reasoning for resolution here...") }}
+
+                            {% if updateTicketForm.resolutionReasoning.errors %}
+                                <div class="error-message">
+                                    {% for error in updateTicketForm.resolutionReasoning.errors %}
+                                        {{ error }}
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
 
                             {{ updateTicketForm.submit(class="update-ticket-submit") }}
                         </form>
@@ -120,4 +131,5 @@
             </div>
         </div>
     </div>
+<script src="{{ url_for('static', filename='js/ticketview.js') }}"></script>
 {% endblock %}

@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import SelectField, StringField, PasswordField, BooleanField, SubmitField, TextAreaField
-from wtforms.validators import DataRequired, Email, Length, EqualTo, InputRequired
+from wtforms.validators import DataRequired, Email, Length, EqualTo, InputRequired, ValidationError
 
 class LoginForm(FlaskForm):
     email = StringField('Email Address', validators=[
@@ -82,4 +82,13 @@ class UpdateTicket(FlaskForm):
         validators=[InputRequired()]
     )
 
+    resolutionReasoning = TextAreaField(
+        "Resolution Reasoning",
+        validators=[Length(max=1000)]
+    )
+
     submit = SubmitField("Update Ticket")
+
+    def validate_resolutionReasoning(self, field):
+        if self.status.data == 5 and not field.data:
+            raise ValidationError("Resolution reasoning is required when closing or resolving a ticket.")

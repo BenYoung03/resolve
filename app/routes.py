@@ -7,6 +7,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required, current_user
 from datetime import datetime
 
+#TODO: Implement Role Required function to lock certain routes behind roles
+
 @app.route('/')
 @app.route('/index')
 def index():
@@ -19,6 +21,32 @@ def index():
         tickets = (db.session.scalars(sa.select(Ticket).order_by(Ticket.CreatedAt.desc())).all())
 
     return render_template('index.html', title='Home', tickets=tickets)
+
+@app.route('/index/closed')
+def closed_tickets():
+    if not current_user.is_authenticated:
+        tickets = []
+    elif current_user.has_role('Employee'):
+        tickets = (db.session.scalars(sa.select(Ticket).where(
+            sa.and_(Ticket.CreatedBy == current_user.UserID, Ticket.StatusID.in_([5, 6]))
+        ).order_by(Ticket.CreatedAt.desc())).all())
+    else:
+        tickets = (db.session.scalars(sa.select(Ticket).where(Ticket.StatusID.in_([5, 6])).order_by(Ticket.CreatedAt.desc())).all())
+
+    return render_template('index.html', title='Closed Tickets', tickets=tickets)
+
+@app.route('/index/open')
+def open_tickets():
+    if not current_user.is_authenticated:
+        tickets = []
+    elif current_user.has_role('Employee'):
+        tickets = (db.session.scalars(sa.select(Ticket).where(
+            sa.and_(Ticket.CreatedBy == current_user.UserID, Ticket.StatusID.in_([1, 2, 3, 4]))
+        ).order_by(Ticket.CreatedAt.desc())).all())
+    else:
+        tickets = (db.session.scalars(sa.select(Ticket).where(Ticket.StatusID.in_([1, 2, 3, 4])).order_by(Ticket.CreatedAt.desc())).all())
+
+    return render_template('index.html', title='Closed Tickets', tickets=tickets)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -158,7 +186,13 @@ def view_ticket(TicketID):
         currentTicket.PriorityID = updateTicketForm.priority.data
         currentTicket.StatusID = updateTicketForm.status.data
         currentTicket.AssignedTo = updateTicketForm.assignedTo.data
+        if updateTicketForm.status.data in [5, 6] and not currentTicket.ClosedAt:
+            currentTicket.ClosedAt = datetime.now()
+        elif updateTicketForm.status.data not in [5, 6]:
+            currentTicket.ClosedAt = None
 
+        if updateTicketForm.resolutionReasoning.data:
+            currentTicket.ResolutionReasoning = updateTicketForm.resolutionReasoning.data
         db.session.commit()
         
         return redirect(url_for('view_ticket', TicketID=TicketID))

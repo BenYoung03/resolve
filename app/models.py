@@ -128,6 +128,8 @@ class Ticket(db.Model):
         sa.ForeignKey("User.UserID"),
         nullable=True
     )
+
+    ResolutionReasoning: so.Mapped[Optional[str]] = so.mapped_column(sa.Text)
     CreatedAt: so.Mapped[datetime] = so.mapped_column(sa.DateTime, nullable=False)
     ClosedAt: so.Mapped[Optional[datetime]] = so.mapped_column(sa.DateTime, nullable=True)
 
