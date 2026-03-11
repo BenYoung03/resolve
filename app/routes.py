@@ -137,6 +137,11 @@ def view_ticket(TicketID):
         sa.select(TicketComment).where(TicketComment.TicketID == TicketID).order_by(TicketComment.CreatedAt.asc())
     ).all()
 
+    if request.method == 'GET':
+        updateTicketForm.priority.data = currentTicket.PriorityID
+        updateTicketForm.status.data = currentTicket.StatusID
+        updateTicketForm.assignedTo.data = currentTicket.assignee.UserID if currentTicket.assignee else 0
+
     if addCommentForm.validate_on_submit():
         newComment = TicketComment(
             comment=addCommentForm.comment.data,
@@ -148,11 +153,11 @@ def view_ticket(TicketID):
         db.session.commit()
         
         return redirect(url_for('view_ticket', TicketID=TicketID))
+    
     if updateTicketForm.validate_on_submit():
         currentTicket.PriorityID = updateTicketForm.priority.data
         currentTicket.StatusID = updateTicketForm.status.data
-        assigned_user_id = updateTicketForm.assignedTo.data
-        currentTicket.AssignedTo = assigned_user_id if assigned_user_id != 0 else None
+        currentTicket.AssignedTo = updateTicketForm.assignedTo.data
 
         db.session.commit()
         

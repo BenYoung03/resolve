@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import SelectField, StringField, PasswordField, BooleanField, SubmitField, TextAreaField
-from wtforms.validators import DataRequired, Email, Length, EqualTo
+from wtforms.validators import DataRequired, Email, Length, EqualTo, InputRequired
 
 class LoginForm(FlaskForm):
     email = StringField('Email Address', validators=[
@@ -79,7 +79,7 @@ class UpdateTicket(FlaskForm):
     assignedTo = SelectField(
         "Assign To",
         coerce=int,
-        validators=[DataRequired()]
+        validators=[InputRequired()]
     )
 
     submit = SubmitField("Update Ticket")
