@@ -251,7 +251,8 @@
     border-color: #2f7de1;
 }
 
-.comment-submit {
+.comment-submit,
+.update-ticket-submit {
     background-color: #2f7de1;
     color: white;
     border: none;
@@ -262,7 +263,12 @@
     min-width: 95px;
 }
 
-.comment-submit:hover {
+.update-ticket-submit {
+    padding: 8px 18px;
+}
+
+.comment-submit:hover,
+.update-ticket-submit:hover {
     background-color: #2563eb;
 }
 
@@ -282,5 +288,32 @@
 .update-ticket-container {
     width: 30%;
     height: fit-content;
+}
+
+.update-ticket-form {
+    display: flex;
+    flex-direction: column;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.update-ticket-form label {
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #333;
+}
+
+.update-select {
+    padding: 6px 12px;
+    border-radius: 6px;
+    border: 1px solid #d3d3d3;
+    background-color: white;
+    font-size: 15px;
+    margin-bottom: 15px;
+    cursor: pointer;
+}
+
+.update-select:hover {
+    border-color: #2f7de1;
 }
 

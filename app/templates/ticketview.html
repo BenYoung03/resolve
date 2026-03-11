@@ -93,18 +93,27 @@
                         </div>
                     </div>
                     <!--TODO: ADD ACTIVITY BOX SHOWING THINGS SUCH AS WHEN ASSIGNMENTS CHANGE OR PRIORITY CHANGES-->
+                    {% if current_user.has_role(['Agent', 'Admin']) %}
                     <div class="update-ticket-container">
                         <h2>Update Ticket</h2>
                         <!--15px padding needing on the left for the following text-->
                         
                         <form action="" method="post" novalidate class="update-ticket-form">
                             {{ updateTicketForm.hidden_tag() }}
-                            {{ updateTicketForm.priority.label }} {{ updateTicketForm.priority() }}
-                            {{ updateTicketForm.status.label }} {{ updateTicketForm.status() }}
-                            {{ updateTicketForm.assignedTo.label }} {{ updateTicketForm.assignedTo() }}
+
+                            {{ updateTicketForm.priority.label }} 
+                            {{ updateTicketForm.priority(class="update-select") }}
+
+                            {{ updateTicketForm.status.label }} 
+                            {{ updateTicketForm.status(class="update-select") }}
+
+                            {{ updateTicketForm.assignedTo.label }}
+                            {{ updateTicketForm.assignedTo(class="update-select") }}
+
                             {{ updateTicketForm.submit(class="update-ticket-submit") }}
                         </form>
                     </div>
+                    {% endif %}
                 </div>
 
             </div>
