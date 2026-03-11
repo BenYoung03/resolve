@@ -50,8 +50,9 @@
                             <div class="comment-list">
 
                                 {% for comment in ticket.comments %}
+                                {% set commenter_role = comment.user.role.name if comment.user and comment.user.role else '' %}
                                 <div class="comment-item">
-                                    <div class="comment-avatar">
+                                    <div class="comment-avatar {% if commenter_role == 'Admin' or commenter_role == 'Agent' %}comment-avatar-agent{% endif %}">
                                         {{ comment.user.email[0]|upper if comment.user and comment.user.email else 'U' }}
                                     </div>
 
@@ -74,7 +75,7 @@
                                 {% endfor %}
 
                                 <div class="comment-item comment-form-row">
-                                    <div class="comment-avatar">
+                                    <div class="comment-avatar {% if current_user.role.name == 'Admin' or current_user.role.name == 'Agent' %}comment-avatar-agent{% endif %}">
                                         {{ current_user.email[0]|upper if current_user.is_authenticated and current_user.email else 'U' }}
                                     </div>
 

@@ -178,6 +178,10 @@
     background-color: #2f7de1;
 }
 
+.comment-avatar-agent {
+    background-color: #d61e10;
+}
+
 .comment-line {
     position: absolute;
     left: 37px;
