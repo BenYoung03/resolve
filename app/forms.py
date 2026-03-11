@@ -62,3 +62,24 @@ class CommentForm(FlaskForm):
         validators=[DataRequired(), Length(min=1)]
     )
     submit = SubmitField("Add Comment")
+
+class UpdateTicket(FlaskForm):
+    status = SelectField(
+        "Status",
+        coerce=int,
+        validators=[DataRequired()]
+    )
+
+    priority = SelectField(
+        "Priority",
+        coerce=int,
+        validators=[DataRequired()]
+    )
+
+    assignedTo = SelectField(
+        "Assign To",
+        coerce=int,
+        validators=[DataRequired()]
+    )
+
+    submit = SubmitField("Update Ticket")

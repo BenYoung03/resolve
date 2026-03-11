@@ -1,7 +1,7 @@
 from app import app, db
 from flask import render_template, flash, redirect, url_for, request
 import sqlalchemy as sa
-from app.forms import CommentForm, LoginForm, RegistrationForm, CreateTicketForm
+from app.forms import CommentForm, LoginForm, RegistrationForm, CreateTicketForm, UpdateTicket
 from app.models import TicketComment, User, Role, Category, Status, Priority, Ticket
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required, current_user
@@ -10,15 +10,14 @@ from datetime import datetime
 @app.route('/')
 @app.route('/index')
 def index():
-    tickets = (
-        db.session.scalars(
-            sa.select(Ticket)
-            .where(Ticket.CreatedBy == current_user.UserID)
-            .order_by(Ticket.CreatedAt.desc())
-        ).all()
-        if current_user.is_authenticated
-        else []
-    )
+
+    if not current_user.is_authenticated:
+        tickets = []
+    elif current_user.has_role('Employee'):
+        tickets = (db.session.scalars(sa.select(Ticket).where(Ticket.CreatedBy == current_user.UserID).order_by(Ticket.CreatedAt.desc())).all())
+    else:
+        tickets = (db.session.scalars(sa.select(Ticket).order_by(Ticket.CreatedAt.desc())).all())
+
     return render_template('index.html', title='Home', tickets=tickets)
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -124,6 +123,14 @@ def create_ticket():
 @login_required
 def view_ticket(TicketID):
     addCommentForm = CommentForm()
+    updateTicketForm = UpdateTicket()
+
+    updateTicketForm.priority.choices = [(p.PriorityID, p.name) for p in Priority.query.all()]
+    updateTicketForm.status.choices = [(s.StatusID, s.name) for s in Status.query.all()]
+    updateTicketForm.assignedTo.choices = [(0, 'Unassigned')] + [
+        (u.UserID, u.username) 
+        for u in User.query.join(Role).filter(Role.name.in_(["Agent", "Admin"])).all()
+    ]
 
     currentTicket = db.session.scalar(sa.select(Ticket).where(Ticket.TicketID == TicketID))
     comments = db.session.scalars(
@@ -141,6 +148,15 @@ def view_ticket(TicketID):
         db.session.commit()
         
         return redirect(url_for('view_ticket', TicketID=TicketID))
+    if updateTicketForm.validate_on_submit():
+        currentTicket.PriorityID = updateTicketForm.priority.data
+        currentTicket.StatusID = updateTicketForm.status.data
+        assigned_user_id = updateTicketForm.assignedTo.data
+        currentTicket.AssignedTo = assigned_user_id if assigned_user_id != 0 else None
+
+        db.session.commit()
+        
+        return redirect(url_for('view_ticket', TicketID=TicketID))
 
     return render_template('ticketview.html', ticket_id=TicketID, ticket=currentTicket, 
-                           comments=comments, commentForm=addCommentForm)
+                           comments=comments, commentForm=addCommentForm, updateTicketForm=updateTicketForm)

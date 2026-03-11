@@ -6,7 +6,7 @@
 
 {% block content %}
 {% if current_user.is_authenticated %}
-    {% if current_user.has_role(['Employee']) %}
+    {% if current_user.has_role(['Employee', 'Agent', 'Admin']) %}
         <div class="ticket-container">
             <div class="left-menu">
                 <ul>
@@ -67,6 +67,7 @@
 <script src="{{ url_for('static', filename='DataTables/datatables.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/ticketview.js') }}"></script>
 <script>
+//TODO: Modify ticket table to have correct columns and filters
 $(document).ready(function() {
     $('#ticketTable').DataTable({
         "pageLength": 10,
