@@ -19,24 +19,49 @@
                     <a href="{{ url_for('index') }}">← Back to Tickets</a>
                 </div>
                 <div class="ticket-summary">
-                    <div class="ticket-summary-header">
-                        <div class="ticket-title">
-                            <h1 class="ticket-number">{{ ticket.ticketNumber }}</h1>
-                            <h2>{{ ticket.subject }}</h2>
-                        </div>
+                    <div class="ticket-summary-left">
+                        <div class="ticket-summary-header">
+                            <div class="ticket-title">
+                                <h1 class="ticket-number">{{ ticket.ticketNumber }}</h1>
+                                <h2>{{ ticket.subject }}</h2>
+                            </div>
 
-                        <div id="ticket-status">{{ ticket.status.name if ticket.status else 'Unknown' }}</div>
+                            <div id="ticket-status">{{ ticket.status.name if ticket.status else 'Unknown' }}</div>
+                        </div>
+                        <div class="ticket-information">
+                            <div class="information-element"><strong>Priority:</strong> {{ ticket.priority.name if ticket.priority else 'Unknown' }}</div>
+                            <div class="information-element"><strong>Category:</strong> {{ ticket.category.name if ticket.category else 'Unknown' }}</div>
+                            <div class="information-element"><strong>Created At:</strong> {{ ticket.CreatedAt.strftime('%b %d, %Y, %I:%M %p') if ticket.CreatedAt else 'Unknown' }}</div>
+                        </div>
+                        <div class="user-information">
+                            <div class="information-element"><strong>Created By:</strong> {{ ticket.creator.email if ticket.creator else 'Unknown' }}</div>
+                            <div class="information-element"><strong>Assigned To:</strong> {{ ticket.assignee.email if ticket.assignee else 'Unassigned' }}</div>
+                            <div class="information-element"><strong>Status:</strong> {{ ticket.status.name if ticket.status else 'Unknown' }}</div>
+                        </div>
                     </div>
-                    <div class="ticket-information">
-                        <div class="information-element"><strong>Priority:</strong> {{ ticket.priority.name if ticket.priority else 'Unknown' }}</div>
-                        <div class="information-element"><strong>Category:</strong> {{ ticket.category.name if ticket.category else 'Unknown' }}</div>
-                        <div class="information-element"><strong>Created At:</strong> {{ ticket.CreatedAt.strftime('%b %d, %Y, %I:%M %p') if ticket.CreatedAt else 'Unknown' }}</div>
-                    </div>
-                    <div class="user-information">
-                        <div class="information-element"><strong>Created By:</strong> {{ ticket.creator.email if ticket.creator else 'Unknown' }}</div>
-                        <div class="information-element"><strong>Assigned To:</strong> {{ ticket.assignee.email if ticket.assignee else 'Unassigned' }}</div>
-                        <div class="information-element"><strong>Status:</strong> {{ ticket.status.name if ticket.status else 'Unknown' }}</div>
-                    </div>
+                    <div class="ticket-summary-right">
+                        <div class="ticket-status-information">
+                            <div class="status-element">
+                                <strong>Ticket Age:</strong>
+                                <div>{{ ticketAge }}</div>
+                            </div>
+                            {% if ticket.status and ticket.status.name == 'Resolved' %}
+                                <div class="status-element">
+                                    <strong>Resolution At:</strong>
+                                    <div>{{ ticket.ClosedAt.strftime('%b %d, %Y, %I:%M %p') }}</div>
+                                </div>
+                                <div class="status-element">
+                                    <strong>Resolution Reasoning:</strong>
+                                    <div>{{ ticket.ResolutionReasoning }}</div>
+                                </div>
+                            {% elif ticket.status and ticket.status.name == 'Closed' %}
+                                <div class="status-element">
+                                    <strong>Closed At:</strong>
+                                    <div>{{ ticket.ClosedAt.strftime('%b %d, %Y, %I:%M %p') }}</div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div> 
                 </div>
                 <div class="bottom-container">
                     <div class="left-container">
@@ -97,7 +122,6 @@
                     {% if current_user.has_role(['Agent', 'Admin']) %}
                     <div class="update-ticket-container">
                         <h2>Update Ticket</h2>
-                        <!--15px padding needing on the left for the following text-->
                         
                         <form action="" method="post" novalidate class="update-ticket-form">
                             {{ updateTicketForm.hidden_tag() }}
@@ -108,6 +132,8 @@
                             {{ updateTicketForm.assignedTo.label }}
                             {{ updateTicketForm.assignedTo(class="update-select") }}
 
+                            <!--TODO: Make it so that you can only change ticket status if the ticket has been assigned. Also make it so that when a ticket is assigned, 
+                            Open is removed as an option for status-->
                             {{ updateTicketForm.status.label }} 
                             {{ updateTicketForm.status(class="update-select", id="status-select") }}
 

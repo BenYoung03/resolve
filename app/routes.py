@@ -189,6 +189,12 @@ def view_ticket(TicketID):
         sa.select(TicketComment).where(TicketComment.TicketID == TicketID).order_by(TicketComment.CreatedAt.asc())
     ).all()
 
+    temp = (currentTicket.ClosedAt if currentTicket.ClosedAt else datetime.now()) - currentTicket.CreatedAt    
+    totalSeconds = int(temp.total_seconds())
+    hours = totalSeconds // 3600
+    minutes = (totalSeconds % 3600) // 60
+    ticketAge = f"{hours}h {minutes}m"
+
     if request.method == 'GET':
         updateTicketForm.priority.data = currentTicket.PriorityID
         updateTicketForm.status.data = currentTicket.StatusID
@@ -223,4 +229,5 @@ def view_ticket(TicketID):
         return redirect(url_for('view_ticket', TicketID=TicketID))
 
     return render_template('ticketview.html', ticket_id=TicketID, ticket=currentTicket, 
-                           comments=comments, commentForm=addCommentForm, updateTicketForm=updateTicketForm)
+                           comments=comments, commentForm=addCommentForm, updateTicketForm=updateTicketForm,
+                           ticketAge=ticketAge)

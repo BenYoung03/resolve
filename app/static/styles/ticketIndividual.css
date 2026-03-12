@@ -81,6 +81,11 @@
     background-color: #f9f9f9;
 }
 
+.ticket-summary{
+    display: flex;
+    width: 100%;
+}
+
 .description-container,
 .comments-container,
 .update-ticket-container{
@@ -89,10 +94,22 @@
     padding-right: 0;
 }
 
+.ticket-summary-left{
+    width: 69%;
+}
+
+.ticket-summary-right{
+    width: 28%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 15px;
+}
+
 .ticket-summary-header {
     display: flex;
     justify-content: space-between;
-    width: 70%;
+    width: 100%;
     align-items: flex-start;
     border-bottom: 1px solid #ddd;
 }
@@ -101,7 +118,7 @@
 .user-information {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    width: 70%;
+    width: 100%;
     gap: 30px;
     align-items: start;
     margin-top: 15px;
@@ -324,6 +341,10 @@
 .resolution-reasoning-input,
 .resolution-reasoning-label {
     display: none;
+}
+
+.resolution-reasoning-input {
+    margin-bottom: 15px;
 }
 
 .error-message {
