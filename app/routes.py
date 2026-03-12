@@ -6,8 +6,20 @@ from app.models import TicketComment, User, Role, Category, Status, Priority, Ti
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required, current_user
 from datetime import datetime
+from functools import wraps
 
-#TODO: Implement Role Required function to lock certain routes behind roles
+#Role required route. If you place @role_required("Role here") under any of the routes, the user will
+#Have to have that role to run the route
+def role_required(*role):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if not current_user.is_authenticated or not current_user.has_role(role):
+                flash('Access denied. Insufficient permissions.')
+                return redirect(url_for('index'))
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
 
 @app.route('/')
 @app.route('/index')
@@ -49,6 +61,7 @@ def open_tickets():
     return render_template('index.html', title='Open Tickets', tickets=tickets)
 
 @app.route('/index/assigned/<int:UserID>', methods=['GET', 'POST'])
+@role_required("Agent", "Admin")
 def assigned_tickets(UserID):
     if not current_user.is_authenticated:
         tickets = []
