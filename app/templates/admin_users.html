@@ -29,7 +29,7 @@
             <tbody>
                 {% for user in users %}
                 <tr>
-                    <td>{{ user.name }}</td>
+                    <td>{{ user.username }}</td>
                     <td>{{ user.email }}</td>
                     <td>
                         <form method="post" action="{{ url_for('admin_change_role', user_id=user.UserID) }}">
@@ -65,7 +65,7 @@
         <form method="post" action="{{ url_for('admin_new_user') }}">
             {{ new_user_form.hidden_tag() }}
             <label>Name:</label>
-            {{ new_user_form.name(placeholder="admin") }}
+            {{ new_user_form.username(placeholder="admin") }}
             <label>Email:</label>
             {{ new_user_form.email(placeholder="admin@admin.com") }}
             <label>Password:</label>

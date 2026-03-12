@@ -109,7 +109,7 @@ def admin_profile():
         return redirect(url_for('index'))
     form = ProfileForm(obj=current_user)
     if form.validate_on_submit():
-        current_user.name = form.name.data
+        current_user.username = form.username.data
         current_user.email = form.email.data
         db.session.commit()
         flash('Profile updated.')
@@ -153,7 +153,7 @@ def admin_new_user():
         return redirect(url_for('index'))
     form = NewUserForm()
     if form.validate_on_submit():
-        new_user = User(name=form.name.data, email=form.email.data,
+        new_user = User(username=form.username.data, email=form.email.data,
                         password_hash=generate_password_hash(form.password.data),
                         roleId=int(form.role.data))
         db.session.add(new_user)
@@ -212,7 +212,7 @@ def admin_new_client():
     form = NewClientForm()
     if form.validate_on_submit():
         employee_role = Role.query.filter_by(name='Employee').first()
-        new_client = User(name=form.name.data, email=form.email.data,
+        new_client = User(username=form.username.data, email=form.email.data,
                           password_hash=generate_password_hash(form.password.data),
                           roleId=employee_role.RoleID)
         db.session.add(new_client)

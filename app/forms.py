@@ -30,7 +30,7 @@ class RegistrationForm(FlaskForm):
 
 
 class ProfileForm(FlaskForm):
-    name = StringField('Name')
+    username = StringField('Name')
     email = StringField('Email')
     language = SelectField('Language', choices=[('en', 'English')])
     submit = SubmitField('Save And Reload')
@@ -42,7 +42,7 @@ class SettingsForm(FlaskForm):
 
 
 class NewUserForm(FlaskForm):
-    name = StringField('Name', validators=[DataRequired()])
+    username = StringField('Name', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     role = SelectField('Role', choices=[('2', 'Agent'), ('3', 'Admin')])
@@ -53,7 +53,7 @@ class ResetPasswordForm(FlaskForm):
     submit = SubmitField('Reset Password')
 
 class NewClientForm(FlaskForm):
-    name = StringField('Name', validators=[DataRequired()])
+    username = StringField('Name', validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired(), Email()])
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Save')

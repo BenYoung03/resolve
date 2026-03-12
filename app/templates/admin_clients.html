@@ -26,7 +26,7 @@
             <tbody>
                 {% for client in clients %}
                 <tr>
-                    <td>{{ client.name }}</td>
+                    <td>{{ client.username }}</td>
                     <td>
                         <form method="post" action="{{ url_for('admin_delete_user', user_id=client.UserID) }}">
                             {{ new_client_form.hidden_tag() }}
@@ -46,7 +46,7 @@
         <h2>Register a new client</h2>
         <form method="post" action="{{ url_for('admin_new_client') }}">
             {{ new_client_form.hidden_tag() }}
-            {{ new_client_form.name(placeholder="Enter the client name here") }}
+            {{ new_client_form.username(placeholder="Enter the client name here") }}
             {{ new_client_form.email(placeholder="Enter the client email here") }}
             {{ new_client_form.password(placeholder="Enter password") }}
             {{ new_client_form.submit() }}
