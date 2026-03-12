@@ -10,7 +10,12 @@
         <div class="ticket-container">
             <div class="left-menu">
                 <ul>
-                    <li><a href="/index">My Tickets</a></li>
+                    {% if current_user.has_role(['Employee']) %}
+                        <li><a href="/index">My Tickets</a></li>
+                    {% endif %}
+                    {% if current_user.has_role(['Agent', 'Admin']) %}
+                        <li><a href="{{ url_for('assigned_tickets', UserID=current_user.UserID)}}">Assigned To Me</a></li>
+                    {% endif %}
                     <li><a href="/index/open">Open Tickets</a></li>
                     <li><a href="/index/closed">Closed Tickets</a></li>
                     <li><a href="/createticket">New Ticket</a></li>
@@ -20,7 +25,6 @@
                 <div class="ticket-buttons">
                     <button id="create-ticket">Submit a Ticket</button>
                     <div class="open-closed">
-                        <!--TODO: Modify these to be links and have them link to a route that queries for only open/closed tickets-->
                         <a href="/index/open" id="open-tickets">Open Tickets</a>
                         <a href="/index/closed" id="closed-tickets">Closed Tickets</a>
                         {% if current_user.has_role(['Employee', 'Agent', 'Admin']) %}
@@ -35,8 +39,10 @@
                             <th>Ticket ID</th>
                             <th>Subject</th>
                             <th>Status</th>
-                            <th>Created At</th>
+                            <th>Priority</th>
+                            <th>Category</th>
                             <th>Assigned To</th>
+                            <th>Created At</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -45,8 +51,10 @@
                             <td><a href="{{ url_for('view_ticket', TicketID=ticket.TicketID)}}">{{ ticket.ticketNumber }}</a></td>
                             <td>{{ ticket.subject }}</td>
                             <td>{{ ticket.status.name }}</td>
-                            <td>{{ ticket.CreatedAt.strftime('%Y-%m-%d %H:%M') }}</td>
+                            <td>{{ ticket.priority.name }}</td>
+                            <td>{{ ticket.category.name }}</td>
                             <td>{{ ticket.assignee.username if ticket.assignee else 'Unassigned' }}</td>
+                            <td>{{ ticket.CreatedAt.strftime('%b %d, %Y, %I:%M %p') }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -62,15 +70,25 @@
 <script src="{{ url_for('static', filename='DataTables/datatables.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/ticketview.js') }}"></script>
 <script>
-//TODO: Modify ticket table to have correct columns and filters
+//TODO: Implement date range filtering, make whole ticket row clickable
+// Also add styling to table. For example, if a priority is critical maybe may the row red or something
+// Or if it hasnt been assigned in a while since creation then flag 
 $(document).ready(function() {
     $('#ticketTable').DataTable({
+        ordering: false,
+        order: [
+            [2, 'asc'],   
+            [3, 'desc'], 
+            [6, 'desc'] 
+        ],
+        stateSave: true,
+        responsive: true,
+        columnControl: ['order', ['search']],
+        columnDefs: [
+            { targets: [2, 3, 4, 5], columnControl: ['order', ['searchList']] } 
+        ],
         "pageLength": 10,
         "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
-        "order": [[3, "desc"]],
-        "columnDefs": [
-            { "orderable": true, "targets": [0, 1, 2, 3, 4] }
-        ],
         "language": {
             "search": "Search tickets:",
             "lengthMenu": "Show _MENU_ tickets per page",
