@@ -21,8 +21,11 @@
                     <button id="create-ticket">Submit a Ticket</button>
                     <div class="open-closed">
                         <!--TODO: Modify these to be links and have them link to a route that queries for only open/closed tickets-->
-                        <button id="open-tickets">Open Tickets</button>
-                        <button id="closed-tickets">Closed Tickets</button>
+                        <a href="/index/open" id="open-tickets">Open Tickets</a>
+                        <a href="/index/closed" id="closed-tickets">Closed Tickets</a>
+                        {% if current_user.has_role(['Employee', 'Agent', 'Admin']) %}
+                            <a href="{{ url_for('assigned_tickets', UserID=current_user.UserID)}}" id="assigned-tickets">Assigned To Me</a>
+                        {% endif %}
                     </div>
                 </div>
                 <!--TODO: Perhaps replace ticket table with some sort of grid-box styling-->
@@ -50,14 +53,6 @@
                 </table>
             </div>
         </div>
-    {% elif current_user.has_role(['Agent', 'Admin']) %}
-        <div>
-            <h2>Agent/Admin View</h2>
-            <p>You are signed in with agent or admin access.</p>
-        </div>
-    {% else %}
-    <!-- This case should not occur -->
-        
     {% endif %}
 {% else %}
     <p>Please create an account or login to get started!</p>

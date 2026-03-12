@@ -46,7 +46,18 @@ def open_tickets():
     else:
         tickets = (db.session.scalars(sa.select(Ticket).where(Ticket.StatusID.in_([1, 2, 3, 4])).order_by(Ticket.CreatedAt.desc())).all())
 
-    return render_template('index.html', title='Closed Tickets', tickets=tickets)
+    return render_template('index.html', title='Open Tickets', tickets=tickets)
+
+@app.route('/index/assigned/<int:UserID>', methods=['GET', 'POST'])
+def assigned_tickets(UserID):
+    if not current_user.is_authenticated:
+        tickets = []
+    else:
+        tickets = (db.session.scalars(sa.select(Ticket).where(Ticket.AssignedTo == current_user.UserID).order_by(Ticket.CreatedAt.desc())).all())
+
+    return render_template('index.html', title='Assigned Tickets', tickets=tickets)
+
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
