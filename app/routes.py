@@ -169,6 +169,7 @@ def view_ticket(TicketID):
         updateTicketForm.priority.data = currentTicket.PriorityID
         updateTicketForm.status.data = currentTicket.StatusID
         updateTicketForm.assignedTo.data = currentTicket.assignee.UserID if currentTicket.assignee else 0
+        updateTicketForm.resolutionReasoning.data = currentTicket.ResolutionReasoning or ""
 
     if addCommentForm.validate_on_submit():
         newComment = TicketComment(
