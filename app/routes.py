@@ -10,7 +10,7 @@ from functools import wraps
 
 from flask_mail import Message
 from app import mail
-from app.email import ticketCreated, ticketStatusChangeNotification
+from app.email import notifyAgentsOfNewTicket, ticketCreated, ticketStatusChangeNotification
 
 
 @app.route("/send-test")
@@ -181,6 +181,10 @@ def create_ticket():
 
         db.session.commit()
         ticketCreated(newTicket, current_user.email)
+
+        agents = (db.session.scalars(sa.select(User).where(User.roleId.in_([2, 3]))).all())
+        agentsEmails = [agent.email for agent in agents]
+        notifyAgentsOfNewTicket(newTicket, agentsEmails)
 
         flash(f'Ticket {newTicket.ticketNumber} created successfully.')
         return redirect(url_for('index'))

@@ -53,3 +53,33 @@ Thank you,
 Resolve Ticketing
 """
     mail.send(msg)
+
+def notifyAgentsOfNewTicket(ticket, recipients):
+    if not recipients:
+        return
+
+    msg = Message(
+        subject=f"New Ticket Created: {ticket.ticketNumber}",
+        recipients=recipients
+    )
+
+    msg.body = f"""
+Hello Agent,
+
+A new support ticket has been created.
+
+Ticket Details
+--------------
+Ticket Number: {ticket.ticketNumber}
+Subject: {ticket.subject}
+Category: {ticket.category.name}
+Priority: {ticket.priority.name}
+Created: {ticket.CreatedAt.strftime('%b %d, %Y, %I:%M %p')}
+
+Please log in to Resolve Ticketing to review and assign the ticket.
+
+Thank you,
+Resolve Ticketing
+"""
+
+    mail.send(msg)
