@@ -10,6 +10,7 @@ from functools import wraps
 
 from flask_mail import Message
 from app import mail
+from app.email import ticketStatusChangeNotification
 
 
 @app.route("/send-test")
@@ -233,6 +234,7 @@ def view_ticket(TicketID):
         return redirect(url_for('view_ticket', TicketID=TicketID))
     
     if updateTicketForm.validate_on_submit():
+        oldStatus = currentTicket.StatusID
         currentTicket.PriorityID = updateTicketForm.priority.data
         currentTicket.StatusID = updateTicketForm.status.data
         currentTicket.AssignedTo = updateTicketForm.assignedTo.data
@@ -250,6 +252,12 @@ def view_ticket(TicketID):
             currentTicket.ResolutionReasoning = updateTicketForm.resolutionReasoning.data
 
         db.session.commit()
+
+        if oldStatus != currentTicket.StatusID:
+            recipient = currentTicket.creator.email
+            oldStatusName = db.session.scalar(sa.select(Status.name).where(Status.StatusID == oldStatus))
+            newStatusName = db.session.scalar(sa.select(Status.name).where(Status.StatusID == currentTicket.StatusID))
+            ticketStatusChangeNotification(currentTicket, recipient, oldStatusName, newStatusName)
         
         return redirect(url_for('view_ticket', TicketID=TicketID))
 
