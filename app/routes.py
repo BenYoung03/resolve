@@ -8,6 +8,20 @@ from flask_login import login_user, logout_user, login_required, current_user
 from datetime import datetime
 from functools import wraps
 
+from flask_mail import Message
+from app import mail
+
+
+@app.route("/send-test")
+def send_test():
+    msg = Message(
+        subject="Flask-Mail Gmail Test",
+        recipients=["resolveticketing@gmail.com"]
+    )
+    msg.body = "Hello from Flask-Mail."
+    mail.send(msg)
+    return "Email sent"
+
 #Role required route. If you place @role_required("Role here") under any of the routes, the user will
 #Have to have that role to run the route
 def role_required(*role):
