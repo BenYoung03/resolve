@@ -10,7 +10,7 @@ from functools import wraps
 
 from flask_mail import Message
 from app import mail
-from app.email import ticketStatusChangeNotification
+from app.email import ticketCreated, ticketStatusChangeNotification
 
 
 @app.route("/send-test")
@@ -180,6 +180,7 @@ def create_ticket():
         newTicket.ticketNumber = f"ID-{newTicket.TicketID:06d}"
 
         db.session.commit()
+        ticketCreated(newTicket, current_user.email)
 
         flash(f'Ticket {newTicket.ticketNumber} created successfully.')
         return redirect(url_for('index'))
