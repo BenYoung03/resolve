@@ -6,7 +6,6 @@ from app import db
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 
-
 class Role(db.Model):
     __tablename__ = "Roles"
 
@@ -17,8 +16,6 @@ class Role(db.Model):
 
     def __repr__(self):
         return f"<Role {self.name}>"
-
-
 
 class User(db.Model, UserMixin):
     __tablename__ = "User"
@@ -131,6 +128,8 @@ class Ticket(db.Model):
         sa.ForeignKey("User.UserID"),
         nullable=True
     )
+
+    ResolutionReasoning: so.Mapped[Optional[str]] = so.mapped_column(sa.Text)
     CreatedAt: so.Mapped[datetime] = so.mapped_column(sa.DateTime, nullable=False)
     ClosedAt: so.Mapped[Optional[datetime]] = so.mapped_column(sa.DateTime, nullable=True)
 

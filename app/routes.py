@@ -1,25 +1,76 @@
 from app import app, db
 from flask import render_template, flash, redirect, url_for, request
 import sqlalchemy as sa
-from app.forms import CommentForm, LoginForm, RegistrationForm, CreateTicketForm
+from app.forms import CommentForm, LoginForm, RegistrationForm, CreateTicketForm, UpdateTicket
 from app.models import TicketComment, User, Role, Category, Status, Priority, Ticket
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required, current_user
 from datetime import datetime
+from functools import wraps
+
+#Role required route. If you place @role_required("Role here") under any of the routes, the user will
+#Have to have that role to run the route
+def role_required(*role):
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if not current_user.is_authenticated or not current_user.has_role(role):
+                flash('Access denied. Insufficient permissions.')
+                return redirect(url_for('index'))
+            return f(*args, **kwargs)
+        return decorated_function
+    return decorator
 
 @app.route('/')
 @app.route('/index')
 def index():
-    tickets = (
-        db.session.scalars(
-            sa.select(Ticket)
-            .where(Ticket.CreatedBy == current_user.UserID)
-            .order_by(Ticket.CreatedAt.desc())
-        ).all()
-        if current_user.is_authenticated
-        else []
-    )
+
+    if not current_user.is_authenticated:
+        tickets = []
+    elif current_user.has_role('Employee'):
+        tickets = (db.session.scalars(sa.select(Ticket).where(Ticket.CreatedBy == current_user.UserID).order_by(Ticket.CreatedAt.desc())).all())
+    else:
+        tickets = (db.session.scalars(sa.select(Ticket).order_by(Ticket.CreatedAt.desc())).all())
+
     return render_template('index.html', title='Home', tickets=tickets)
+
+@app.route('/index/closed')
+def closed_tickets():
+    if not current_user.is_authenticated:
+        tickets = []
+    elif current_user.has_role('Employee'):
+        tickets = (db.session.scalars(sa.select(Ticket).where(
+            sa.and_(Ticket.CreatedBy == current_user.UserID, Ticket.StatusID.in_([5, 6]))
+        ).order_by(Ticket.CreatedAt.desc())).all())
+    else:
+        tickets = (db.session.scalars(sa.select(Ticket).where(Ticket.StatusID.in_([5, 6])).order_by(Ticket.CreatedAt.desc())).all())
+
+    return render_template('index.html', title='Closed Tickets', tickets=tickets)
+
+@app.route('/index/open')
+def open_tickets():
+    if not current_user.is_authenticated:
+        tickets = []
+    elif current_user.has_role('Employee'):
+        tickets = (db.session.scalars(sa.select(Ticket).where(
+            sa.and_(Ticket.CreatedBy == current_user.UserID, Ticket.StatusID.in_([1, 2, 3, 4]))
+        ).order_by(Ticket.CreatedAt.desc())).all())
+    else:
+        tickets = (db.session.scalars(sa.select(Ticket).where(Ticket.StatusID.in_([1, 2, 3, 4])).order_by(Ticket.CreatedAt.desc())).all())
+
+    return render_template('index.html', title='Open Tickets', tickets=tickets)
+
+@app.route('/index/assigned/<int:UserID>', methods=['GET', 'POST'])
+@role_required("Agent", "Admin")
+def assigned_tickets(UserID):
+    if not current_user.is_authenticated:
+        tickets = []
+    else:
+        tickets = (db.session.scalars(sa.select(Ticket).where(Ticket.AssignedTo == current_user.UserID).order_by(Ticket.CreatedAt.desc())).all())
+
+    return render_template('index.html', title='Assigned Tickets', tickets=tickets)
+
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -104,7 +155,7 @@ def create_ticket():
             StatusID=1,  # Sets status to open by default
             CreatedBy=current_user.UserID,
             AssignedTo=None,
-            CreatedAt=datetime.utcnow(),
+            CreatedAt=datetime.now(),
             ClosedAt=None
         )
 
@@ -124,23 +175,70 @@ def create_ticket():
 @login_required
 def view_ticket(TicketID):
     addCommentForm = CommentForm()
+    updateTicketForm = UpdateTicket()
+
+    updateTicketForm.priority.choices = [(p.PriorityID, p.name) for p in Priority.query.all()]
+    updateTicketForm.status.choices = [(s.StatusID, s.name) for s in Status.query.all()]
+    updateTicketForm.assignedTo.choices = [(0, 'Unassigned')] + [
+        (u.UserID, u.username) 
+        for u in User.query.join(Role).filter(Role.name.in_(["Agent", "Admin"])).all()
+    ]
 
     currentTicket = db.session.scalar(sa.select(Ticket).where(Ticket.TicketID == TicketID))
     comments = db.session.scalars(
         sa.select(TicketComment).where(TicketComment.TicketID == TicketID).order_by(TicketComment.CreatedAt.asc())
     ).all()
 
+    temp = (currentTicket.ClosedAt if currentTicket.ClosedAt else datetime.now()) - currentTicket.CreatedAt    
+    totalSeconds = int(temp.total_seconds())
+    hours = totalSeconds // 3600
+    minutes = (totalSeconds % 3600) // 60
+    if hours >= 24:
+        days = hours // 24
+        hours = hours % 24
+        ticketAge = f"{days} day {hours}h {minutes}m" if days == 1 else f"{days} days {hours}h {minutes}m"
+    else:
+        ticketAge = f"{hours}h {minutes}m"
+
+    if request.method == 'GET':
+        updateTicketForm.priority.data = currentTicket.PriorityID
+        updateTicketForm.status.data = currentTicket.StatusID
+        updateTicketForm.assignedTo.data = currentTicket.assignee.UserID if currentTicket.assignee else 0
+        updateTicketForm.resolutionReasoning.data = currentTicket.ResolutionReasoning or ""
+
     if addCommentForm.validate_on_submit():
         newComment = TicketComment(
             comment=addCommentForm.comment.data,
             TicketID=TicketID,
             UserID=current_user.UserID,
-            CreatedAt=datetime.utcnow()
+            CreatedAt=datetime.now()
         )
         db.session.add(newComment)
         db.session.commit()
         
         return redirect(url_for('view_ticket', TicketID=TicketID))
+    
+    if updateTicketForm.validate_on_submit():
+        currentTicket.PriorityID = updateTicketForm.priority.data
+        currentTicket.StatusID = updateTicketForm.status.data
+        currentTicket.AssignedTo = updateTicketForm.assignedTo.data
+        # Makes it so ticket cannot be set to open if it is assigned
+        if updateTicketForm.assignedTo.data != 0 and updateTicketForm.status.data == 1:
+            flash("Assigned tickets cannot have status 'Open'")
+            return redirect(url_for("view_ticket", TicketID=TicketID))
+
+        if updateTicketForm.status.data in [5, 6] and not currentTicket.ClosedAt:
+            currentTicket.ClosedAt = datetime.now()
+        elif updateTicketForm.status.data not in [5, 6]:
+            currentTicket.ClosedAt = None
+
+        if updateTicketForm.resolutionReasoning.data:
+            currentTicket.ResolutionReasoning = updateTicketForm.resolutionReasoning.data
+
+        db.session.commit()
+        
+        return redirect(url_for('view_ticket', TicketID=TicketID))
 
     return render_template('ticketview.html', ticket_id=TicketID, ticket=currentTicket, 
-                           comments=comments, commentForm=addCommentForm)
+                           comments=comments, commentForm=addCommentForm, updateTicketForm=updateTicketForm,
+                           ticketAge=ticketAge)
