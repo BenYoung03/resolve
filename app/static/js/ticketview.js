@@ -17,4 +17,22 @@ document.addEventListener("DOMContentLoaded", function () {
 
     statusSelect.addEventListener("change", toggleResolutionReasoning);
     toggleResolutionReasoning();
+
+    var assignedSelect = document.getElementById("assigned-select");
+    assignedSelect.addEventListener("change", function () {
+        var selectedOption = this.options[this.selectedIndex];
+        if (selectedOption.value !== "0") {
+            var statusSelect = document.getElementById("status-select");
+            for (var i = 0; i < statusSelect.options.length; i++) {
+                if (selectedOption.value !== "0") {
+                for (var i = 0; i < statusSelect.options.length; i++) {
+                    if (statusSelect.options[i].value === "1") { 
+                        statusSelect.value = "2";
+                    }
+                }
+
+            }
+        }
+    }
+});
 });

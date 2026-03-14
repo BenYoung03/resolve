@@ -352,3 +352,13 @@
     font-size: 10px;
 }
 
+.ticket-status-information{
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.status-element{
+    margin-bottom: 15px;
+}
+

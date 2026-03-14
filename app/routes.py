@@ -193,7 +193,12 @@ def view_ticket(TicketID):
     totalSeconds = int(temp.total_seconds())
     hours = totalSeconds // 3600
     minutes = (totalSeconds % 3600) // 60
-    ticketAge = f"{hours}h {minutes}m"
+    if hours >= 24:
+        days = hours // 24
+        hours = hours % 24
+        ticketAge = f"{days} day {hours}h {minutes}m" if days == 1 else f"{days} days {hours}h {minutes}m"
+    else:
+        ticketAge = f"{hours}h {minutes}m"
 
     if request.method == 'GET':
         updateTicketForm.priority.data = currentTicket.PriorityID
@@ -217,6 +222,11 @@ def view_ticket(TicketID):
         currentTicket.PriorityID = updateTicketForm.priority.data
         currentTicket.StatusID = updateTicketForm.status.data
         currentTicket.AssignedTo = updateTicketForm.assignedTo.data
+        # Makes it so ticket cannot be set to open if it is assigned
+        if updateTicketForm.assignedTo.data != 0 and updateTicketForm.status.data == 1:
+            flash("Assigned tickets cannot have status 'Open'")
+            return redirect(url_for("view_ticket", TicketID=TicketID))
+
         if updateTicketForm.status.data in [5, 6] and not currentTicket.ClosedAt:
             currentTicket.ClosedAt = datetime.now()
         elif updateTicketForm.status.data not in [5, 6]:
@@ -224,6 +234,7 @@ def view_ticket(TicketID):
 
         if updateTicketForm.resolutionReasoning.data:
             currentTicket.ResolutionReasoning = updateTicketForm.resolutionReasoning.data
+
         db.session.commit()
         
         return redirect(url_for('view_ticket', TicketID=TicketID))
