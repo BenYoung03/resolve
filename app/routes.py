@@ -269,8 +269,10 @@ def view_ticket(TicketID):
         if oldAssigned != newAssigned and newAssigned is not None:
             recipient = currentTicket.assignee.email
             ticketAssignedNotification(currentTicket, recipient)
+        if currentTicket.StatusID == 5:
+            return redirect(url_for('view_ticket', TicketID=TicketID, confetti=1))
         return redirect(url_for('view_ticket', TicketID=TicketID))
 
-    return render_template('ticketview.html', ticket_id=TicketID, ticket=currentTicket, 
+    return render_template('ticketview.html', ticket_id=TicketID, ticket=currentTicket,
                            comments=comments, commentForm=addCommentForm, updateTicketForm=updateTicketForm,
-                           ticketAge=ticketAge)
+                           ticketAge=ticketAge, show_confetti=request.args.get('confetti') == '1')
