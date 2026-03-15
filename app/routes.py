@@ -10,7 +10,7 @@ from functools import wraps
 
 from flask_mail import Message
 from app import mail
-from app.email import notifyAgentsOfNewTicket, ticketCreated, ticketStatusChangeNotification
+from app.email import notifyAgentsOfNewTicket, ticketAssignedNotification, ticketCreated, ticketStatusChangeNotification
 
 
 @app.route("/send-test")
@@ -242,7 +242,8 @@ def view_ticket(TicketID):
         oldStatus = currentTicket.StatusID
         currentTicket.PriorityID = updateTicketForm.priority.data
         currentTicket.StatusID = updateTicketForm.status.data
-        currentTicket.AssignedTo = updateTicketForm.assignedTo.data
+        oldAssigned = currentTicket.assignee.UserID if currentTicket.assignee else None
+        currentTicket.AssignedTo = updateTicketForm.assignedTo.data if updateTicketForm.assignedTo.data != 0 else None
         # Makes it so ticket cannot be set to open if it is assigned
         if updateTicketForm.assignedTo.data != 0 and updateTicketForm.status.data == 1:
             flash("Assigned tickets cannot have status 'Open'")
@@ -264,6 +265,10 @@ def view_ticket(TicketID):
             newStatusName = db.session.scalar(sa.select(Status.name).where(Status.StatusID == currentTicket.StatusID))
             ticketStatusChangeNotification(currentTicket, recipient, oldStatusName, newStatusName)
         
+        newAssigned = currentTicket.assignee.UserID if currentTicket.assignee else None
+        if oldAssigned != newAssigned and newAssigned is not None:
+            recipient = currentTicket.assignee.email
+            ticketAssignedNotification(currentTicket, recipient)
         return redirect(url_for('view_ticket', TicketID=TicketID))
 
     return render_template('ticketview.html', ticket_id=TicketID, ticket=currentTicket, 

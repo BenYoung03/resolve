@@ -83,3 +83,29 @@ Resolve Ticketing
 """
 
     mail.send(msg)
+
+def ticketAssignedNotification(ticket, recipient):
+    msg = Message(
+        subject=f"Ticket Has Been Assigned To You: {ticket.ticketNumber}",
+        recipients=[recipient]
+    )
+
+    msg.body = f"""
+Hello {ticket.assignee.username},
+
+A support ticket has been assigned to you.
+
+Ticket Details
+--------------
+Ticket Number: {ticket.ticketNumber}
+Subject: {ticket.subject}
+Category: {ticket.category.name}
+Priority: {ticket.priority.name}
+Created: {ticket.CreatedAt.strftime('%b %d, %Y, %I:%M %p')}
+
+Please log in to Resolve Ticketing to review the ticket.
+
+Thank you,
+Resolve Ticketing
+"""
+    mail.send(msg)
