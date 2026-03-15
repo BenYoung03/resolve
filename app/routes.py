@@ -8,6 +8,21 @@ from flask_login import login_user, logout_user, login_required, current_user
 from datetime import datetime
 from functools import wraps
 
+from flask_mail import Message
+from app import mail
+from app.email import notifyAgentsOfNewTicket, ticketAssignedNotification, ticketCreated, ticketStatusChangeNotification
+
+
+@app.route("/send-test")
+def send_test():
+    msg = Message(
+        subject="Flask-Mail Gmail Test",
+        recipients=["resolveticketing@gmail.com"]
+    )
+    msg.body = "Hello from Flask-Mail."
+    mail.send(msg)
+    return "Email sent"
+
 #Role required route. If you place @role_required("Role here") under any of the routes, the user will
 #Have to have that role to run the route
 def role_required(*role):
@@ -165,6 +180,11 @@ def create_ticket():
         newTicket.ticketNumber = f"ID-{newTicket.TicketID:06d}"
 
         db.session.commit()
+        ticketCreated(newTicket, current_user.email)
+
+        agents = (db.session.scalars(sa.select(User).where(User.roleId.in_([2, 3]))).all())
+        agentsEmails = [agent.email for agent in agents]
+        notifyAgentsOfNewTicket(newTicket, agentsEmails)
 
         flash(f'Ticket {newTicket.ticketNumber} created successfully.')
         return redirect(url_for('index'))
@@ -219,9 +239,11 @@ def view_ticket(TicketID):
         return redirect(url_for('view_ticket', TicketID=TicketID))
     
     if updateTicketForm.validate_on_submit():
+        oldStatus = currentTicket.StatusID
         currentTicket.PriorityID = updateTicketForm.priority.data
         currentTicket.StatusID = updateTicketForm.status.data
-        currentTicket.AssignedTo = updateTicketForm.assignedTo.data
+        oldAssigned = currentTicket.assignee.UserID if currentTicket.assignee else None
+        currentTicket.AssignedTo = updateTicketForm.assignedTo.data if updateTicketForm.assignedTo.data != 0 else None
         # Makes it so ticket cannot be set to open if it is assigned
         if updateTicketForm.assignedTo.data != 0 and updateTicketForm.status.data == 1:
             flash("Assigned tickets cannot have status 'Open'")
@@ -236,7 +258,17 @@ def view_ticket(TicketID):
             currentTicket.ResolutionReasoning = updateTicketForm.resolutionReasoning.data
 
         db.session.commit()
+
+        if oldStatus != currentTicket.StatusID:
+            recipient = currentTicket.creator.email
+            oldStatusName = db.session.scalar(sa.select(Status.name).where(Status.StatusID == oldStatus))
+            newStatusName = db.session.scalar(sa.select(Status.name).where(Status.StatusID == currentTicket.StatusID))
+            ticketStatusChangeNotification(currentTicket, recipient, oldStatusName, newStatusName)
         
+        newAssigned = currentTicket.assignee.UserID if currentTicket.assignee else None
+        if oldAssigned != newAssigned and newAssigned is not None:
+            recipient = currentTicket.assignee.email
+            ticketAssignedNotification(currentTicket, recipient)
         return redirect(url_for('view_ticket', TicketID=TicketID))
 
     return render_template('ticketview.html', ticket_id=TicketID, ticket=currentTicket, 
