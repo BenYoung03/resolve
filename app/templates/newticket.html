@@ -5,29 +5,41 @@
 {% endblock %}
 
 {% block content %}
-<h2>Submit a New Ticket</h2>
+
 
 <!--TODO: STYLE PAGE-->
+<div class="new-ticket-form">
+    <h2>Submit a New Ticket</h2>
+    <form action="" method="post" novalidate>
+        {{ form.hidden_tag() }}
 
-<form action="" method="post" novalidate>
-    {{ form.hidden_tag() }}
+        <div class="form-element">
+            {{ form.subject.label }}
+            {{ form.subject(placeholder="Enter subject") }}
+        </div>
 
-    {{ form.subject.label }}
-    {{ form.subject(placeholder="Enter subject") }}
+        <div class="form-element">
+            <!--TODO: Implement error handling for when description is too short-->
+            {{ form.description.label }}
+            {{ form.description(placeholder="Describe your issue here...") }}
+        </div>
+        
+        <div class="form-element">
+            {{ form.category.label }}
+            {{ form.category() }}
+        </div>
 
-    <!--TODO: Implement error handling for when description is too short-->
-    {{ form.description.label }}
-    {{ form.description(placeholder="Describe your issue here...") }}
-    
-    {{ form.category.label }}
-    {{ form.category() }}
-    
-    {{ form.priority.label }}
-    {{ form.priority() }}
-    
-    {{ form.submit() }}
-</form>
+        <div class="form-element">
+            {{ form.priority.label }}
+            {{ form.priority() }}
+        </div>
 
-<a href="{{ url_for('index') }}">Back to Dashboard</a>
+        {{ form.submit() }}
+    </form>
+
+    <a href="{{ url_for('index') }}">Back to Dashboard</a>
+</div>
+
+
 {% endblock %}
 

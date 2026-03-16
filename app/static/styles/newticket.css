@@ -1,0 +1,12 @@
+.new-ticket-form {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    align-items: center;
+}
+
+.form-element{
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+}
