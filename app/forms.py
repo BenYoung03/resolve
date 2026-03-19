@@ -1,8 +1,7 @@
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, TextAreaField, MultipleFileField
-from wtforms.validators import DataRequired, Email, Length, EqualTo
+from wtforms.validators import DataRequired, Email, Length, EqualTo, InputRequired, ValidationError
 from wtforms.widgets import ListWidget, CheckboxInput
-
 
 class LoginForm(FlaskForm):
     email = StringField('Email Address', validators=[
@@ -14,6 +13,11 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Sign In')
 
 class RegistrationForm(FlaskForm):
+    username = StringField('Username', validators=[
+        DataRequired(),
+        Length(min=3, max=15, message='Username must be between 3 and 15 characters.')
+    ])
+
     email = StringField('Email Address', validators=[
         DataRequired(),
         Email(message='Please enter a valid email address.')
@@ -66,3 +70,64 @@ class RolePermissionForm(FlaskForm):
 
 class RoleUserAssignForm(FlaskForm):
     submit = SubmitField('Create Role')
+class CreateTicketForm(FlaskForm):
+    subject = StringField(
+        "Subject",
+        validators=[DataRequired(), Length(min=3, max=200)]
+    )
+
+    description = TextAreaField(
+        "Description",
+        validators=[DataRequired(), Length(min=10)]
+    )
+
+    category = SelectField(
+        "Category",
+        coerce=int,
+        validators=[DataRequired()]
+    )
+
+    priority = SelectField(
+        "Priority",
+        coerce=int,
+        validators=[DataRequired()]
+    )
+
+    submit = SubmitField("Create Ticket")
+    
+class CommentForm(FlaskForm):
+    comment = TextAreaField(
+        "Comment",
+        validators=[DataRequired(), Length(min=1)]
+    )
+    submit = SubmitField("Add Comment")
+
+class UpdateTicket(FlaskForm):
+    status = SelectField(
+        "Status",
+        coerce=int,
+        validators=[DataRequired()]
+    )
+
+    priority = SelectField(
+        "Priority",
+        coerce=int,
+        validators=[DataRequired()]
+    )
+
+    assignedTo = SelectField(
+        "Assign To",
+        coerce=int,
+        validators=[InputRequired()]
+    )
+
+    resolutionReasoning = TextAreaField(
+        "Resolution Reasoning",
+        validators=[Length(max=1000)]
+    )
+
+    submit = SubmitField("Update Ticket")
+
+    def validate_resolutionReasoning(self, field):
+        if self.status.data == 5 and not field.data:
+            raise ValidationError("Resolution reasoning is required when closing or resolving a ticket.")

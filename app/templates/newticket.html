@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/newticket.css') }}">
+{% endblock %}
+
+{% block content %}
+<h2>Submit a New Ticket</h2>
+
+<!--TODO: STYLE PAGE-->
+
+<form action="" method="post" novalidate>
+    {{ form.hidden_tag() }}
+
+    {{ form.subject.label }}
+    {{ form.subject(placeholder="Enter subject") }}
+
+    <!--TODO: Implement error handling for when description is too short-->
+    {{ form.description.label }}
+    {{ form.description(placeholder="Describe your issue here...") }}
+    
+    {{ form.category.label }}
+    {{ form.category() }}
+    
+    {{ form.priority.label }}
+    {{ form.priority() }}
+    
+    {{ form.submit() }}
+</form>
+
+<a href="{{ url_for('index') }}">Back to Dashboard</a>
+{% endblock %}
+

@@ -10,6 +10,8 @@
         <div class="header-wrapper"><h2>Create Your Account</h2></div>
         <form action="" method="post" novalidate>
             {{ form.hidden_tag() }}
+            {{ form.username.label }}
+            {{ form.username(class="username", placeholder="Enter Username")}}
             {{ form.email.label }}
             {{ form.email(class="email", placeholder="Enter Email", autofocus=True) }}
             {{ form.password.label }}

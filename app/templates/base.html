@@ -1,25 +1,37 @@
 <!doctype html>
 <html>
-  <head>
-    <title>Resolve</title>
-    <link
-      href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&amp;display=swap"
-      rel="stylesheet"
-    />
-    <link
-      rel="stylesheet"
-      type="text/css"
-      href="{{ url_for('static',filename='styles/home.css') }}"
-    />
-  </head>
+    <head>
+        <title>Resolve</title>
+        <link href="{{ url_for('static', filename='DataTables/datatables.min.css') }}" rel="stylesheet">
+        <link href="https://fonts.googleapis.com/css2?family=Roboto:ital,wght@0,100..900;1,100..900&amp;display=swap" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/home.css') }}">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    </head>
 
   {% block extra_head %}{% endblock %}
 
-  <body>
-    <div class="header-container">
-      <div class="header">
-        <div class="left-header">
-          <h1>Resolve</h1>
+    <body>
+        <div class="header-container">
+            <div class="header">
+                <div class="left-header">
+                    <h1>Resolve</h1>
+                </div>
+                <div class="middle-header">
+                    <a href="/"><img src="{{url_for('static', filename='img/home.png')}}"/></a>
+                </div>
+                <div class="right-header">
+                    {% if current_user.is_authenticated %}
+                        <a href="/logout">Logout</a>
+                        {% if current_user.has_role(['Admin']) %}
+                            <!-- Temporary link for admin page. Add route once created -->
+                            <a href="">Admin</a>
+                        {% endif %}
+                    {% else %}
+                    <a href="/login">Login</a>
+                    <a href="/register">Register</a>
+                    {% endif %}
+                </div>
+            </div>
         </div>
         <div class="right-header">
           {% if current_user.is_authenticated %}
@@ -34,12 +46,21 @@
       </div>
     </div>
 
-    {% with messages = get_flashed_messages() %} {% if messages %}
-    <ul>
-      {% for message in messages %}
-      <li>{{ message }}</li>
-      {% endfor %}
-    </ul>
-    {% endif %} {% endwith %} {% block content %}{% endblock %}
-  </body>
+    <!--TODO: Make it so flashed messages are better displayed-->
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        <ul>
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ url_for('static', filename='DataTables/datatables.min.js') }}"></script>    
+    <script src="{{ url_for('static', filename='Chosen/chosen.jquery.min.js') }}"></script>
+    </body>
 </html>

@@ -1,23 +1,110 @@
 {% extends "base.html" %}
 
+{% block extra_head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/ticketView.css') }}">
+{% endblock %}
+
 {% block content %}
-<h1>Welcome to Resolve!</h1>
 {% if current_user.is_authenticated %}
-    {% if current_user.has_role(['Employee']) %}
-        <div>
-            <h2>Employee View</h2>
-            <p>You are signed in as an employee.</p>
+    {% if current_user.has_role(['Employee', 'Agent', 'Admin']) %}
+        <div class="ticket-container">
+            <div class="left-menu">
+                <ul>
+                    {% if current_user.has_role(['Employee']) %}
+                        <li><a href="/index">My Tickets</a></li>
+                    {% endif %}
+                    {% if current_user.has_role(['Agent', 'Admin']) %}
+                        <li><a href="{{ url_for('assigned_tickets', UserID=current_user.UserID)}}">Assigned To Me</a></li>
+                    {% endif %}
+                    <li><a href="/index/open">Open Tickets</a></li>
+                    <li><a href="/index/closed">Closed Tickets</a></li>
+                    <li><a href="/createticket">New Ticket</a></li>
+                </ul>
+            </div>
+            <div class="right-menu">
+                <div class="ticket-buttons">
+                    <button id="create-ticket">Submit a Ticket</button>
+                    <div class="open-closed">
+                        <a href="/index/open" id="open-tickets">Open Tickets</a>
+                        <a href="/index/closed" id="closed-tickets">Closed Tickets</a>
+                        {% if current_user.has_role(['Employee', 'Agent', 'Admin']) %}
+                            <a href="{{ url_for('assigned_tickets', UserID=current_user.UserID)}}" id="assigned-tickets">Assigned To Me</a>
+                        {% endif %}
+                    </div>
+                </div>
+                <!--TODO: Perhaps replace ticket table with some sort of grid-box styling-->
+                <table id="ticketTable">
+                    <thead>
+                        <tr>
+                            <th>Ticket ID</th>
+                            <th>Subject</th>
+                            <th>Status</th>
+                            <th>Priority</th>
+                            <th>Category</th>
+                            <th>Assigned To</th>
+                            <th>Created At</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ticket in tickets %}
+                        <tr>
+                            <td><a href="{{ url_for('view_ticket', TicketID=ticket.TicketID)}}">{{ ticket.ticketNumber }}</a></td>
+                            <td>{{ ticket.subject }}</td>
+                            <td>{{ ticket.status.name }}</td>
+                            <td>{{ ticket.priority.name }}</td>
+                            <td>{{ ticket.category.name }}</td>
+                            <td>{{ ticket.assignee.username if ticket.assignee else 'Unassigned' }}</td>
+                            <td>{{ ticket.CreatedAt.strftime('%b %d, %Y, %I:%M %p') }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
-    {% elif current_user.has_role(['Agent', 'Admin']) %}
-        <div>
-            <h2>Agent/Admin View</h2>
-            <p>You are signed in with agent or admin access.</p>
-        </div>
-    {% else %}
-    <!-- This case should not occur -->
-        
     {% endif %}
 {% else %}
     <p>Please create an account or login to get started!</p>
 {% endif %}
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="{{ url_for('static', filename='DataTables/datatables.min.js') }}"></script>
+<script src="{{ url_for('static', filename='js/ticketview.js') }}"></script>
+<script>
+//TODO: Implement date range filtering, make whole ticket row clickable
+// Also add styling to table. For example, if a priority is critical maybe may the row red or something
+// Or if it hasnt been assigned in a while since creation then flag 
+$(document).ready(function() {
+    $('#ticketTable').DataTable({
+        ordering: false,
+        order: [
+            [2, 'asc'],   
+            [3, 'desc'], 
+            [6, 'desc'] 
+        ],
+        stateSave: true,
+        responsive: true,
+        columnControl: ['order', ['search']],
+        columnDefs: [
+            { targets: [2, 3, 4, 5], columnControl: ['order', ['searchList']] } 
+        ],
+        "pageLength": 10,
+        "lengthMenu": [[10, 25, 50, -1], [10, 25, 50, "All"]],
+        "language": {
+            "search": "Search tickets:",
+            "lengthMenu": "Show _MENU_ tickets per page",
+            "info": "Showing _START_ to _END_ of _TOTAL_ tickets",
+            "infoEmpty": "No tickets available",
+            "infoFiltered": "(filtered from _MAX_ total tickets)",
+            "zeroRecords": "No matching tickets found"
+        }
+    });
+});
+</script>
+
+<script>
+document.getElementById('create-ticket').addEventListener('click', function() {
+    window.location.href = "{{ url_for('create_ticket') }}";
+});
+</script>
+
 {% endblock %}
