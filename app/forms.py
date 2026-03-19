@@ -1,6 +1,7 @@
 from flask_wtf import FlaskForm
-from wtforms import SelectField, StringField, PasswordField, BooleanField, SubmitField, TextAreaField
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, SelectField, TextAreaField, MultipleFileField
 from wtforms.validators import DataRequired, Email, Length, EqualTo, InputRequired, ValidationError
+from wtforms.widgets import ListWidget, CheckboxInput
 
 class LoginForm(FlaskForm):
     email = StringField('Email Address', validators=[
@@ -31,6 +32,44 @@ class RegistrationForm(FlaskForm):
         EqualTo('password')])
     submit = SubmitField('Register')
 
+
+class ProfileForm(FlaskForm):
+    username = StringField('Name')
+    email = StringField('Email')
+    language = SelectField('Language', choices=[('en', 'English')])
+    submit = SubmitField('Save And Reload')
+
+class SettingsForm(FlaskForm):
+    old_password = PasswordField('Old Password')
+    new_password = PasswordField('New Password')
+    submit = SubmitField('Update Password')
+
+
+class NewUserForm(FlaskForm):
+    username = StringField('Name', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    role = SelectField('Role', choices=[('2', 'Agent'), ('3', 'Admin')])
+    submit = SubmitField('Create User')
+
+class ResetPasswordForm(FlaskForm):
+    new_password = PasswordField('New Password', validators=[DataRequired()])
+    submit = SubmitField('Reset Password')
+
+class NewClientForm(FlaskForm):
+    username = StringField('Name', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    submit = SubmitField('Save')
+
+
+
+class RolePermissionForm(FlaskForm):
+    role_name = StringField('Role Name', validators=[DataRequired()])
+    submit = SubmitField('Next')
+
+class RoleUserAssignForm(FlaskForm):
+    submit = SubmitField('Create Role')
 class CreateTicketForm(FlaskForm):
     subject = StringField(
         "Subject",

@@ -12,7 +12,8 @@ class Role(db.Model):
     RoleID: so.Mapped[int] = so.mapped_column(primary_key=True)
     name: so.Mapped[str] = so.mapped_column(sa.String, nullable=False)
 
-    users: so.Mapped[list["User"]] = so.relationship(back_populates="role")
+    users: so.WriteOnlyMapped["User"] = so.relationship(back_populates="role")
+    active: so.Mapped[bool] = so.mapped_column(sa.Boolean, nullable=False, default=True)
 
     def __repr__(self):
         return f"<Role {self.name}>"
@@ -21,9 +22,9 @@ class User(db.Model, UserMixin):
     __tablename__ = "User"
 
     UserID: so.Mapped[int] = so.mapped_column(primary_key=True)
-    username: so.Mapped[Optional[str]] = so.mapped_column(sa.String)
-    email: so.Mapped[Optional[str]] = so.mapped_column(sa.String)
-    password_hash: so.Mapped[Optional[str]] = so.mapped_column(sa.String)
+    email: so.Mapped[str] = so.mapped_column(sa.String, nullable=False, unique=True)
+    username: so.Mapped[str] = so.mapped_column(sa.String, nullable=False, server_default="")
+    password_hash: so.Mapped[str] = so.mapped_column(sa.String, nullable=False)
     roleId: so.Mapped[int] = so.mapped_column(sa.ForeignKey("Roles.RoleID"), nullable=False)
 
     role: so.Mapped["Role"] = so.relationship(back_populates="users")
@@ -171,6 +172,23 @@ class TicketComment(db.Model):
     comment: so.Mapped[str] = so.mapped_column(sa.Text, nullable=False)
     CreatedAt: so.Mapped[datetime] = so.mapped_column(sa.DateTime, nullable=False)
 
+    ticket_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("Ticket.id"), nullable=False)
+    id: so.Mapped[int] = so.mapped_column(primary_key=True)
+    user_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("User.UserID"), nullable=False)
+    text: so.Mapped[str] = so.mapped_column(sa.Text, nullable=False)
+    created_at: so.Mapped[datetime] = so.mapped_column(sa.DateTime, nullable=False, default=datetime.utcnow)
+
+
+class Permission(db.Model):
+    __tablename__ = "Permission"
+    id: so.Mapped[int] = so.mapped_column(primary_key=True)
+    name: so.Mapped[str] = so.mapped_column(sa.String, nullable=False, unique=True)
+
+class RolePermission(db.Model):
+    __tablename__ = "RolePermission"
+    id: so.Mapped[int] = so.mapped_column(primary_key=True)
+    role_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("roles.RoleID"), nullable=False)
+    permission_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey("Permission.id"), nullable=False)
 
     ticket: so.Mapped["Ticket"] = so.relationship(back_populates="comments")
     user: so.Mapped["User"] = so.relationship(back_populates="comments")

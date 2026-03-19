@@ -8,7 +8,7 @@
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     </head>
 
-    {% block extra_head %}{% endblock %}
+  {% block extra_head %}{% endblock %}
 
     <body>
         <div class="header-container">
@@ -33,6 +33,18 @@
                 </div>
             </div>
         </div>
+        <div class="right-header">
+          {% if current_user.is_authenticated %}
+          <a href="/logout">Logout</a>
+          {% if current_user.has_role(['Admin']) %}
+            <a href="/admin/panel">Admin Dashboard</a>
+          {% endif %} {% else %}
+          <a href="/login">Login</a>
+          <a href="/register">Register</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
 
     <!--TODO: Make it so flashed messages are better displayed-->
     {% with messages = get_flashed_messages() %}
