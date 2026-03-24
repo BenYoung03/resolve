@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+{% block extra_head %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/admin_panel.css') }}">
+{% endblock %}
+{% block content %}
+<div class="panel-wrapper">
+    <div class="panel-sidebar">
+        <p><strong>Admin</strong></p>
+        <a href="{{ url_for('admin_users') }}">Users</a>
+        <a href="{{ url_for('admin_clients') }}">Clients</a>
+        <a href="{{ url_for('admin_roles') }}">Roles</a>
+        <a href="{{ url_for('admin_settings') }}">Settings</a>
+        <a href="{{ url_for('admin_profile') }}">Profile</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+    <div class="panel-content">
+        <div class="section-header">
+            <h2>Clients</h2>
+            <button onclick="document.getElementById('new-client-modal').style.display='flex'">New Client</button>
+        </div>
+        <div class="filter-row">
+            <label>Client Name:</label>
+            <input type="text" id="client-filter" placeholder="Type to filter" onkeyup="filterClients()">
+        </div>
+        <table class="issues-table" id="clients-table">
+            <tbody>
+                {% for client in clients %}
+                <tr>
+                    <td>{{ client.username }}</td>
+                    <td>
+                        <form method="post" action="{{ url_for('admin_delete_user', user_id=client.UserID) }}">
+                            {{ new_client_form.hidden_tag() }}
+                            <button type="submit">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- New Client Modal -->
+<div id="new-client-modal" class="modal">
+    <div class="modal-content">
+        <h2>Register a new client</h2>
+        <form method="post" action="{{ url_for('admin_new_client') }}">
+            {{ new_client_form.hidden_tag() }}
+            {{ new_client_form.username(placeholder="Enter the client name here") }}
+            {{ new_client_form.email(placeholder="Enter the client email here") }}
+            {{ new_client_form.password(placeholder="Enter password") }}
+            {{ new_client_form.submit() }}
+        </form>
+        <button onclick="document.getElementById('new-client-modal').style.display='none'">X</button>
+    </div>
+</div>
+
+<script>
+function filterClients() {
+    const filter = document.getElementById('client-filter').value.toLowerCase();
+    const rows = document.querySelectorAll('#clients-table tbody tr');
+    rows.forEach(row => {
+        const name = row.cells[0].textContent.toLowerCase();
+        row.style.display = name.includes(filter) ? '' : 'none';
+    });
+}
+</script>
+{% endblock %}
