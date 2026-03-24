@@ -92,3 +92,54 @@ class UpdateTicket(FlaskForm):
     def validate_resolutionReasoning(self, field):
         if self.status.data == 5 and not field.data:
             raise ValidationError("Resolution reasoning is required when closing or resolving a ticket.")
+        
+
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, SubmitField, SelectField
+from wtforms.validators import DataRequired, Email
+
+class AdminSettingsForm(FlaskForm):
+    old_password = PasswordField('Old Password', validators=[DataRequired()])
+    new_password = PasswordField('New Password', validators=[DataRequired()])
+    submit = SubmitField('Save')
+
+class AdminProfileForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    language = SelectField('Language', choices=[('English', 'English')])
+    submit = SubmitField('Save')
+
+class AdminNewClientForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    submit = SubmitField('Create Client')
+
+class AdminRoleForm(FlaskForm):
+    role_name = StringField('Role Name')
+    role = SelectField('Role', coerce=int)
+    submit = SubmitField('Save')
+
+class AdminResetPasswordForm(FlaskForm):
+    new_password = PasswordField('New Password', validators=[
+        DataRequired(),
+        Length(min=6, message='Password must be at least 6 characters long.')
+    ])
+    submit = SubmitField('Reset Password')
+
+
+class AdminNewUserForm(FlaskForm):
+    username = StringField('Username', validators=[
+        DataRequired(),
+        Length(min=3, max=15, message='Username must be between 3 and 15 characters.')
+    ])
+    email = StringField('Email', validators=[
+        DataRequired(),
+        Email(message='Please enter a valid email address.')
+    ])
+    password = PasswordField('Password', validators=[
+        DataRequired(),
+        Length(min=6, message='Password must be at least 6 characters long.')
+    ])
+    role = SelectField('Role', coerce=int, validators=[DataRequired()])
+    submit = SubmitField('Create User')

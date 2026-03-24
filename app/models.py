@@ -11,7 +11,8 @@ class Role(db.Model):
 
     RoleID: so.Mapped[int] = so.mapped_column(primary_key=True)
     name: so.Mapped[str] = so.mapped_column(sa.String, nullable=False)
-
+    active: so.Mapped[bool] = so.mapped_column(sa.Boolean, nullable=False, server_default=sa.true())
+    
     users: so.Mapped[list["User"]] = so.relationship(back_populates="role")
 
     def __repr__(self):

@@ -1,7 +1,12 @@
 from app import app, db
 from flask import render_template, flash, redirect, url_for, request
 import sqlalchemy as sa
-from app.forms import CommentForm, LoginForm, RegistrationForm, CreateTicketForm, UpdateTicket
+# from app.forms import CommentForm, LoginForm, RegistrationForm, CreateTicketForm, UpdateTicket
+from app.forms import (
+    CommentForm, LoginForm, RegistrationForm, CreateTicketForm, UpdateTicket,
+    AdminSettingsForm, AdminProfileForm, AdminNewClientForm, AdminRoleForm,
+    AdminResetPasswordForm, AdminNewUserForm
+)
 from app.models import TicketComment, User, Role, Category, Status, Priority, Ticket
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required, current_user
@@ -18,7 +23,7 @@ def role_required(*role):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            if not current_user.is_authenticated or not current_user.has_role(role):
+            if not current_user.is_authenticated or not current_user.has_role(*role):
                 flash('Access denied. Insufficient permissions.')
                 return redirect(url_for('index'))
             return f(*args, **kwargs)
@@ -265,3 +270,410 @@ def view_ticket(TicketID):
     return render_template('ticketview.html', ticket_id=TicketID, ticket=currentTicket,
                            comments=comments, commentForm=addCommentForm, updateTicketForm=updateTicketForm,
                            ticketAge=ticketAge, show_confetti=request.args.get('confetti') == '1')
+@app.route('/admin')
+@login_required
+@role_required("Admin")
+def admin_functionalities():
+    return render_template('admin_functionalities.html')
+
+@app.route('/admin/users')
+@login_required
+@role_required("Admin")
+def admin_users():
+    users = db.session.scalars(sa.select(User).order_by(User.username.asc())).all()
+
+    role_choices = [
+        (role.RoleID, role.name)
+        for role in db.session.scalars(sa.select(Role).order_by(Role.name.asc())).all()
+    ]
+
+    role_form = AdminRoleForm()
+    role_form.role.choices = role_choices
+
+    reset_form = AdminResetPasswordForm()
+
+    new_user_form = AdminNewUserForm()
+    new_user_form.role.choices = role_choices
+
+    return render_template(
+        'admin_users.html',
+        users=users,
+        role_form=role_form,
+        reset_form=reset_form,
+        new_user_form=new_user_form
+    )
+
+
+@app.route('/admin/clients')
+@login_required
+@role_required("Admin")
+def admin_clients():
+    clients = db.session.scalars(
+        sa.select(User).join(Role).where(Role.name == "Employee").order_by(User.username.asc())
+    ).all()
+    new_client_form = AdminNewClientForm()
+    return render_template('admin_clients.html', clients=clients, new_client_form=new_client_form)
+
+
+@app.route('/admin/roles')
+@login_required
+@role_required("Admin")
+def admin_roles():
+    roles = db.session.scalars(sa.select(Role).order_by(Role.name.asc())).all()
+    form = AdminRoleForm()
+    return render_template('admin_roles.html', roles=roles, form=form)
+
+
+@app.route('/admin/settings', methods=['GET', 'POST'])
+@login_required
+@role_required("Admin")
+def admin_settings():
+    form = AdminSettingsForm()
+    if form.validate_on_submit():
+        if not check_password_hash(current_user.password_hash, form.old_password.data):
+            flash('Old password is incorrect.')
+            return redirect(url_for('admin_settings'))
+        current_user.password_hash = generate_password_hash(form.new_password.data)
+        db.session.commit()
+        flash('Password updated.')
+        return redirect(url_for('admin_settings'))
+    return render_template('admin_settings.html', form=form)
+
+
+@app.route('/admin/profile', methods=['GET', 'POST'])
+@login_required
+@role_required("Admin")
+def admin_profile():
+    form = AdminProfileForm()
+
+    if request.method == 'GET':
+        form.username.data = current_user.username
+        form.email.data = current_user.email
+        form.language.data = 'English'
+
+    if form.validate_on_submit():
+        duplicate_username = db.session.scalar(
+            sa.select(User).where(
+                sa.and_(User.username == form.username.data, User.UserID != current_user.UserID)
+            )
+        )
+        duplicate_email = db.session.scalar(
+            sa.select(User).where(
+                sa.and_(User.email == form.email.data, User.UserID != current_user.UserID)
+            )
+        )
+
+        if duplicate_username:
+            flash('Username already exists.')
+            return redirect(url_for('admin_profile'))
+
+        if duplicate_email:
+            flash('Email already exists.')
+            return redirect(url_for('admin_profile'))
+
+        current_user.username = form.username.data
+        current_user.email = form.email.data
+        db.session.commit()
+        flash('Profile updated.')
+        return redirect(url_for('admin_profile'))
+
+    return render_template('admin_profile.html', form=form)
+
+@app.route('/admin/change-role/<int:user_id>', methods=['POST'])
+@login_required
+@role_required("Admin")
+def admin_change_role(user_id):
+    form = AdminRoleForm()
+    form.role.choices = [
+        (role.RoleID, role.name)
+        for role in db.session.scalars(sa.select(Role).order_by(Role.name.asc())).all()
+    ]
+
+    if not form.validate_on_submit():
+        flash('Invalid role form.')
+        return redirect(url_for('admin_users'))
+
+    user = db.session.get(User, user_id)
+    role = db.session.get(Role, form.role.data)
+
+    if not user or not role:
+        flash('User or role not found.')
+        return redirect(url_for('admin_users'))
+
+    user.roleId = role.RoleID
+    db.session.commit()
+    flash(f'Role for {user.username} updated to {role.name}.')
+    return redirect(url_for('admin_users'))
+@app.route('/admin/reset-password/<int:user_id>', methods=['POST'])
+@login_required
+@role_required("Admin")
+def admin_reset_password(user_id):
+    form = AdminResetPasswordForm()
+
+    if not form.validate_on_submit():
+        flash('Invalid reset password form.')
+        return redirect(url_for('admin_users'))
+
+    user = db.session.get(User, user_id)
+    if not user:
+        flash('User not found.')
+        return redirect(url_for('admin_users'))
+
+    user.password_hash = generate_password_hash(form.new_password.data)
+    db.session.commit()
+    flash(f'Password reset for {user.username}.')
+    return redirect(url_for('admin_users'))
+
+@app.route('/admin/new-user', methods=['POST'])
+@login_required
+@role_required("Admin")
+def admin_new_user():
+    form = AdminNewUserForm()
+    form.role.choices = [
+        (role.RoleID, role.name)
+        for role in db.session.scalars(sa.select(Role).order_by(Role.name.asc())).all()
+    ]
+
+    if not form.validate_on_submit():
+        flash('Invalid new user form.')
+        return redirect(url_for('admin_users'))
+
+    existing_user = db.session.scalar(sa.select(User).where(User.email == form.email.data))
+    existing_name = db.session.scalar(sa.select(User).where(User.username == form.username.data))
+
+    if existing_user or existing_name:
+        flash('User username or email already exists.')
+        return redirect(url_for('admin_users'))
+
+    role = db.session.get(Role, form.role.data)
+    if not role:
+        flash('Selected role does not exist.')
+        return redirect(url_for('admin_users'))
+
+    user = User(
+        username=form.username.data,
+        email=form.email.data,
+        password_hash=generate_password_hash(form.password.data),
+        roleId=role.RoleID
+    )
+    db.session.add(user)
+    db.session.commit()
+    flash('User created.')
+    return redirect(url_for('admin_users'))
+
+@app.route('/admin/delete-user/<int:user_id>', methods=['POST'])
+@login_required
+@role_required("Admin")
+def admin_delete_user(user_id):
+    user = db.session.get(User, user_id)
+
+    if not user:
+        flash('User not found.')
+        return redirect(url_for('admin_users'))
+
+    if user.UserID == current_user.UserID:
+        flash('You cannot delete your own account.')
+        return redirect(url_for('admin_users'))
+
+    has_tickets = db.session.scalar(
+        sa.select(Ticket.TicketID).where(
+            sa.or_(Ticket.CreatedBy == user.UserID, Ticket.AssignedTo == user.UserID)
+        ).limit(1)
+    )
+    has_comments = db.session.scalar(
+        sa.select(TicketComment.CommentID).where(TicketComment.UserID == user.UserID).limit(1)
+    )
+
+    if has_tickets or has_comments:
+        flash('Cannot delete user because they are linked to tickets or comments.')
+        return redirect(url_for('admin_users'))
+
+    db.session.delete(user)
+    db.session.commit()
+    flash('User deleted.')
+    return redirect(url_for('admin_users'))
+
+
+@app.route('/admin/new-client', methods=['POST'])
+@login_required
+@role_required("Admin")
+def admin_new_client():
+    form = AdminNewClientForm()
+    if not form.validate_on_submit():
+        flash('Invalid client form.')
+        return redirect(url_for('admin_clients'))
+
+    existing_user = db.session.scalar(sa.select(User).where(User.email == form.email.data))
+    existing_name = db.session.scalar(sa.select(User).where(User.username == form.username.data))
+    if existing_user or existing_name:
+        flash('Client username or email already exists.')
+        return redirect(url_for('admin_clients'))
+
+    employee_role = db.session.scalar(sa.select(Role).where(Role.name == "Employee"))
+    if not employee_role:
+        flash('Employee role is missing.')
+        return redirect(url_for('admin_clients'))
+
+    user = User(
+        username=form.username.data,
+        email=form.email.data,
+        password_hash=generate_password_hash(form.password.data),
+        roleId=employee_role.RoleID
+    )
+    db.session.add(user)
+    db.session.commit()
+    flash('Client created.')
+    return redirect(url_for('admin_clients'))
+
+
+@app.route('/admin/toggle-all-roles/<int:active>', methods=['POST'])
+@login_required
+@role_required("Admin")
+def admin_toggle_all_roles(active):
+    roles = db.session.scalars(sa.select(Role)).all()
+    core_roles = {"Admin", "Agent", "Employee"}
+
+    for role in roles:
+        if hasattr(role, 'active') and role.name not in core_roles:
+            role.active = bool(active)
+
+    db.session.commit()
+    flash('Custom roles updated.')
+    return redirect(url_for('admin_roles'))
+
+@app.route('/admin/toggle-role/<int:role_id>', methods=['POST'])
+@login_required
+@role_required("Admin")
+def admin_toggle_role(role_id):
+    role = db.session.get(Role, role_id)
+
+    if not role:
+        flash('Role not found.')
+        return redirect(url_for('admin_roles'))
+
+    if role.name in {"Admin", "Agent", "Employee"}:
+        flash('Core roles cannot be disabled here.')
+        return redirect(url_for('admin_roles'))
+
+    if hasattr(role, 'active'):
+        role.active = not role.active
+        db.session.commit()
+        flash('Role updated.')
+
+    return redirect(url_for('admin_roles'))
+
+@app.route('/admin/edit-role/<int:role_id>', methods=['GET', 'POST'])
+@login_required
+@role_required("Admin")
+def admin_edit_role(role_id):
+    role = db.session.get(Role, role_id)
+    if not role:
+        flash('Role not found.')
+        return redirect(url_for('admin_roles'))
+
+    form = AdminRoleForm()
+    form.role.choices = [(role.RoleID, role.name)]
+
+    if request.method == 'GET':
+        form.role_name.data = role.name
+
+    if form.validate_on_submit():
+        if role.name in {"Admin", "Agent", "Employee"}:
+            flash('Core roles cannot be renamed.')
+            return redirect(url_for('admin_roles'))
+
+        existing = db.session.scalar(
+            sa.select(Role).where(
+                sa.and_(Role.name == form.role_name.data, Role.RoleID != role.RoleID)
+            )
+        )
+        if existing:
+            flash('A role with that name already exists.')
+            return redirect(url_for('admin_edit_role', role_id=role_id))
+
+        role.name = form.role_name.data
+        db.session.commit()
+        flash('Role updated.')
+        return redirect(url_for('admin_roles'))
+
+    return render_template('admin_edit_role.html', form=form, role=role)
+
+@app.route('/admin/delete-role/<int:role_id>', methods=['POST'])
+@login_required
+@role_required("Admin")
+def admin_delete_role(role_id):
+    role = db.session.get(Role, role_id)
+
+    if not role:
+        flash('Role not found.')
+        return redirect(url_for('admin_roles'))
+
+    if role.name in {"Admin", "Agent", "Employee"}:
+        flash('Core roles cannot be deleted.')
+        return redirect(url_for('admin_roles'))
+
+    if role.users:
+        flash('Cannot delete a role that is still assigned to users.')
+        return redirect(url_for('admin_roles'))
+
+    db.session.delete(role)
+    db.session.commit()
+    flash('Role deleted.')
+    return redirect(url_for('admin_roles'))
+
+
+@app.route('/admin/create-role', methods=['POST'])
+@login_required
+@role_required("Admin")
+def admin_create_role_step1():
+    form = AdminRoleForm()
+    if not form.validate_on_submit():
+        flash('Invalid role form.')
+        return redirect(url_for('admin_roles'))
+
+    role_name = form.role_name.data
+    permissions = request.form.getlist('permissions')
+    agents = db.session.scalars(
+        sa.select(User).join(Role).where(Role.name.in_(["Agent", "Admin"])).order_by(User.email.asc())
+    ).all()
+
+    return render_template(
+        'admin_role_assign.html',
+        form=form,
+        role_name=role_name,
+        permissions=permissions,
+        agents=agents
+    )
+
+
+@app.route('/admin/create-role/assign', methods=['POST'])
+@login_required
+@role_required("Admin")
+def admin_create_role_step2():
+    role_name = (request.form.get('role_name') or '').strip()
+    user_ids = request.form.getlist('user_ids')
+
+    if not role_name:
+        flash('Role name is required.')
+        return redirect(url_for('admin_roles'))
+
+    existing = db.session.scalar(sa.select(Role).where(Role.name == role_name))
+    if existing:
+        flash('Role already exists.')
+        return redirect(url_for('admin_roles'))
+
+    new_role = Role(name=role_name, active=True)
+    db.session.add(new_role)
+    db.session.flush()
+
+    if user_ids:
+        users = db.session.scalars(
+            sa.select(User).where(User.UserID.in_([int(uid) for uid in user_ids]))
+        ).all()
+        for user in users:
+            user.roleId = new_role.RoleID
+
+    db.session.commit()
+    flash('Role created. Selected permissions were not saved because no permission table exists yet.')
+    return redirect(url_for('admin_roles'))
+
