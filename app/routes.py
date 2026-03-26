@@ -232,6 +232,7 @@ def view_ticket(TicketID):
         
         return redirect(url_for('view_ticket', TicketID=TicketID))
     
+    # TODO: Add more flash style error messages
     if updateTicketForm.validate_on_submit():
         oldStatus = currentTicket.StatusID
         currentTicket.PriorityID = updateTicketForm.priority.data
