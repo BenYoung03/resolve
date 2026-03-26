@@ -1,6 +1,7 @@
 from flask_mail import Message
 from app import mail
 from threading import Thread
+import jwt
 
 from flask import current_app
 
@@ -113,3 +114,6 @@ Thank you,
 Resolve Ticketing
 """
     Thread(target=sendAsyncEmail, args=(current_app._get_current_object(), msg)).start()
+
+def passwordResetEmail(user):
+    print("Test")

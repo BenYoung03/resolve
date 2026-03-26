@@ -31,6 +31,13 @@ class RegistrationForm(FlaskForm):
         EqualTo('password')])
     submit = SubmitField('Register')
 
+class PasswordResetForm(FlaskForm):
+    email = StringField('Email Address', validators=[
+        DataRequired(),
+        Email(message='Please enter a valid email address.')
+    ])
+    submit = SubmitField('Request Password Reset')
+
 class CreateTicketForm(FlaskForm):
     subject = StringField(
         "Subject",

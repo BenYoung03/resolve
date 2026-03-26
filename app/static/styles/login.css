@@ -52,9 +52,26 @@ input[type="text"], input[type="password"], input[type="email"] {
 }
 
 .confirm-container a {
-    color: #777777;
+    color: #2f7de1;
     opacity: 80%;
     cursor: pointer;
-    font-size: 8px;
+    font-size: 12px;
     margin-top: 15px;
+    text-decoration: none;
 }
+
+.login-options{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.login-options a{
+    color: #2f7de1;
+    opacity: 80%;
+    cursor: pointer;
+    font-size: 12px;
+    text-decoration: none;
+    font-size: 16px
+}
+
