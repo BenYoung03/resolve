@@ -177,6 +177,11 @@ def create_ticket():
 
         flash(f'Ticket {newTicket.ticketNumber} created successfully.')
         return redirect(url_for('index'))
+    
+    if request.method == "POST" and not form.validate():
+        for field_errors in form.errors.values():
+            for error in field_errors:
+                flash(error, "warning")
 
     return render_template('newticket.html', form=form)
 

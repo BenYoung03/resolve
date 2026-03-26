@@ -34,12 +34,12 @@ class RegistrationForm(FlaskForm):
 class CreateTicketForm(FlaskForm):
     subject = StringField(
         "Subject",
-        validators=[DataRequired(), Length(min=3, max=200)]
+        validators=[DataRequired(), Length(min=3, max=200, message="Subject must be between 3 and 200 characters long")]
     )
 
     description = TextAreaField(
         "Description",
-        validators=[DataRequired(), Length(min=10)]
+        validators=[DataRequired(), Length(min=10, message="Description must be 10 characters long")]
     )
 
     category = SelectField(

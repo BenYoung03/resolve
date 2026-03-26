@@ -6,11 +6,9 @@
 
 {% block content %}
 
-
-<!--TODO: STYLE PAGE-->
-<div class="new-ticket-form">
-    <h2>Submit a New Ticket</h2>
-    <form action="" method="post" novalidate>
+<div class="new-ticket-container">
+    <form action="" method="post" novalidate class="new-ticket-form">
+        <h2>Submit a New Ticket</h2>
         {{ form.hidden_tag() }}
 
         <div class="form-element">
@@ -26,18 +24,30 @@
         
         <div class="form-element">
             {{ form.category.label }}
-            {{ form.category() }}
+            {{ form.category(class="new-ticket-select") }}
         </div>
 
         <div class="form-element">
             {{ form.priority.label }}
-            {{ form.priority() }}
+            {{ form.priority(class="new-ticket-select") }}
         </div>
 
-        {{ form.submit() }}
-    </form>
+        {{ form.submit(class="new-ticket-submit") }}
 
-    <a href="{{ url_for('index') }}">Back to Dashboard</a>
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+            <ul class="flashed-message-list">
+                {% for message in messages %}
+                    <li class="flashed-message-element">{{ message }}</li>
+                {% endfor %}
+            </ul>
+            {% endif %}
+        {% endwith %}
+
+        <div class="form-element">
+            <a href="{{ url_for('index') }}">Back to Dashboard</a>
+        </div>
+    </form>
 </div>
 
 
