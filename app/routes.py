@@ -30,11 +30,12 @@ def role_required(*role):
 def index():
 
     if not current_user.is_authenticated:
-        tickets = []
+        return redirect(url_for('login'))
+    # This currently finds only tickets that are not resolved or closed. Perhaps change logic later
     elif current_user.has_role('Employee'):
-        tickets = (db.session.scalars(sa.select(Ticket).where(Ticket.CreatedBy == current_user.UserID).order_by(Ticket.CreatedAt.desc())).all())
+        tickets = (db.session.scalars(sa.select(Ticket).where(Ticket.CreatedBy == current_user.UserID, Ticket.StatusID.notin_([5, 6])).order_by(Ticket.CreatedAt.desc())).all())
     else:
-        tickets = (db.session.scalars(sa.select(Ticket).order_by(Ticket.CreatedAt.desc())).all())
+        tickets = (db.session.scalars(sa.select(Ticket).where(Ticket.StatusID.notin_([5, 6])).order_by(Ticket.CreatedAt.desc())).all())
 
     return render_template('index.html', title='Home', tickets=tickets)
 
@@ -57,10 +58,10 @@ def open_tickets():
         tickets = []
     elif current_user.has_role('Employee'):
         tickets = (db.session.scalars(sa.select(Ticket).where(
-            sa.and_(Ticket.CreatedBy == current_user.UserID, Ticket.StatusID.in_([1, 2, 3, 4]))
+            sa.and_(Ticket.CreatedBy == current_user.UserID, Ticket.StatusID.notin_([5,6]))
         ).order_by(Ticket.CreatedAt.desc())).all())
     else:
-        tickets = (db.session.scalars(sa.select(Ticket).where(Ticket.StatusID.in_([1, 2, 3, 4])).order_by(Ticket.CreatedAt.desc())).all())
+        tickets = (db.session.scalars(sa.select(Ticket).where(Ticket.StatusID.notin_([5,6])).order_by(Ticket.CreatedAt.desc())).all())
 
     return render_template('index.html', title='Open Tickets', tickets=tickets)
 
@@ -70,7 +71,7 @@ def assigned_tickets(UserID):
     if not current_user.is_authenticated:
         tickets = []
     else:
-        tickets = (db.session.scalars(sa.select(Ticket).where(Ticket.AssignedTo == current_user.UserID).order_by(Ticket.CreatedAt.desc())).all())
+        tickets = (db.session.scalars(sa.select(Ticket).where(Ticket.AssignedTo == current_user.UserID, Ticket.StatusID.notin_([5,6])).order_by(Ticket.CreatedAt.desc())).all())
 
     return render_template('index.html', title='Assigned Tickets', tickets=tickets)
 

@@ -19,6 +19,7 @@
                     <li><a href="/index/open">Open Tickets</a></li>
                     <li><a href="/index/closed">Closed Tickets</a></li>
                     <li><a href="/createticket">New Ticket</a></li>
+                    <!--TODO: Maybe add fourth button for "Resolved Tickets" for Admins only-->
                 </ul>
             </div>
             <div class="right-menu">
@@ -81,7 +82,7 @@ $(document).ready(function() {
             [3, 'desc'], 
             [6, 'desc'] 
         ],
-        stateSave: true,
+        stateSave: false,
         responsive: true,
         columnControl: ['order', ['search']],
         columnDefs: [
