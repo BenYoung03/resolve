@@ -38,6 +38,13 @@ class PasswordResetForm(FlaskForm):
     ])
     submit = SubmitField('Request Password Reset')
 
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField('Password', validators=[DataRequired()])
+    confirmPassword = PasswordField('Confirm Password', validators=[
+        DataRequired(),
+        EqualTo('password')])
+    submit = SubmitField('Reset Password')
+
 class CreateTicketForm(FlaskForm):
     subject = StringField(
         "Subject",
