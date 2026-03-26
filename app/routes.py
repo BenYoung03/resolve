@@ -252,7 +252,10 @@ def view_ticket(TicketID):
             recipient = currentTicket.creator.email
             oldStatusName = db.session.scalar(sa.select(Status.name).where(Status.StatusID == oldStatus))
             newStatusName = db.session.scalar(sa.select(Status.name).where(Status.StatusID == currentTicket.StatusID))
-            ticketStatusChangeNotification(currentTicket, recipient, oldStatusName, newStatusName)
+            if app.config['MAIL_SUPPRESS_SEND']:
+                print(f"email failed to send")
+            else:
+                ticketStatusChangeNotification(currentTicket, recipient, oldStatusName, newStatusName)
         
         newAssigned = currentTicket.assignee.UserID if currentTicket.assignee else None
         if oldAssigned != newAssigned and newAssigned is not None:
