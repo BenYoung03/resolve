@@ -1,5 +1,12 @@
 from flask_mail import Message
 from app import mail
+from threading import Thread
+
+from flask import app
+
+def sendAsyncEmail(app, msg):
+    with app.app_context():
+        mail.send(msg)
 
 #TODO: Update stylings for message using HTML instead of plaintext
 def ticketStatusChangeNotification(ticket, recipient, oldStatus, newStatus):
@@ -22,7 +29,7 @@ Thank you,
 Resolve Ticketing
 """
 
-    mail.send(msg)
+    Thread(target=sendAsyncEmail, args=(app, msg)).start()
 
 def ticketCreated(ticket, recipient):
     msg = Message(
@@ -52,7 +59,7 @@ You can view your ticket and add additional comments by logging into resolve.
 Thank you,
 Resolve Ticketing
 """
-    mail.send(msg)
+    Thread(target=sendAsyncEmail, args=(app, msg)).start()
 
 def notifyAgentsOfNewTicket(ticket, recipients):
     if not recipients:
@@ -82,7 +89,7 @@ Thank you,
 Resolve Ticketing
 """
 
-    mail.send(msg)
+    Thread(target=sendAsyncEmail, args=(app, msg)).start()
 
 def ticketAssignedNotification(ticket, recipient):
     msg = Message(
@@ -108,4 +115,4 @@ Please log in to Resolve Ticketing to review the ticket.
 Thank you,
 Resolve Ticketing
 """
-    mail.send(msg)
+    Thread(target=sendAsyncEmail, args=(app, msg)).start()

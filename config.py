@@ -1,4 +1,6 @@
 import os
+
+from flask import app
 basedir = os.path.abspath(os.path.dirname(__file__))
 
 class Config:
@@ -13,3 +15,8 @@ class Config:
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')
     MAIL_DEFAULT_SENDER = os.environ.get("MAIL_USERNAME")
     ADMINS = ['resolveticketing@gmail.com']
+
+    if not MAIL_SERVER or not MAIL_USERNAME or not MAIL_PASSWORD:
+        MAIL_SUPPRESS_SEND = True
+    else:
+        MAIL_SUPPRESS_SEND = False
