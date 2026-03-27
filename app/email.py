@@ -1,5 +1,12 @@
 from flask_mail import Message
 from app import mail
+from threading import Thread
+
+from flask import current_app
+
+def sendAsyncEmail(app, msg):
+    with app.app_context():
+        mail.send(msg)
 
 #TODO: Update stylings for message using HTML instead of plaintext
 def ticketStatusChangeNotification(ticket, recipient, oldStatus, newStatus):
@@ -22,7 +29,7 @@ Thank you,
 Resolve Ticketing
 """
 
-    mail.send(msg)
+    Thread(target=sendAsyncEmail, args=(current_app._get_current_object(), msg)).start()
 
 def ticketCreated(ticket, recipient):
     msg = Message(
@@ -36,7 +43,6 @@ Hello {ticket.creator.username},
 Your support request has been successfully submitted.
 
 Ticket Details
---------------
 Ticket Number: {ticket.ticketNumber}
 Subject: {ticket.subject}
 Category: {ticket.category.name}
@@ -52,7 +58,7 @@ You can view your ticket and add additional comments by logging into resolve.
 Thank you,
 Resolve Ticketing
 """
-    mail.send(msg)
+    Thread(target=sendAsyncEmail, args=(current_app._get_current_object(), msg)).start()
 
 def notifyAgentsOfNewTicket(ticket, recipients):
     if not recipients:
@@ -69,7 +75,6 @@ Hello Agent,
 A new support ticket has been created.
 
 Ticket Details
---------------
 Ticket Number: {ticket.ticketNumber}
 Subject: {ticket.subject}
 Category: {ticket.category.name}
@@ -82,7 +87,7 @@ Thank you,
 Resolve Ticketing
 """
 
-    mail.send(msg)
+    Thread(target=sendAsyncEmail, args=(current_app._get_current_object(), msg)).start()
 
 def ticketAssignedNotification(ticket, recipient):
     msg = Message(
@@ -96,7 +101,6 @@ Hello {ticket.assignee.username},
 A support ticket has been assigned to you.
 
 Ticket Details
---------------
 Ticket Number: {ticket.ticketNumber}
 Subject: {ticket.subject}
 Category: {ticket.category.name}
@@ -108,4 +112,4 @@ Please log in to Resolve Ticketing to review the ticket.
 Thank you,
 Resolve Ticketing
 """
-    mail.send(msg)
+    Thread(target=sendAsyncEmail, args=(current_app._get_current_object(), msg)).start()

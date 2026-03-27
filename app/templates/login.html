@@ -21,6 +21,15 @@
 
             <div class="confirm-container">
                 {{ form.submit(class="login-confirm") }}
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                    <ul class="flashed-message-list">
+                        {% for message in messages %}
+                            <li class="flashed-message-element">{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                {% endwith %}
                 <a href="{{ url_for('register') }}>Don't have an account? Click here!</a> 
             </div>
         </form>
