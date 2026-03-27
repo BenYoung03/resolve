@@ -297,8 +297,12 @@ def admin_users():
         for role in db.session.scalars(sa.select(Role).order_by(Role.name.asc())).all()
     ]
 
-    role_form = AdminRoleForm()
-    role_form.role.choices = role_choices
+    role_forms = {}
+    for user in users:
+        form = AdminRoleForm()
+        form.role.choices = role_choices
+        form.role.data = user.roleId
+        role_forms[user.UserID] = form
 
     reset_form = AdminResetPasswordForm()
 
@@ -308,7 +312,7 @@ def admin_users():
     return render_template(
         'admin_users.html',
         users=users,
-        role_form=role_form,
+        role_forms=role_forms,
         reset_form=reset_form,
         new_user_form=new_user_form
     )
@@ -414,6 +418,7 @@ def admin_change_role(user_id):
     db.session.commit()
     flash(f'Role for {user.username} updated to {role.name}.')
     return redirect(url_for('admin_users'))
+
 @app.route('/admin/reset-password/<int:user_id>', methods=['POST'])
 @login_required
 @role_required("Admin")

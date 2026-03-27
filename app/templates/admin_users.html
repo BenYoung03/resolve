@@ -33,8 +33,8 @@
                     <td>{{ user.email }}</td>
                     <td>
                         <form method="post" action="{{ url_for('admin_change_role', user_id=user.UserID) }}">
-                            {{ role_form.hidden_tag() }}
-                            {{ role_form.role() }}
+                            {{ role_forms[user.UserID].hidden_tag() }}
+                            {{ role_forms[user.UserID].role() }}
                             <button type="submit">Role</button>
                         </form>
                     </td>
@@ -47,7 +47,7 @@
                     </td>
                     <td>
                         <form method="post" action="{{ url_for('admin_delete_user', user_id=user.UserID) }}">
-                            {{ role_form.hidden_tag() }}
+                            {{ reset_form.hidden_tag() }}
                             <button type="submit">Delete</button>
                         </form>
                     </td>
