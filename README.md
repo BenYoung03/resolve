@@ -44,11 +44,11 @@ You can now follow these steps to install Resolve locally:
    ```
    git clone https://github.com/BenYoung03/resolve.git`
    ```
-3. Create a python virtual environment
+2. Create a python virtual environment
    ```
    python -m venv venv
    ```
-5. Activate the virtual enviornment, there are three ways to do so
+3. Activate the virtual environment, there are three ways to do so
 
 * Windows (CMD):
   ```
@@ -66,7 +66,7 @@ You can now follow these steps to install Resolve locally:
    ```
    pip install -r packages.txt
    ```
-6. Create .env file for email sending and place in root of project directory (*Optional*)
+5. Create .env file for email sending and place in root of project directory (*Optional*)
    ```
    MAIL_SERVER=smtp.googlemail.com
    MAIL_PORT=587
@@ -74,11 +74,15 @@ You can now follow these steps to install Resolve locally:
    MAIL_USERNAME=<email-here>
    MAIL_PASSWORD=<gmail-app-password-here>
    ```
+6. Run the setup.ps1 PowerShell script which creates the SQLite database with the required tables and a test admin account.
+    ```
+   .\setup.ps1
+   ```
 7. Run the application:
    ```
-   flask run
+   flask --app resolve run
    ```
-9. Open Application in browser
+8. Open Application in browser
    ```
    http://127.0.0.1:5000
    ```
