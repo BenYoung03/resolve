@@ -179,6 +179,13 @@ def reset_password(token):
 
     return render_template('resetPassword.html', form=form)
 
+# TODO: REMOVE ONCE DONE TESTING
+@app.route('/test/reset-password-email', methods=['GET'])
+@login_required
+def test_reset_password_email_template():
+    token = current_user.get_reset_password_token()
+    return render_template('email/resetPassword.html', user=current_user, token=token)
+
 #Logout route
 @app.route('/logout')
 #If user is logged in allow them to run this route

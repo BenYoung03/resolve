@@ -122,15 +122,16 @@ def passwordResetEmail(user):
         recipients=[user.email]
     )
 
-    msg.body = f"""
-    Hello {user.username},
-        
-    We received a request to reset your password. If you made this request, 
-    please click the link below to reset your password:
-    {url_for('reset_password', token=token, _external=True)}
-    If you did not request a password reset, please ignore this email. Your password will remain unchanged.
+    msg.body = f"""Hello {user.username},
+
+    We received a request to reset your password.
+    Reset link: {url_for('reset_password', token=token, _external=True)}
+
+    If you did not request a password reset, please ignore this email.
 
     Thank you,
     Resolve Ticketing
     """
+    msg.html = render_template('email/resetPassword.html', user=user, token=token)
     Thread(target=sendAsyncEmail, args=(app, msg)).start()
+    
