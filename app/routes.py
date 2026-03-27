@@ -1,11 +1,11 @@
 from app import app, db
 from flask import render_template, flash, redirect, url_for, request
 import sqlalchemy as sa
-# from app.forms import CommentForm, LoginForm, RegistrationForm, CreateTicketForm, UpdateTicket
+# from app.forms import CommentForm, LoginForm, PasswordResetForm, RegistrationForm, CreateTicketForm, ResetPasswordForm, UpdateTicket
 from app.forms import (
     CommentForm, LoginForm, RegistrationForm, CreateTicketForm, UpdateTicket,
     AdminSettingsForm, AdminProfileForm, AdminNewClientForm, AdminRoleForm,
-    AdminResetPasswordForm, AdminNewUserForm
+    AdminResetPasswordForm, AdminNewUserForm, PasswordResetForm, ResetPasswordForm
 )
 from app.models import TicketComment, User, Role, Category, Status, Priority, Ticket
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -15,7 +15,7 @@ from functools import wraps
 
 from flask_mail import Message
 from app import mail
-from app.email import notifyAgentsOfNewTicket, ticketAssignedNotification, ticketCreated, ticketStatusChangeNotification
+from app.email import notifyAgentsOfNewTicket, ticketAssignedNotification, ticketCreated, ticketStatusChangeNotification, passwordResetEmail
 
 #Role required route. If you place @role_required("Role here") under any of the routes, the user will
 #Have to have that role to run the route
@@ -81,7 +81,6 @@ def assigned_tickets(UserID):
     return render_template('index.html', title='Assigned Tickets', tickets=tickets)
 
 
-
 @app.route('/login', methods=['GET', 'POST'])
 def login():
     form = LoginForm()
@@ -139,6 +138,46 @@ def register():
         return redirect(url_for('login'))
     
     return render_template('register.html', form=form)
+
+@app.route('/password-reset-request', methods=['GET', 'POST'])
+def password_reset_request():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    form = PasswordResetForm()
+
+    if form.validate_on_submit():
+        user = db.session.scalar(sa.select(User).where(User.email == form.email.data))
+        if user:
+            passwordResetEmail(user)
+        flash('If an account with that email exists, a password reset email has been sent.')
+        return redirect(url_for('login'))
+    
+    if request.method == 'POST' and not form.validate():
+        for field_errors in form.errors.values():
+            for error in field_errors:
+                flash(error, 'error')
+    return render_template('resetPasswordReq.html', form=form)
+
+@app.route('/reset_password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+    user = User.verify_reset_password_token(token)
+    if not user:
+        return redirect(url_for('index'))
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        user.set_password(form.password.data)
+        db.session.commit()
+        flash('Your password has been reset.')
+        return redirect(url_for('login'))
+    
+    if request.method == 'POST' and not form.validate():
+        for field_errors in form.errors.values():
+            for error in field_errors:
+                flash(error, 'error')
+
+    return render_template('resetPassword.html', form=form)
 
 #Logout route
 @app.route('/logout')

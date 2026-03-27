@@ -5,6 +5,10 @@ import sqlalchemy.orm as so
 from app import db
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
+from app import app
+from time import time
+
+import jwt
 
 class Role(db.Model):
     __tablename__ = "Roles"
@@ -56,6 +60,19 @@ class User(db.Model, UserMixin):
 
     def get_id(self):
         return str(self.UserID)
+
+    def get_reset_password_token(self, expires_in=600):
+        return jwt.encode(
+            {'reset_password': self.UserID, 'exp': time() + expires_in},
+            app.config['SECRET_KEY'], algorithm='HS256'
+        )
+    
+    def verify_reset_password_token(token):
+        try:
+            id = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])['reset_password']
+        except:
+            return 
+        return db.session.get(User, id)
 
     def __repr__(self):
         return f"<User {self.username or self.email}>"

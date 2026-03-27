@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 
 {% block extra_head %}
+    <!--TODO: Make this a universal auth.css file for register, login, and both password reset pages-->
     <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='styles/login.css') }}">
 {% endblock %}
 
@@ -15,8 +16,11 @@
             {{ form.password.label }}
             {{ form.password(class="password", placeholder="Enter Password")}}
 
-            <div>
-                {{ form.remember_me() }} {{ form.remember_me.label }}
+            <div class="login-options">
+                <div>
+                    {{ form.remember_me() }} {{ form.remember_me.label }}
+                </div>
+                <a href="/password-reset-request">Forgot Password?</a> <!--Add link here after route is done-->
             </div>
 
             <div class="confirm-container">
@@ -30,7 +34,7 @@
                     </ul>
                     {% endif %}
                 {% endwith %}
-                <a href="{{ url_for('register') }}>Don't have an account? Click here!</a> 
+                <a href="{{ url_for('register') }}">Don't have an account? Click here!</a>
             </div>
         </form>
     </div>
