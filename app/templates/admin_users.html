@@ -1,0 +1,111 @@
+{% extends "base.html" %} {% block extra_head %}
+<link
+  rel="stylesheet"
+  type="text/css"
+  href="{{ url_for('static', filename='styles/admin_panel.css') }}"
+/>
+{% endblock %} {% block content %}
+<div class="panel-wrapper">
+  <div class="panel-sidebar">
+    <p><strong>Admin</strong></p>
+    <a href="{{ url_for('admin_users') }}">Users</a>
+    <a href="{{ url_for('admin_clients') }}">Clients</a>
+    <a href="{{ url_for('admin_roles') }}">Roles</a>
+    <a href="{{ url_for('admin_settings') }}">Settings</a>
+    <a href="{{ url_for('admin_profile') }}">Profile</a>
+    <a href="{{ url_for('logout') }}">Logout</a>
+  </div>
+  <div class="panel-content">
+    <div class="section-header">
+      <h2>Internal Users</h2>
+      <button
+        onclick="
+          document.getElementById('new-user-modal').style.display = 'flex'
+        "
+      >
+        New User
+      </button>
+    </div>
+    <table class="issues-table">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th colspan="3"></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for user in users %}
+        <tr>
+          <td>{{ user.name }}</td>
+          <td>{{ user.email }}</td>
+          <td>
+            <form
+              method="post"
+              action="{{ url_for('admin_change_role', user_id=user.UserID) }}"
+            >
+              {{ role_form.hidden_tag() }} {{ role_form.role() }}
+              <button type="submit">Role</button>
+            </form>
+          </td>
+          <td>
+            <form
+              method="post"
+              action="{{ url_for('admin_reset_password', user_id=user.UserID) }}"
+            >
+              {{ reset_form.hidden_tag() }} {{
+              reset_form.new_password(placeholder="New password") }}
+              <button type="submit">Reset Password</button>
+            </form>
+          </td>
+          <td>
+            <form
+              method="post"
+              action="{{ url_for('admin_delete_user', user_id=user.UserID) }}"
+            >
+              {{ role_form.hidden_tag() }}
+              <button type="submit">Delete</button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- New User Modal -->
+<div id="new-user-modal" class="modal">
+  <div class="modal-content">
+    <h2>Add a new User</h2>
+    <form method="post" action="{{ url_for('admin_users') }}">
+      {{ new_user_form.hidden_tag() }}
+
+      <label>Username:</label>
+      {{ new_user_form.username(placeholder="admin") }}
+
+      <label>Email:</label>
+      {{ new_user_form.email(placeholder="admin@admin.com") }}
+
+      <label>Password:</label>
+      {{ new_user_form.password() }}
+
+      <label>Language:</label>
+      <select>
+        <option>English</option>
+      </select>
+
+      <div class="role-tags">
+        {{ new_user_form.role.label }} {{ new_user_form.role() }}
+      </div>
+
+      {{ new_user_form.submit() }}
+    </form>
+    <button
+      onclick="document.getElementById('new-user-modal').style.display = 'none'"
+    >
+      X
+    </button>
+  </div>
+</div>
+{% endblock %}
