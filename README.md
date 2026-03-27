@@ -41,21 +41,32 @@ This will allow you to see what version of pip you have, and if it is installed 
 You can now follow these steps to install Resolve locally:
 
 1. Clone the Repo
-   `git clone https://github.com/BenYoung03/resolve.git`'
-2. Create a python virtual environment
-   `python -m venv venv`
-3. Activate the virtual enviornment, there are three ways to do so
+   ```
+   git clone https://github.com/BenYoung03/resolve.git`
+   ```
+3. Create a python virtual environment
+   ```
+   python -m venv venv
+   ```
+5. Activate the virtual enviornment, there are three ways to do so
 
 * Windows (CMD):
-  `venv\Scripts\activate`
+  ```
+  venv\Scripts\activate
+  ```
 * Windows (PowerShell):
-  `venv\Scripts\Activate.ps1`
+  ```
+  venv\Scripts\Activate.ps1
+  ```
 * Mac/Linux:
-  `source venv/bin/activate`
-
+  ```
+  source venv/bin/activate
+  ```
 4. Install project dependencies
-   `pip install -r packages.txt`
-5. Create .env file for email sending and place in root of project directory (*Optional*)
+   ```
+   pip install -r packages.txt
+   ```
+6. Create .env file for email sending and place in root of project directory (*Optional*)
    ```
    MAIL_SERVER=smtp.googlemail.com
    MAIL_PORT=587
@@ -63,7 +74,11 @@ You can now follow these steps to install Resolve locally:
    MAIL_USERNAME=<email-here>
    MAIL_PASSWORD=<gmail-app-password-here>
    ```
-6. Run the application:
-   `flask run`
-7. Open Application in browser
-   `http://127.0.0.1:5000`
+7. Run the application:
+   ```
+   flask run
+   ```
+9. Open Application in browser
+   ```
+   http://127.0.0.1:5000
+   ```
