@@ -1,3 +1,4 @@
+<a id="readme-top"></a>
 # Resolve - IT Ticketing System
 
 Resolve is a web-based IT ticketing system designed to help organizations manage technical support requests efficiently. Users can create tickets, track progress, communicate with IT staff, and receive email notifications when ticket statuses change.
@@ -21,6 +22,8 @@ The Back End is built using Python, Flask and SQLite. Flask handles all of the r
 The SQLite database consists of many tables including the User, TicketStatus, Tickets, TicketPriority, TicketComment, TicketCategories, and Roles tables. Corresponding model classes for these tables include User, Role, Status, Ticket, Priority, Category, TicketComment
 
 User authentication is handled using Flask-Login built in functionalities. The User model extends UserMixin, allowing Flask-Login to automatically handle functionailty such as tracking logged in usrs and restricting access to protected routes. Werkzueg is used to generate password hashes to ensure secure storage of user data. Email notifications are handled using Flask-Mail. We used a Gmail SMTP connection to send email notifications from resolveticketing@gmail.com. PyJWT is used to generate a JSON web token which is used when sending password reset emails to users that request one.
+
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 # Getting Started
 
@@ -86,3 +89,14 @@ You can now follow these steps to install Resolve locally:
    ```
    http://127.0.0.1:5000
    ```
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+# Features
+**To fill in**
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+# Contact
+Benjamin Young - bryoung1@lakeheadu.ca
+
+LinkedIn: [Benjamin Young](https://www.linkedin.com/in/benjamin-young-2b5497282/)  
+GitHub: [BenYoung03](https://github.com/BenYoung03)
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
