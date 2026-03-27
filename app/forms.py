@@ -92,3 +92,54 @@ class UpdateTicket(FlaskForm):
     def validate_resolutionReasoning(self, field):
         if self.status.data == 5 and not field.data:
             raise ValidationError("Resolution reasoning is required when closing or resolving a ticket.")
+        
+
+class AdminNewUserForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    role = SelectField('Role', coerce=int)
+    submit = SubmitField('Create User')
+
+
+    
+class AdminChangeRoleForm(FlaskForm):
+    role = SelectField('Role', coerce=int, validators=[DataRequired()])
+    submit = SubmitField('Change Role')
+
+class AdminResetPasswordForm(FlaskForm):
+    new_password = PasswordField('New Password', validators=[DataRequired()])
+    submit = SubmitField('Reset Password')
+
+
+class AdminNewClientForm(FlaskForm):
+    client_name = StringField('Client Name', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    password = PasswordField('Password', validators=[DataRequired()])
+    submit = SubmitField('Create Client')
+
+
+class AdminNewRoleForm(FlaskForm):
+    role_name = StringField("Role Name", validators=[DataRequired()])
+    submit = SubmitField("Create Role")
+
+
+
+
+class AdminSettingsForm(FlaskForm):
+    site_name = StringField('Site Name', validators=[DataRequired()])
+    old_password = PasswordField('Old Password', validators=[DataRequired()])
+    new_password = PasswordField('New Password', validators=[DataRequired()])
+    confirm_password = PasswordField('Confirm Password', validators=[
+        DataRequired(),
+        EqualTo('new_password', message='Passwords must match')
+    ])
+    submit = SubmitField('Save Settings')
+
+
+
+
+class AdminProfileForm(FlaskForm):
+    username = StringField("Username", validators=[DataRequired()])
+    email = StringField("Email")
+    submit = SubmitField("Save")

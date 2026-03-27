@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block extra_head %}
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='styles/admin_panel.css') }}">
+{% endblock %}
+{% block content %}
+<div class="panel-wrapper">
+    <div class="panel-sidebar">
+        <p><strong>Admin</strong></p>
+        <a href="{{ url_for('admin_users') }}">Users</a>
+        <a href="{{ url_for('admin_clients') }}">Clients</a>
+        <a href="{{ url_for('admin_roles') }}">Roles</a>
+        <a href="{{ url_for('admin_settings') }}">Settings</a>
+        <a href="{{ url_for('admin_profile') }}">Profile</a>
+        <a href="{{ url_for('logout') }}">Logout</a>
+    </div>
+    <div class="panel-content">
+        <h3>Configure Role</h3>
+        <form method="post" action="{{ url_for('admin_create_role_step2') }}">
+            {{ form.hidden_tag() }}
+            <input type="hidden" name="role_name" value="{{ role_name }}">
+            <input type="hidden" name="permissions" value="{{ permissions }}">
+            <div class="role-step2-header">
+                <a href="{{ url_for('admin_roles') }}">Back</a>
+                <button type="submit">Create Role</button>
+            </div>
+            <input type="text" id="user-search" placeholder="Search User..." onkeyup="filterUsers()">
+            <div class="users-grid" id="users-grid">
+                {% for user in agents %}
+                <label>
+                    <input type="checkbox" name="user_ids" value="{{ user.UserID }}">
+                    {{ user.email }}
+                </label>
+                {% endfor %}
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+function filterUsers() {
+    const filter = document.getElementById('user-search').value.toLowerCase();
+    document.querySelectorAll('#users-grid label').forEach(label => {
+        label.style.display = label.textContent.toLowerCase().includes(filter) ? '' : 'none';
+    });
+}
+</script>
+{% endblock %}

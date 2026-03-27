@@ -12,13 +12,20 @@ from flask_mail import Message
 from app import mail
 from app.email import notifyAgentsOfNewTicket, ticketAssignedNotification, ticketCreated, ticketStatusChangeNotification
 
+def has_role(self, roles):
+    if self.role is None:
+        return False
+    if isinstance(roles, str):
+        roles = [roles]
+    return self.role.name in roles
+
 #Role required route. If you place @role_required("Role here") under any of the routes, the user will
 #Have to have that role to run the route
-def role_required(*role):
+def role_required(*roles):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            if not current_user.is_authenticated or not current_user.has_role(role):
+            if not current_user.is_authenticated or not current_user.has_role(roles):
                 flash('Access denied. Insufficient permissions.')
                 return redirect(url_for('index'))
             return f(*args, **kwargs)
@@ -275,3 +282,156 @@ def view_ticket(TicketID):
     return render_template('ticketview.html', ticket_id=TicketID, ticket=currentTicket,
                            comments=comments, commentForm=addCommentForm, updateTicketForm=updateTicketForm,
                            ticketAge=ticketAge, show_confetti=request.args.get('confetti') == '1')
+
+
+@app.route('/admin/panel')
+@login_required
+@role_required('Admin')
+def admin_panel():
+    return render_template('admin_panel.html', title='Admin Panel')
+
+@app.route('/admin/roles', methods=['GET', 'POST'])
+@login_required
+@role_required('Admin')
+def admin_roles():
+    form = AdminNewRoleForm()
+    if form.validate_on_submit():
+        new_role = Role(name=form.role_name.data)
+        db.session.add(new_role)
+        db.session.commit()
+        flash(f"Role '{form.role_name.data}' created successfully!")
+        return redirect(url_for('admin_roles'))
+    return render_template('admin_roles.html', title='Admin Roles', form=form)
+
+
+@app.route('/admin/roles/toggle_all/<int:active>', methods=['POST'])
+@login_required
+@role_required('Admin')
+def admin_toggle_all_roles(active):
+    for role in Role.query.all():
+        role.active = bool(active)
+    db.session.commit()
+    flash("All roles updated.")
+    return redirect(url_for('admin_roles'))
+
+@app.route('/admin/users', methods=['GET', 'POST'])
+@login_required
+@role_required('Admin')
+def admin_users():
+    from app.forms import AdminNewUserForm, AdminChangeRoleForm, AdminResetPasswordForm
+
+    new_user_form = AdminNewUserForm()
+    role_form = AdminChangeRoleForm()
+    reset_form = AdminResetPasswordForm()
+
+    # Populate role choices for new user
+    new_user_form.role.choices = [(r.RoleID, r.name) for r in Role.query.all()]
+
+    users = User.query.all()
+
+    if new_user_form.validate_on_submit():
+        username = new_user_form.username.data
+        email = new_user_form.email.data
+        password = new_user_form.password.data
+        role_id = new_user_form.role.data
+
+        if User.query.filter_by(email=email).first():
+            flash('Email already exists.')
+            return redirect(url_for('admin_users'))
+        if User.query.filter_by(username=username).first():
+            flash('Username already exists.')
+            return redirect(url_for('admin_users'))
+
+        role = Role.query.get(role_id)
+        new_user = User(username=username, email=email, password_hash=generate_password_hash(password), role=role)
+        db.session.add(new_user)
+        db.session.commit()
+        flash('New user created successfully!')
+        return redirect(url_for('admin_users'))
+
+    return render_template('admin_users.html',
+                           title='Admin Users',
+                           new_user_form=new_user_form,
+                           role_form=role_form,
+                           reset_form=reset_form,
+                           users=users)
+
+
+@app.route('/admin/users/<int:user_id>/role', methods=['POST'])
+@login_required
+@role_required('Admin')
+def admin_change_role(user_id):
+    form = AdminChangeRoleForm()
+    user = User.query.get_or_404(user_id)
+    if form.validate_on_submit():
+        role = Role.query.get(form.role.data)
+        user.role = role
+        db.session.commit()
+        flash(f"{user.username}'s role updated to {role.name}.")
+    return redirect(url_for('admin_users'))
+
+
+@app.route('/admin/users/<int:user_id>/reset', methods=['POST'])
+@login_required
+@role_required('Admin')
+def admin_reset_password(user_id):
+    form = AdminResetPasswordForm()
+    user = User.query.get_or_404(user_id)
+    if form.validate_on_submit():
+        user.password_hash = generate_password_hash(form.new_password.data)
+        db.session.commit()
+        flash(f"{user.username}'s password has been reset.")
+    return redirect(url_for('admin_users'))
+
+
+@app.route('/admin/users/<int:user_id>/delete', methods=['POST'])
+@login_required
+@role_required('Admin')
+def admin_delete_user(user_id):
+    user = User.query.get_or_404(user_id)
+    db.session.delete(user)
+    db.session.commit()
+    flash(f"User {user.username} has been deleted.")
+    return redirect(url_for('admin_users'))
+
+
+@app.route('/admin/clients', methods=['GET', 'POST'])
+@login_required
+@role_required('Admin')
+def admin_clients():
+    new_client_form = AdminNewClientForm()
+    if new_client_form.validate_on_submit():
+        client_name = new_client_form.client_name.data
+        new_client = Client(name=client_name)
+        db.session.add(new_client)
+        db.session.commit()
+        flash(f"New client '{client_name}' added successfully!")
+        return redirect(url_for('admin_clients'))
+
+    return render_template('admin_clients.html', title='Admin Clients', new_client_form=new_client_form)
+
+
+@app.route('/admin/clients/new', methods=['POST'])
+@login_required
+@role_required('Admin')
+def admin_new_client():
+    client_name = request.form.get('client_name')
+    if not client_name:
+        flash("Client name is required.")
+        return redirect(url_for('admin_clients'))
+
+    new_client = Client(name=client_name)
+    db.session.add(new_client)
+    db.session.commit()
+    flash(f"New client '{client_name}' created successfully.")
+    return redirect(url_for('admin_clients'))
+
+@app.route('/admin/settings', methods=['GET', 'POST'])
+@login_required
+@role_required('Admin')
+def admin_settings():
+    form = AdminSettingsForm()
+    if form.validate_on_submit():
+        flash('Settings saved successfully!', 'success')
+        return redirect(url_for('admin_settings'))
+    return render_template('admin_settings.html', title='Admin Settings', form=form)

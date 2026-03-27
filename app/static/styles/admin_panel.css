@@ -1,0 +1,119 @@
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  font-size: 14px;
+  color: #333;
+  background: #f8f8f8;
+}
+
+/* Layout */
+.panel-wrapper {
+  display: flex;
+  min-height: 100vh;
+}
+
+.panel-sidebar {
+  width: 180px;
+  background: #eee;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.panel-sidebar p {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.panel-sidebar a {
+  text-decoration: none;
+  color: #333;
+  padding: 5px;
+}
+
+.panel-sidebar a:hover {
+  text-decoration: underline;
+}
+
+.panel-content {
+  flex: 1;
+  padding: 15px;
+}
+
+/* Headings */
+.section-header, .panel-title {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  font-weight: bold;
+}
+
+/* Buttons */
+button {
+  padding: 5px 10px;
+  border: 1px solid #333;
+  background: #fff;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #eee;
+}
+
+/* Forms */
+label {
+  display: block;
+  margin-bottom: 3px;
+}
+
+input, select, textarea {
+  width: 100%;
+  padding: 5px;
+  margin-bottom: 8px;
+  border: 1px solid #ccc;
+}
+
+/* Tables */
+.issues-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 15px;
+}
+
+.issues-table th, .issues-table td {
+  text-align: left;
+  padding: 6px;
+  border: 1px solid #ddd;
+}
+
+/* Modals */
+.modal {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modal-content {
+  background: #fff;
+  padding: 15px;
+  width: 90%;
+  max-width: 300px;
+  position: relative;
+}
+
+.modal-content button:last-child {
+  position: absolute;
+  top: 5px;
+  right: 5px;
+}
