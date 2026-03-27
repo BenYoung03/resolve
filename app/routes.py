@@ -146,6 +146,11 @@ def password_reset_request():
             passwordResetEmail(user)
         flash('If an account with that email exists, a password reset email has been sent.')
         return redirect(url_for('login'))
+    
+    if request.method == 'POST' and not form.validate():
+        for field_errors in form.errors.values():
+            for error in field_errors:
+                flash(error, 'error')
     return render_template('resetPasswordReq.html', form=form)
 
 @app.route('/reset_password/<token>', methods=['GET', 'POST'])
@@ -161,6 +166,12 @@ def reset_password(token):
         db.session.commit()
         flash('Your password has been reset.')
         return redirect(url_for('login'))
+    
+    if request.method == 'POST' and not form.validate():
+        for field_errors in form.errors.values():
+            for error in field_errors:
+                flash(error, 'error')
+
     return render_template('resetPassword.html', form=form)
 
 #Logout route

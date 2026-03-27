@@ -39,7 +39,10 @@ class PasswordResetForm(FlaskForm):
     submit = SubmitField('Request Password Reset')
 
 class ResetPasswordForm(FlaskForm):
-    password = PasswordField('Password', validators=[DataRequired()])
+    password = PasswordField('Password', validators=[
+        DataRequired(),
+        Length(min=6, message='Password must be at least 6 characters long.')
+    ])
     confirmPassword = PasswordField('Confirm Password', validators=[
         DataRequired(),
         EqualTo('password')])
