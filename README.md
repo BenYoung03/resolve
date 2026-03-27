@@ -90,13 +90,17 @@ You can now follow these steps to install Resolve locally:
    http://127.0.0.1:5000
    ```
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 # Features
 **To fill in**
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
+
 # Contact
 Benjamin Young - bryoung1@lakeheadu.ca
 
 LinkedIn: [Benjamin Young](https://www.linkedin.com/in/benjamin-young-2b5497282/)  
 GitHub: [BenYoung03](https://github.com/BenYoung03)
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
