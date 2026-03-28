@@ -183,8 +183,23 @@ def reset_password(token):
 @app.route('/test/reset-password-email', methods=['GET'])
 @login_required
 def test_reset_password_email_template():
-    token = current_user.get_reset_password_token()
-    return render_template('email/resetPassword.html', user=current_user, token=token)
+    ticket = db.session.scalar(
+        sa.select(Ticket)
+        .where(Ticket.CreatedBy == current_user.UserID)
+        .order_by(Ticket.CreatedAt.desc())
+    )
+
+    if not ticket:
+        ticket = db.session.scalar(sa.select(Ticket).order_by(Ticket.CreatedAt.desc()))
+
+    if not ticket:
+        flash('No tickets found to preview the status-change email template.')
+        return redirect(url_for('index'))
+
+    return render_template(
+        'email/ticketCreated.html',
+        ticket=ticket
+    )
 
 #Logout route
 @app.route('/logout')

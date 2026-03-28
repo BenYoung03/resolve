@@ -29,6 +29,12 @@ def ticketStatusChangeNotification(ticket, recipient, oldStatus, newStatus):
     Thank you,
     Resolve Ticketing
     """
+    msg.html = render_template(
+        'email/ticketStatusChange.html',
+        ticket=ticket,
+        oldStatus=oldStatus,
+        newStatus=newStatus
+    )
 
     Thread(target=sendAsyncEmail, args=(app, msg)).start()
 
@@ -59,6 +65,12 @@ def ticketCreated(ticket, recipient):
     Thank you,
     Resolve Ticketing
     """
+
+    msg.html = render_template(
+        'email/ticketCreated.html',
+        ticket=ticket
+    )
+
     Thread(target=sendAsyncEmail, args=(app, msg)).start()
 
 def notifyAgentsOfNewTicket(ticket, recipients):
