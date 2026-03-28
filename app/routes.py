@@ -179,42 +179,6 @@ def reset_password(token):
 
     return render_template('resetPassword.html', form=form)
 
-# TODO: REMOVE ONCE DONE TESTING
-@app.route('/test/reset-password-email', methods=['GET'])
-@login_required
-def test_reset_password_email_template():
-    ticket = db.session.scalar(
-        sa.select(Ticket)
-        .where(Ticket.CreatedBy == current_user.UserID)
-        .order_by(Ticket.CreatedAt.desc())
-    )
-
-    if not ticket:
-        ticket = db.session.scalar(sa.select(Ticket).order_by(Ticket.CreatedAt.desc()))
-
-    if not ticket:
-        flash('No tickets found to preview the comment-added email template.')
-        return redirect(url_for('index'))
-
-    fake_comment_author = 'agent.support@lakeheadu.ca'
-    fake_comment_text = (
-        "Quick update from support:\n"
-        "- We reproduced the issue on Chrome and Edge.\n"
-        "- A patch is queued for tonight's deployment window.\n\n"
-        "If this blocks your work, reply with a screenshot and we can prioritize a hotfix."
-    )
-    fake_comment_created_at = datetime.now()
-    fake_commenter_role = 'Agent'
-
-    return render_template(
-        'email/commentAdded.html',
-        ticket=ticket,
-        commentAuthor=fake_comment_author,
-        commentText=fake_comment_text,
-        commentCreatedAt=fake_comment_created_at,
-        commenterRole=fake_commenter_role
-    )
-
 #Logout route
 @app.route('/logout')
 #If user is logged in allow them to run this route
