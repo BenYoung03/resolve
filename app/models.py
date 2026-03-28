@@ -47,6 +47,10 @@ class User(db.Model, UserMixin):
         back_populates="user"
     )
 
+    activity_logs: so.Mapped[list["ActivityLog"]] = so.relationship(
+        back_populates="user"
+    )
+
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
@@ -169,10 +173,14 @@ class Ticket(db.Model):
         cascade="all, delete-orphan"
     )
 
+    activity_logs: so.Mapped[list["ActivityLog"]] = so.relationship(
+        back_populates="ticket",
+        cascade="all, delete-orphan",
+        order_by="desc(ActivityLog.CreatedAt)"
+    )
+
     def __repr__(self):
         return f"<Ticket {self.TicketID}: {self.subject}>"
-
-
 
 class TicketComment(db.Model):
     __tablename__ = "TicketComment"
@@ -195,3 +203,24 @@ class TicketComment(db.Model):
 
     def __repr__(self):
         return f"<TicketComment {self.CommentID}>"
+
+class ActivityLog(db.Model):
+    __tablename__ = "ActivityLog"
+
+    LogID: so.Mapped[int] = so.mapped_column(primary_key=True, autoincrement=True)
+    UserID: so.Mapped[int] = so.mapped_column(
+        sa.ForeignKey("User.UserID"),
+        nullable=False
+    )
+    TicketID: so.Mapped[int] = so.mapped_column(
+        sa.ForeignKey("Tickets.TicketID"),
+        nullable=False
+    )
+    action: so.Mapped[str] = so.mapped_column(sa.String, nullable=False)
+    CreatedAt: so.Mapped[datetime] = so.mapped_column(sa.DateTime, nullable=False)  
+
+    user: so.Mapped["User"] = so.relationship(back_populates="activity_logs")
+    ticket: so.Mapped["Ticket"] = so.relationship(back_populates="activity_logs")
+
+    def __repr__(self):
+        return f"<ActivityLog {self.LogID}: {self.action} at {self.CreatedAt}>"

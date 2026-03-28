@@ -23,7 +23,7 @@ def role_required(*role):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            if not current_user.is_authenticated or not current_user.has_role(*role):
+            if not current_user.is_authenticated or not current_user.has_role(role):
                 flash('Access denied. Insufficient permissions.')
                 return redirect(url_for('index'))
             return f(*args, **kwargs)
@@ -296,7 +296,7 @@ def view_ticket(TicketID):
     # TODO: Add more flash style error messages
     if updateTicketForm.validate_on_submit():
         # Only agents and admins can update tickets
-        if not current_user.has_role('Agent', 'Admin'):
+        if not current_user.has_role(['Agent', 'Admin']):
             flash('Access denied. Only agents and admins can update tickets.')
             return redirect(url_for('view_ticket', TicketID=TicketID))
         
