@@ -7,6 +7,22 @@ This project was created to be the Advanced Project for my Lakehead Computer Sci
 
 To view the project, click here! **ADD LINK HERE**
 
+<details>
+  <summary>Table of Contents</summary>
+  <ol>
+    <li><a href="#how-its-made">How It's Made</a></li>
+    <li>
+      <a href="#getting-started">Getting Started</a>
+      <ul>
+        <li><a href="#prerequisites">Prerequisites</a></li>
+        <li><a href="#installation">Installation</a></li>
+      </ul>
+    </li>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ol>
+</details>
+
 # How It's Made:
 
 **Front End:** HTML, CSS, JavaScript, Datatables
