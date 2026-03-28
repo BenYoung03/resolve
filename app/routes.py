@@ -164,7 +164,8 @@ def reset_password(token):
         return redirect(url_for('index'))
     user = User.verify_reset_password_token(token)
     if not user:
-        return redirect(url_for('index'))
+        flash('Invalid or expired token. Please try again.')
+        return redirect(url_for('login'))
     form = ResetPasswordForm()
     if form.validate_on_submit():
         user.set_password(form.password.data)
@@ -233,6 +234,13 @@ def create_ticket():
 @app.route('/ticket/<int:TicketID>', methods=['GET', 'POST'])
 @login_required
 def view_ticket(TicketID):
+
+    if current_user.has_role('Employee'):
+        ticket = db.session.scalar(sa.select(Ticket).where(Ticket.TicketID == TicketID))
+        if not ticket or ticket.CreatedBy != current_user.UserID:
+            flash('You do not have permission to view this ticket.')
+            return redirect(url_for('index'))
+        
     addCommentForm = CommentForm()
     updateTicketForm = UpdateTicket()
 
@@ -287,6 +295,11 @@ def view_ticket(TicketID):
     
     # TODO: Add more flash style error messages
     if updateTicketForm.validate_on_submit():
+        # Only agents and admins can update tickets
+        if not current_user.has_role('Agent', 'Admin'):
+            flash('Access denied. Only agents and admins can update tickets.')
+            return redirect(url_for('view_ticket', TicketID=TicketID))
+        
         oldStatus = currentTicket.StatusID
         currentTicket.PriorityID = updateTicketForm.priority.data
         currentTicket.StatusID = updateTicketForm.status.data
