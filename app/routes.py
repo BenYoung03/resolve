@@ -7,7 +7,7 @@ from app.forms import (
     AdminSettingsForm, AdminProfileForm, AdminNewClientForm, AdminRoleForm,
     AdminResetPasswordForm, AdminNewUserForm, PasswordResetForm, ResetPasswordForm
 )
-from app.models import TicketComment, User, Role, Category, Status, Priority, Ticket
+from app.models import TicketComment, User, Role, Category, Status, Priority, Ticket, ActivityLog
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required, current_user
 from datetime import datetime
@@ -214,6 +214,15 @@ def create_ticket():
 
         newTicket.ticketNumber = f"ID-{newTicket.TicketID:06d}"
 
+        newActivity = ActivityLog(
+            UserID = newTicket.CreatedBy,
+            TicketID = newTicket.TicketID,
+            action = "Ticket created",
+            CreatedAt=datetime.now(),
+        )
+
+        db.session.add(newActivity)
+
         db.session.commit()
         ticketCreated(newTicket, current_user.email)
 
@@ -324,15 +333,36 @@ def view_ticket(TicketID):
             recipient = currentTicket.creator.email
             oldStatusName = db.session.scalar(sa.select(Status.name).where(Status.StatusID == oldStatus))
             newStatusName = db.session.scalar(sa.select(Status.name).where(Status.StatusID == currentTicket.StatusID))
+            newAssigned = currentTicket.assignee.UserID if currentTicket.assignee else None
+            
+            newActivity = ActivityLog(
+                UserID = current_user.UserID,
+                TicketID = currentTicket.TicketID,
+                action = f"Status changed from {oldStatusName} to {newStatusName}",
+                CreatedAt=datetime.now(),
+            )
+            db.session.add(newActivity)
+            db.session.commit()
+
             if app.config['MAIL_SUPPRESS_SEND']:
                 print(f"email failed to send")
             else:
                 ticketStatusChangeNotification(currentTicket, recipient, oldStatusName, newStatusName)
         
         newAssigned = currentTicket.assignee.UserID if currentTicket.assignee else None
-        if oldAssigned != newAssigned and newAssigned is not None:
-            recipient = currentTicket.assignee.email
-            ticketAssignedNotification(currentTicket, recipient)
+        if oldAssigned != newAssigned:
+            newActivity = ActivityLog(
+                UserID = current_user.UserID,
+                TicketID = currentTicket.TicketID,
+                action = "Ticket unassigned" if newAssigned is None else "Ticket assigned to " + currentTicket.assignee.username,
+                CreatedAt=datetime.now(),
+            )
+            db.session.add(newActivity)
+            db.session.commit()
+            if currentTicket.assignee:
+                recipient = currentTicket.assignee.email
+                ticketAssignedNotification(currentTicket, recipient)
+
         if currentTicket.StatusID == 5:
             return redirect(url_for('view_ticket', TicketID=TicketID, confetti=1))
         return redirect(url_for('view_ticket', TicketID=TicketID))
