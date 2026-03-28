@@ -114,11 +114,11 @@ Resolve has many features that are essential to any IT ticketing system.
 ### Ticket Management
 With Resolve, Users are able to create tickets by filling out the create ticket form. Employees who need to create a ticket are able to input a subject, description, category, and priority for their ticket. Upon creation, the ticket is assigned a unique ticket number, and agents/admins will receive the ticket and will be able to view, update, and monitor the details, and the employee who created the ticket can monitor the ticket for any updates.
 
-![Ticket Form](NewTicket.png)
+![Ticket Form](README%20Images/NewTicket.png)
 
 Users are able to view tickets on the home page of Resolve. The home page features buttons that allow users to submit a new ticket and filter tickets by open, closed, and ticket assignment if the user is an agent/admin. The table that contains the ticket information is built using the DataTables library. Users are able to filter each column as well as search for individual tickets as a result. 
 
-![Home Page](HomePage.png)
+![Home Page](README%20Images/HomePage.png)
 
 ### Role-Based Access
 
@@ -127,15 +127,15 @@ Resolve implements a role-based access system that ensures users of certain role
 The implementation of role-based access can be seen prominently throughout the individual ticket view page. For agents and admins, there exists a "update ticket" form which allows users with correct permissions to update the ticket priority, assignee, and status. For employees, this feature is not present, as employees are only able to monitor tickets, and no modification is allowed. 
 
 <p align="center">
-  <img src="AgentTicketView.png" alt="Agent View" width="49%">
-  <img src="EmployeeTicketView.png" alt="Employee View" width="49%">
+  <img src="README%20Images/AgentTicketView.png" alt="Agent View" width="49%">
+  <img src="README%20Images/EmployeeTicketView.png" alt="Employee View" width="49%">
 </p>
 
 ### Email Notifications 
 
 Resolve also features automated email notifications, which keep users informed about important updates related to their tickets. These notifications are triggered when key events occur. Examples of said events that have a coinciding email notification include ticket status changes, ticket creation, ticket assignment to an agent, and new comments. Furthermore, Flask is also able to send password reset emails to users who forget their passwords. This is performed by generating a JSON Web Token, which expires after a short period of time, and sending an email to the user containing the time-limited password reset link. Each email notification uses a corresponding HTML template with custom styling to ensure a consistent and professional appearance. Below is an example of the password reset email template:
 
-![Password Reset](PasswordReset.png)
+![Password Reset](README%20Images/PasswordReset.png)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
