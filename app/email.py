@@ -21,6 +21,7 @@ def ticketStatusChangeNotification(ticket, recipient, oldStatus, newStatus):
 
     The status of your ticket has been updated.
 
+    Ticket Details:
     Ticket: {ticket.ticketNumber}
     Subject: {ticket.subject}
     Previous Status: {oldStatus}
@@ -49,12 +50,11 @@ def ticketCreated(ticket, recipient):
 
     Your support request has been successfully submitted.
 
-    Ticket Details
+    Ticket Details:
     Ticket Number: {ticket.ticketNumber}
     Subject: {ticket.subject}
     Category: {ticket.category.name}
     Priority: {ticket.priority.name}
-    Status: Open
     Created: {ticket.CreatedAt.strftime('%b %d, %Y, %I:%M %p')}
 
     Our team will review your request and begin working on it shortly.
@@ -87,7 +87,7 @@ def notifyAgentsOfNewTicket(ticket, recipients):
 
     A new support ticket has been created.
 
-    Ticket Details
+    Ticket Details:
     Ticket Number: {ticket.ticketNumber}
     Subject: {ticket.subject}
     Category: {ticket.category.name}
@@ -99,6 +99,10 @@ def notifyAgentsOfNewTicket(ticket, recipients):
     Thank you,
     Resolve Ticketing
     """
+    msg.html = render_template(
+        'email/notifyAgentsOfNewTicket.html',
+        ticket=ticket
+    )
 
     Thread(target=sendAsyncEmail, args=(app, msg)).start()
 
@@ -113,7 +117,7 @@ def ticketAssignedNotification(ticket, recipient):
 
     A support ticket has been assigned to you.
 
-    Ticket Details
+    Ticket Details:
     Ticket Number: {ticket.ticketNumber}
     Subject: {ticket.subject}
     Category: {ticket.category.name}
@@ -125,6 +129,46 @@ def ticketAssignedNotification(ticket, recipient):
     Thank you,
     Resolve Ticketing
     """
+
+    msg.html = render_template(
+        'email/ticketAssigned.html',
+        ticket=ticket
+    )
+
+    Thread(target=sendAsyncEmail, args=(app, msg)).start()
+
+def commentAddedNotification(ticket, recipient, commentAuthor, commentText, commentCreatedAt=None, commenterRole=None):
+    msg = Message(
+        subject=f"New Comment Added: {ticket.ticketNumber}",
+        recipients=[recipient]
+    )
+
+    msg.body = f"""
+    Hello {ticket.creator.username},
+
+    A new comment was added to your ticket.
+
+    Ticket Details:
+    Ticket Number: {ticket.ticketNumber}
+    Subject: {ticket.subject}
+    Comment Author: {commentAuthor}
+    Comment: {commentText}
+
+    Please login to resolve to see further details.
+
+    Thank you,
+    Resolve Ticketing
+    """
+
+    msg.html = render_template(
+        'email/commentAdded.html',
+        ticket=ticket,
+        commentAuthor=commentAuthor,
+        commentText=commentText,
+        commentCreatedAt=commentCreatedAt,
+        commenterRole=commenterRole
+    )
+
     Thread(target=sendAsyncEmail, args=(app, msg)).start()
 
 def passwordResetEmail(user):
@@ -146,4 +190,6 @@ def passwordResetEmail(user):
     """
     msg.html = render_template('email/resetPassword.html', user=user, token=token)
     Thread(target=sendAsyncEmail, args=(app, msg)).start()
+
+# TODO: ADD WELCOME EMAIL AFTER REGISTRATION
     

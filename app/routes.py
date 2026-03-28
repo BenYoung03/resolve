@@ -15,7 +15,7 @@ from functools import wraps
 
 from flask_mail import Message
 from app import mail
-from app.email import notifyAgentsOfNewTicket, ticketAssignedNotification, ticketCreated, ticketStatusChangeNotification, passwordResetEmail
+from app.email import notifyAgentsOfNewTicket, ticketAssignedNotification, ticketCreated, ticketStatusChangeNotification, passwordResetEmail, commentAddedNotification
 
 #Role required route. If you place @role_required("Role here") under any of the routes, the user will
 #Have to have that role to run the route
@@ -193,12 +193,26 @@ def test_reset_password_email_template():
         ticket = db.session.scalar(sa.select(Ticket).order_by(Ticket.CreatedAt.desc()))
 
     if not ticket:
-        flash('No tickets found to preview the status-change email template.')
+        flash('No tickets found to preview the comment-added email template.')
         return redirect(url_for('index'))
 
+    fake_comment_author = 'agent.support@lakeheadu.ca'
+    fake_comment_text = (
+        "Quick update from support:\n"
+        "- We reproduced the issue on Chrome and Edge.\n"
+        "- A patch is queued for tonight's deployment window.\n\n"
+        "If this blocks your work, reply with a screenshot and we can prioritize a hotfix."
+    )
+    fake_comment_created_at = datetime.now()
+    fake_commenter_role = 'Agent'
+
     return render_template(
-        'email/ticketCreated.html',
-        ticket=ticket
+        'email/commentAdded.html',
+        ticket=ticket,
+        commentAuthor=fake_comment_author,
+        commentText=fake_comment_text,
+        commentCreatedAt=fake_comment_created_at,
+        commenterRole=fake_commenter_role
     )
 
 #Logout route
@@ -293,6 +307,14 @@ def view_ticket(TicketID):
             TicketID=TicketID,
             UserID=current_user.UserID,
             CreatedAt=datetime.now()
+        )
+        commentAddedNotification(
+            currentTicket,
+            currentTicket.creator.email,
+            current_user.email,
+            addCommentForm.comment.data,
+            newComment.CreatedAt,
+            current_user.role.name if current_user.role else None,
         )
         db.session.add(newComment)
         db.session.commit()

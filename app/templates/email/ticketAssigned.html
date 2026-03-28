@@ -72,17 +72,17 @@
 
 						<tr>
 							<td class="email-content">
-								<div class="email-opener">Ticket Created</div>
+								<div class="email-opener">Ticket Assigned</div>
+
+                                <div class="email-line">
+									Hello {{ ticket.assignee.username }},
+								</div>
 
 								<div class="email-line">
-									Hello {{ ticket.creator.username }},
+									A support ticket has been assigned to you.
 								</div>
 
-                                <div class="email-line">
-									Your support request has been successfully submitted.
-								</div>
-
-                                <div class="email-line">
+								<div class="email-line">
 									Ticket Details:
 								</div>
 
@@ -113,13 +113,9 @@
 								</div>
 						
                                 <div class="email-line">
-                                    Our team will review your request and begin working on it shortly. You will receive email updates when the status of your ticket changes.
+									Please log in to Resolve Ticketing to review the ticket.
 								</div>
-
-                                <div class="email-line">
-                                    You can view your ticket and add additional details if needed by logging into resolve.
-								</div>
-
+                                
 								<div class="email-line">
 									Thank you,
 								</div>

@@ -61,6 +61,67 @@
 			.email-line {
 				margin-bottom: 12px;
 			}
+
+			.comment-shell {
+				background-color: #ffffff;
+				border: 1px solid #e6e6e6;
+				border-radius: 8px;
+				padding: 14px;
+				margin: 14px 0 18px;
+			}
+
+			.comment-table {
+				width: 100%;
+				border-collapse: collapse;
+			}
+
+			.avatar-cell {
+				width: 46px;
+				vertical-align: top;
+				padding-right: 12px;
+			}
+
+			.comment-avatar {
+				width: 36px;
+				height: 36px;
+				line-height: 36px;
+				border-radius: 50%;
+				text-align: center;
+				color: #ffffff;
+				background-color: #2f7de1;
+				font-weight: 700;
+				font-size: 18px;
+			}
+
+			.comment-avatar-agent {
+				background-color: #d61e10;
+			}
+
+			.comment-content {
+				vertical-align: top;
+			}
+
+			.comment-meta {
+				color: #555;
+				font-size: 14px;
+				margin-bottom: 4px;
+			}
+
+			.comment-author {
+				font-size: 15px;
+				font-weight: 700;
+				color: #2f7de1;
+				margin-bottom: 6px;
+			}
+
+			.comment-text {
+				font-size: 15px;
+				line-height: 1.5;
+				color: #333;
+				white-space: pre-wrap;
+				word-wrap: break-word;
+				overflow-wrap: break-word;
+			}
 		</style>
 	</head>
 
@@ -72,17 +133,17 @@
 
 						<tr>
 							<td class="email-content">
-								<div class="email-opener">Ticket Created</div>
+								<div class="email-opener">New Comment Added {{ ticket.ticketNumber }}</div>
 
-								<div class="email-line">
+                                <div class="email-line">
 									Hello {{ ticket.creator.username }},
 								</div>
 
-                                <div class="email-line">
-									Your support request has been successfully submitted.
+								<div class="email-line">
+									A new comment was added to your ticket.
 								</div>
 
-                                <div class="email-line">
+								<div class="email-line">
 									Ticket Details:
 								</div>
 
@@ -94,16 +155,23 @@
 									<strong>Subject:</strong> {{ ticket.subject }}
 								</div>
 
-                                <div class="email-line">
-									<strong>Category:</strong> {{ ticket.category.name }}
-								</div>
-
-                                <div class="email-line">
-									<strong>Priority:</strong> {{ ticket.priority.name }}
-								</div>
-
-                                <div class="email-line">
-									<strong>Created:</strong> {{ ticket.CreatedAt.strftime('%b %d, %Y, %I:%M %p') }}
+								<div class="comment-shell">
+									<table role="presentation" class="comment-table" cellpadding="0" cellspacing="0" border="0">
+										<tr>
+											<td class="avatar-cell">
+												<div class="comment-avatar {% if commenterRole == 'Admin' or commenterRole == 'Agent' %}comment-avatar-agent{% endif %}">
+													{{ commentAuthor[0]|upper if commentAuthor else 'U' }}
+												</div>
+											</td>
+											<td class="comment-content">
+												<div class="comment-meta">
+													{{ commentCreatedAt.strftime('%b %d, %Y, %I:%M %p') if commentCreatedAt else 'Unknown' }}
+												</div>
+												<div class="comment-author">{{ commentAuthor }}</div>
+												<div class="comment-text">{{ commentText }}</div>
+											</td>
+										</tr>
+									</table>
 								</div>
 
 								<div class="email-button">
@@ -113,13 +181,9 @@
 								</div>
 						
                                 <div class="email-line">
-                                    Our team will review your request and begin working on it shortly. You will receive email updates when the status of your ticket changes.
+									Please login to resolve to see further details.
 								</div>
-
-                                <div class="email-line">
-                                    You can view your ticket and add additional details if needed by logging into resolve.
-								</div>
-
+                                
 								<div class="email-line">
 									Thank you,
 								</div>
