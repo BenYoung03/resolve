@@ -5,7 +5,7 @@ Resolve is a web-based IT ticketing system designed to help organizations manage
 
 This project was created to be the Advanced Project for my Lakehead Computer Science Degree in a team of three!
 
-To view the project, click here! **ADD LINK HERE**
+To view the project, click here! https://resolve.solargames.ca/login
 
 <details>
   <summary>Table of Contents</summary>
