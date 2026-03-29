@@ -264,6 +264,7 @@ def view_ticket(TicketID):
     comments = db.session.scalars(
         sa.select(TicketComment).where(TicketComment.TicketID == TicketID).order_by(TicketComment.CreatedAt.asc())
     ).all()
+    #TODO: Add Activity pagination for better UI
     activities = db.session.scalars(
         sa.select(ActivityLog).where(ActivityLog.TicketID == TicketID).order_by(ActivityLog.CreatedAt.desc())
     ).all()

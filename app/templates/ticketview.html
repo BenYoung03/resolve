@@ -26,7 +26,7 @@
                                 <h2>{{ ticket.subject }}</h2>
                             </div>
 
-                            <div id="ticket-status">{{ ticket.status.name if ticket.status else 'Unknown' }}</div>
+                            <div id="ticket-status" class="status-{{ ticket.status.name|lower|replace(' ', '-') if ticket.status else 'unknown' }}">{{ ticket.status.name if ticket.status else 'Unknown' }}</div>
                         </div>
                         <div class="ticket-information">
                             <div class="information-element"><strong>Priority:</strong> {{ ticket.priority.name if ticket.priority else 'Unknown' }}</div>
