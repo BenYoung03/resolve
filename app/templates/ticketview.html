@@ -69,6 +69,28 @@
                             <h2>Description</h2>
                             <div class="description-text">{{ ticket.description }}</div>
                         </div>
+                        <!--TODO: Maybe combine Activity and Comment container and make each toggleable-->
+                        {% if current_user.has_role(['Agent', 'Admin']) %}
+                        <div class="activity-log-container">
+                            <h2>Activity Log</h2>
+
+                            <div class="activity-list">
+                                {% for activity in activities %}
+                                    <div class="activity-item">
+                                        <div class="activity-content">
+                                            <div class="activity-author">{{ activity.user.username if activity.user and activity.user.username else (activity.user.email if activity.user else 'Unknown User') }}</div>
+                                            <div class="activity-separator">|</div>
+                                            <div class="activity-meta activity-date">
+                                                {{ activity.CreatedAt.strftime('%b %d, %Y, %I:%M %p') if activity.CreatedAt else 'Unknown' }}
+                                            </div>
+                                            <div class="activity-separator">|</div>
+                                            <div class="activity-text">{{ activity.action }}</div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div> 
+                        {% endif %}
                         <div class="comments-container">
                             <h2>Comments</h2>
 
@@ -161,6 +183,26 @@
                             {{ updateTicketForm.submit(class="update-ticket-submit") }}
                         </form>
                     </div>
+                    {% elif current_user.has_role(['Employee']) %}
+                    <div class="activity-log-container-small">
+                            <h2>Activity Log</h2>
+
+                            <div class="activity-list">
+                                {% for activity in activities %}
+                                    <div class="activity-item">
+                                        <div class="activity-content">
+                                            <div class="activity-author">{{ activity.user.username if activity.user and activity.user.username else (activity.user.email if activity.user else 'Unknown User') }}</div>
+                                            <div class="activity-separator">|</div>
+                                            <div class="activity-meta activity-date">
+                                                {{ activity.CreatedAt.strftime('%b %d, %Y, %I:%M %p') if activity.CreatedAt else 'Unknown' }}
+                                            </div>
+                                            <div class="activity-separator">|</div>
+                                            <div class="activity-text">{{ activity.action }}</div>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div> 
                     {% endif %}
                 </div>
 

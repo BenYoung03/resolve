@@ -2,17 +2,16 @@
     display: flex;
     flex-direction: row;
     gap: 20px;
-    padding: 20px;
+    padding: 0px 20px 20px 0;
 }
 
 .left-menu {
-    position: fixed;
-    top: 95px;
-    left: 0;
-    height: calc(100vh - 70px);
+    position: sticky;
+    top: 0;
     width: 20%;
-    background-color: #f8f9fa;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    min-height: 100vh;
+    background-color: #f9f9f9;
+    border-right: 1px solid #ddd;
     box-sizing: border-box;
 }
 
@@ -48,12 +47,13 @@
 }
 
 .right-menu {
-    margin-left: 20%; 
-    width: 80%; 
+    margin-left: 0;
+    width: 80%;
     box-sizing: border-box;
     display: flex;
-    justify-content: center;
     flex-direction: column;
+    padding: 0;
+    padding-top: 20px;
 }
 
 #create-ticket {

@@ -24,7 +24,7 @@ $seedScript = @'
 import os
 
 from app import app, db
-from app.models import Category, Priority, Role, Status, User
+from app.models import Category, Priority, Role, Status, User, ActivityLog
 
 roles = ["Employee", "Agent", "Admin"]
 priorities = ["Low", "Medium", "High", "Urgent", "Critical"]

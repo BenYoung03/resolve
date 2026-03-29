@@ -7,7 +7,7 @@ from app.forms import (
     AdminSettingsForm, AdminProfileForm, AdminNewClientForm, AdminRoleForm,
     AdminResetPasswordForm, AdminNewUserForm, PasswordResetForm, ResetPasswordForm
 )
-from app.models import TicketComment, User, Role, Category, Status, Priority, Ticket
+from app.models import TicketComment, User, Role, Category, Status, Priority, Ticket, ActivityLog
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required, current_user
 from datetime import datetime
@@ -23,7 +23,7 @@ def role_required(*role):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            if not current_user.is_authenticated or not current_user.has_role(*role):
+            if not current_user.is_authenticated or not current_user.has_role(role):
                 flash('Access denied. Insufficient permissions.')
                 return redirect(url_for('index'))
             return f(*args, **kwargs)
@@ -214,6 +214,15 @@ def create_ticket():
 
         newTicket.ticketNumber = f"ID-{newTicket.TicketID:06d}"
 
+        newActivity = ActivityLog(
+            UserID = newTicket.CreatedBy,
+            TicketID = newTicket.TicketID,
+            action = "Ticket created",
+            CreatedAt=datetime.now(),
+        )
+
+        db.session.add(newActivity)
+
         db.session.commit()
         ticketCreated(newTicket, current_user.email)
 
@@ -255,6 +264,9 @@ def view_ticket(TicketID):
     comments = db.session.scalars(
         sa.select(TicketComment).where(TicketComment.TicketID == TicketID).order_by(TicketComment.CreatedAt.asc())
     ).all()
+    activities = db.session.scalars(
+        sa.select(ActivityLog).where(ActivityLog.TicketID == TicketID).order_by(ActivityLog.CreatedAt.desc())
+    ).all()
 
     temp = (currentTicket.ClosedAt if currentTicket.ClosedAt else datetime.now()) - currentTicket.CreatedAt    
     totalSeconds = int(temp.total_seconds())
@@ -288,23 +300,27 @@ def view_ticket(TicketID):
             newComment.CreatedAt,
             current_user.role.name if current_user.role else None,
         )
+
         db.session.add(newComment)
         db.session.commit()
         
         return redirect(url_for('view_ticket', TicketID=TicketID))
     
     # TODO: Add more flash style error messages
+    # TODO: Make it so other status' can only be applied upon assigning to an agent
     if updateTicketForm.validate_on_submit():
         # Only agents and admins can update tickets
-        if not current_user.has_role('Agent', 'Admin'):
+        if not current_user.has_role(['Agent', 'Admin']):
             flash('Access denied. Only agents and admins can update tickets.')
             return redirect(url_for('view_ticket', TicketID=TicketID))
         
         oldStatus = currentTicket.StatusID
+        oldPriority = currentTicket.PriorityID
         currentTicket.PriorityID = updateTicketForm.priority.data
         currentTicket.StatusID = updateTicketForm.status.data
         oldAssigned = currentTicket.assignee.UserID if currentTicket.assignee else None
         currentTicket.AssignedTo = updateTicketForm.assignedTo.data if updateTicketForm.assignedTo.data != 0 else None
+
         # Makes it so ticket cannot be set to open if it is assigned
         if updateTicketForm.assignedTo.data != 0 and updateTicketForm.status.data == 1:
             flash("Assigned tickets cannot have status 'Open'")
@@ -317,29 +333,72 @@ def view_ticket(TicketID):
 
         if updateTicketForm.resolutionReasoning.data:
             currentTicket.ResolutionReasoning = updateTicketForm.resolutionReasoning.data
+            newActivity = ActivityLog(
+                UserID = current_user.UserID,
+                TicketID = currentTicket.TicketID,
+                action = f"Ticket resolved by {current_user.username} with resolution reasoning: {updateTicketForm.resolutionReasoning.data}",
+                CreatedAt=datetime.now(),
+            )
+            db.session.add(newActivity)
+            db.session.commit()
 
-        db.session.commit()
-
-        if oldStatus != currentTicket.StatusID:
+        if oldStatus != currentTicket.StatusID and currentTicket.StatusID not in [5]:
             recipient = currentTicket.creator.email
             oldStatusName = db.session.scalar(sa.select(Status.name).where(Status.StatusID == oldStatus))
             newStatusName = db.session.scalar(sa.select(Status.name).where(Status.StatusID == currentTicket.StatusID))
+            newAssigned = currentTicket.assignee.UserID if currentTicket.assignee else None
+            
+            newActivity = ActivityLog(
+                UserID = current_user.UserID,
+                TicketID = currentTicket.TicketID,
+                action = f"Status changed from {oldStatusName} to {newStatusName}",
+                CreatedAt=datetime.now(),
+            )
+            db.session.add(newActivity)
+            db.session.commit()
+
             if app.config['MAIL_SUPPRESS_SEND']:
                 print(f"email failed to send")
             else:
                 ticketStatusChangeNotification(currentTicket, recipient, oldStatusName, newStatusName)
         
         newAssigned = currentTicket.assignee.UserID if currentTicket.assignee else None
-        if oldAssigned != newAssigned and newAssigned is not None:
-            recipient = currentTicket.assignee.email
-            ticketAssignedNotification(currentTicket, recipient)
+        if oldAssigned != newAssigned:
+            newActivity = ActivityLog(
+                UserID = current_user.UserID,
+                TicketID = currentTicket.TicketID,
+                action = "Ticket unassigned" if newAssigned is None else "Ticket assigned to " + currentTicket.assignee.username,
+                CreatedAt=datetime.now(),
+            )
+            db.session.add(newActivity)
+            db.session.commit()
+            if newAssigned is not None:
+                recipient = currentTicket.assignee.email
+                ticketAssignedNotification(currentTicket, recipient)
+        
+        if oldPriority != currentTicket.PriorityID:
+            recipient = currentTicket.creator.email
+            oldPriorityName = db.session.scalar(sa.select(Priority.name).where(Priority.PriorityID == oldPriority))
+            newPriorityName = db.session.scalar(sa.select(Priority.name).where(Priority.PriorityID == currentTicket.PriorityID))
+
+            newActivity = ActivityLog(
+                UserID = current_user.UserID,
+                TicketID = currentTicket.TicketID,
+                action = f"Priority changed from {oldPriorityName} to {newPriorityName}",
+                CreatedAt=datetime.now(),
+            )
+            db.session.add(newActivity)
+            db.session.commit()
+
+            # TODO: Maybe add priority notification email later
+
         if currentTicket.StatusID == 5:
             return redirect(url_for('view_ticket', TicketID=TicketID, confetti=1))
         return redirect(url_for('view_ticket', TicketID=TicketID))
 
     return render_template('ticketview.html', ticket_id=TicketID, ticket=currentTicket,
                            comments=comments, commentForm=addCommentForm, updateTicketForm=updateTicketForm,
-                           ticketAge=ticketAge, show_confetti=request.args.get('confetti') == '1')
+                           ticketAge=ticketAge, show_confetti=request.args.get('confetti') == '1', activities=activities)
 @app.route('/admin')
 @login_required
 @role_required("Admin")

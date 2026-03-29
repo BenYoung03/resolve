@@ -15,12 +15,12 @@
     display: flex;
     flex-direction: row;
     gap: 20px;
-    padding: 20px;
+    padding: 0px 20px 20px 0;
 }
 
 .right-menu {
-    margin-left: 20%; 
-    width: 80%; 
+    margin-left: 0;
+    width: 80%;
     box-sizing: border-box;
     display: flex;
     justify-content: center;
@@ -29,13 +29,12 @@
 }
 
 .left-menu {
-    position: fixed;
-    top: 95px;
-    left: 0;
-    height: calc(100vh - 70px);
+    position: sticky;
+    top: 0;
     width: 20%;
-    background-color: #f8f9fa;
-    box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+    min-height: 100vh;   
+    background-color: #f9f9f9;   
+    border-right: 1px solid #ddd;
     box-sizing: border-box;
 }
 
@@ -73,7 +72,9 @@
 .ticket-summary,
 .description-container,
 .comments-container, 
-.update-ticket-container{
+.update-ticket-container,
+.activity-log-container,
+.activity-log-container-small {
     border: 1px solid #ddd;
     border-radius: 5px;
     padding: 15px;
@@ -88,8 +89,14 @@
 
 .description-container,
 .comments-container,
-.update-ticket-container{
+.update-ticket-container,
+.activity-log-container{
     width: 100%;
+    padding-left: 0;
+    padding-right: 0;
+}
+
+.activity-log-container-small {
     padding-left: 0;
     padding-right: 0;
 }
@@ -159,28 +166,42 @@
     max-width: 100%;
 }
 
+.description-text {
+    padding-top: 6px;
+}
+
 .description-container h2,
 .comments-container h2,
-.update-ticket-container h2 {
-    margin-top: 0;
+.update-ticket-container h2,
+.activity-log-container h2,
+.activity-log-container-small h2 {
+    margin: 0;
     border-bottom: 1px solid #ddd;
     padding-left: 15px;
-    padding-bottom: 15px;
+    padding-bottom: 14px;
 }
 
-.comment-list {
-    padding: 10px 0;
+.comment-list,
+.activity-list {
+    padding: 4px 0 8px;
 }
 
-.comment-item {
+
+.comment-item,
+.activity-item {
     display: flex;
     align-items: flex-start;
     gap: 16px;
-    padding: 14px 20px;
+    padding: 10px 20px;
     position: relative;
 }
 
-.comment-avatar {
+.activity-item{
+    border-bottom: 1px solid #eee;
+}
+
+.comment-avatar,
+.activity-avatar {
     width: 36px;
     height: 36px;
     min-width: 36px;
@@ -191,15 +212,16 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    position: relative;
     background-color: #2f7de1;
 }
 
-.comment-avatar-agent {
+.comment-avatar-agent,
+.activity-avatar-agent {
     background-color: #d61e10;
 }
 
-.comment-line {
+.comment-line,
+.activity-line {
     position: absolute;
     left: 37px;
     top: 50px;
@@ -208,38 +230,77 @@
     background-color: #d9d9d9;
 }
 
-.comment-content {
+.comment-content,
+.activity-content {
     flex: 1;
     min-width: 0;
 }
 
-.comment-meta {
+.comment-meta,
+.activity-meta {
     margin-bottom: 4px;
     color: #555;
     font-size: 15px;
 }
 
-.comment-title {
+.comment-title,
+.activity-title {
     font-size: 15px;
     font-weight: 700;
     color: #222;
     margin-bottom: 8px;
 }
 
-.comment-author {
+.comment-author,
+.activity-author {
     font-size: 15px;
     font-weight: 700;
     color: #2f7de1;
     margin-bottom: 6px;
 }
 
-.comment-text {
+.comment-text,
+.activity-text {
     font-size: 15px;
     color: #333;
     line-height: 1.5;
     white-space: pre-wrap;
     word-wrap: break-word;
     overflow-wrap: break-word;
+}
+
+.activity-text{
+    font-weight: bold;
+}
+
+.activity-item {
+    display: block;
+    padding: 10px 20px;
+}
+
+.activity-content {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.activity-meta,
+.activity-author,
+.activity-text {
+    margin-bottom: 0;
+    font-size: 16px;
+}
+
+.activity-separator {
+    color: #999;
+    font-size: 14px;
+}
+
+.activity-text {
+    display: inline;
+    white-space: normal;
+    line-height: 1.4;
 }
 
 .comment-form-row {
@@ -306,7 +367,8 @@
     flex-direction: column;
 }
 
-.update-ticket-container {
+.update-ticket-container,
+.activity-log-container-small {
     width: 30%;
     height: fit-content;
 }
@@ -314,6 +376,7 @@
 .update-ticket-form {
     display: flex;
     flex-direction: column;
+    padding-top: 6px;
     padding-left: 15px;
     padding-right: 15px;
 }
