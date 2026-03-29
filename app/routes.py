@@ -959,7 +959,7 @@ def admin_create_role_step1():
     role_name = form.role_name.data
     permissions = request.form.getlist('permissions')
     agents = db.session.scalars(
-        sa.select(User).join(Role).where(Role.name.in_(["Agent", "Admin"])).order_by(User.email.asc())
+        sa.select(User).order_by(User.email.asc())
     ).all()
 
     return render_template(
