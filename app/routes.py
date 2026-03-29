@@ -264,6 +264,9 @@ def view_ticket(TicketID):
     comments = db.session.scalars(
         sa.select(TicketComment).where(TicketComment.TicketID == TicketID).order_by(TicketComment.CreatedAt.asc())
     ).all()
+    activities = db.session.scalars(
+        sa.select(ActivityLog).where(ActivityLog.TicketID == TicketID).order_by(ActivityLog.CreatedAt.desc())
+    ).all()
 
     temp = (currentTicket.ClosedAt if currentTicket.ClosedAt else datetime.now()) - currentTicket.CreatedAt    
     totalSeconds = int(temp.total_seconds())
@@ -336,8 +339,8 @@ def view_ticket(TicketID):
                 action = f"Ticket resolved by {current_user.username} with resolution reasoning: {updateTicketForm.resolutionReasoning.data}",
                 CreatedAt=datetime.now(),
             )
-
-        db.session.commit()
+            db.session.add(newActivity)
+            db.session.commit()
 
         if oldStatus != currentTicket.StatusID and currentTicket.StatusID not in [5]:
             recipient = currentTicket.creator.email
@@ -395,7 +398,7 @@ def view_ticket(TicketID):
 
     return render_template('ticketview.html', ticket_id=TicketID, ticket=currentTicket,
                            comments=comments, commentForm=addCommentForm, updateTicketForm=updateTicketForm,
-                           ticketAge=ticketAge, show_confetti=request.args.get('confetti') == '1')
+                           ticketAge=ticketAge, show_confetti=request.args.get('confetti') == '1', activities=activities)
 @app.route('/admin')
 @login_required
 @role_required("Admin")

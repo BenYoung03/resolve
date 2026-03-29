@@ -41,8 +41,8 @@ body {
 .header-container{
     text-align: center;
     border-bottom: 2px solid #ddd;
-    padding: 0;
-    margin: 15px;
+    padding: 10px 10px 0 10px;
+    margin: 0;
 }
 
 .header a,
