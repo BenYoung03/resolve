@@ -557,7 +557,9 @@ def admin_users():
 
     role_choices = [
         (role.RoleID, role.name)
-        for role in db.session.scalars(sa.select(Role).order_by(Role.name.asc())).all()
+        for role in db.session.scalars(
+            sa.select(Role).where(Role.active == True).order_by(Role.name.asc())
+        ).all()
     ]
 
     role_form = AdminRoleForm()
@@ -685,6 +687,10 @@ def admin_change_role(user_id):
     user = db.session.get(User, user_id)
     role = db.session.get(Role, form.role.data)
 
+    if not role or not role.active:
+        flash('Selected role is disabled or not found.')
+        return redirect(url_for('admin_users'))
+    
     if not user or not role:
         flash('User or role not found.')
         return redirect(url_for('admin_users'))
@@ -742,8 +748,8 @@ def admin_new_user():
         return redirect(url_for('admin_users'))
 
     role = db.session.get(Role, form.role.data)
-    if not role:
-        flash('Selected role does not exist.')
+    if not role or not role.active:
+        flash('Selected role does not exist or is disabled.')
         return redirect(url_for('admin_users'))
 
     user = User(
@@ -835,9 +841,30 @@ def admin_toggle_all_roles(active):
     roles = db.session.scalars(sa.select(Role)).all()
     core_roles = {"Admin", "Agent", "Employee"}
 
+    employee_role = db.session.scalar(
+        sa.select(Role).where(Role.name == "Employee")
+    )
+
+    if not employee_role:
+        flash('Employee role not found.')
+        return redirect(url_for('admin_roles'))
+
+    make_active = bool(active)
+
     for role in roles:
-        if hasattr(role, 'active') and role.name not in core_roles:
-            role.active = bool(active)
+        if role.name in core_roles:
+            continue
+
+        was_active = role.active
+        role.active = make_active
+
+        if was_active and not role.active:
+            users_with_role = db.session.scalars(
+                sa.select(User).where(User.roleId == role.RoleID)
+            ).all()
+
+            for user in users_with_role:
+                user.roleId = employee_role.RoleID
 
     db.session.commit()
     flash('Custom roles updated.')
@@ -860,11 +887,26 @@ def admin_toggle_role(role_id):
         flash('Core roles cannot be disabled here.')
         return redirect(url_for('admin_roles'))
 
-    if hasattr(role, 'active'):
-        role.active = not role.active
-        db.session.commit()
-        flash('Role updated.')
+    employee_role = db.session.scalar(
+        sa.select(Role).where(Role.name == "Employee")
+    )
 
+    if not employee_role:
+        flash('Employee role not found.')
+        return redirect(url_for('admin_roles'))
+
+    role.active = not role.active
+
+    if not role.active:
+        users_with_role = db.session.scalars(
+            sa.select(User).where(User.roleId == role.RoleID)
+        ).all()
+
+        for user in users_with_role:
+            user.roleId = employee_role.RoleID
+
+    db.session.commit()
+    flash('Role updated.')
     return redirect(url_for('admin_roles'))
 
 @app.route('/admin/edit-role/<int:role_id>', methods=['GET', 'POST'])
