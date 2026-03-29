@@ -29,7 +29,11 @@
                             <div id="ticket-status" class="status-{{ ticket.status.name|lower|replace(' ', '-') if ticket.status else 'unknown' }}">{{ ticket.status.name if ticket.status else 'Unknown' }}</div>
                         </div>
                         <div class="ticket-information">
-                            <div class="information-element"><strong>Priority:</strong> {{ ticket.priority.name if ticket.priority else 'Unknown' }}</div>
+                            <div class="information-element"><strong>Priority:</strong> 
+                                <div class="priority priority-{{ ticket.priority.name|lower|replace(' ', '-') if ticket.priority else 'unknown' }}">
+                                    {{ ticket.priority.name if ticket.priority else 'Unknown' }}
+                                </div>
+                            </div>
                             <div class="information-element"><strong>Category:</strong> {{ ticket.category.name if ticket.category else 'Unknown' }}</div>
                             <div class="information-element"><strong>Created At:</strong> {{ ticket.CreatedAt.strftime('%b %d, %Y, %I:%M %p') if ticket.CreatedAt else 'Unknown' }}</div>
                         </div>

@@ -8,7 +8,7 @@
 .left-menu {
     position: sticky;
     top: 0;
-    width: 20%;
+    width: 15%;
     min-height: 100vh;
     background-color: #f9f9f9;
     border-right: 1px solid #ddd;
@@ -48,7 +48,7 @@
 
 .right-menu {
     margin-left: 0;
-    width: 80%;
+    width: 84%;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
@@ -103,3 +103,103 @@
 .open-closed a:hover {
     background-color: #e0e0e0;
 }
+
+.table-card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 16px;
+}
+
+.status,
+.priority {
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 14px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 50%;
+}
+
+.status-open{ 
+    background: #2f7de1;
+}
+
+.status-assigned{ 
+    background: #7c3aed; 
+}
+
+.status-in-progress{ 
+    background: #f59e0b; 
+}
+
+.status-pending{ 
+    background: #eab308; 
+}
+
+.status-resolved{ 
+    background: #16a34a; 
+}
+
+.status-closed{ 
+    background: #6b7280;  
+}
+
+.priority-low {
+    background-color: #374151;
+}
+
+.priority-medium {
+    background-color: #1D4ED8;
+}
+
+.priority-high {
+    background-color: #B45309;
+}
+
+.priority-urgent {
+    background-color: #B91C1C;
+}
+
+.priority-critical {
+    background-color: #DC2626;
+}
+
+.unassigned {
+    color: #B91C1C;
+    font-weight: 600;
+}
+
+.ticket-link {
+    font-weight: 400;
+    color: #2f7de1;
+    text-decoration: none;
+}
+
+.ticket-link:hover {
+    font-weight: 600;
+    color: #2563eb;
+}
+
+.clickable-row {
+    cursor: pointer;
+}
+
+#ticketTable tbody tr td {
+    border-bottom: 1px solid #ddd;
+}
+
+
+.clickable-row:hover {
+    background-color: #f5f9ff !important;
+}
+
+.table-card {
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 16px;
+}
+

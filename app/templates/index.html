@@ -33,33 +33,53 @@
                         {% endif %}
                     </div>
                 </div>
-                <!--TODO: Perhaps replace ticket table with some sort of grid-box styling-->
-                <table id="ticketTable">
-                    <thead>
-                        <tr>
-                            <th>Ticket ID</th>
-                            <th>Subject</th>
-                            <th>Status</th>
-                            <th>Priority</th>
-                            <th>Category</th>
-                            <th>Assigned To</th>
-                            <th>Created At</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for ticket in tickets %}
-                        <tr>
-                            <td><a href="{{ url_for('view_ticket', TicketID=ticket.TicketID)}}">{{ ticket.ticketNumber }}</a></td>
-                            <td>{{ ticket.subject }}</td>
-                            <td>{{ ticket.status.name }}</td>
-                            <td>{{ ticket.priority.name }}</td>
-                            <td>{{ ticket.category.name }}</td>
-                            <td>{{ ticket.assignee.username if ticket.assignee else 'Unassigned' }}</td>
-                            <td>{{ ticket.CreatedAt.strftime('%b %d, %Y, %I:%M %p') }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                <div class="table-card">
+                    <table id="ticketTable">
+                        <thead>
+                            <tr>
+                                <th>Ticket ID</th>
+                                <th>Subject</th>
+                                <th>Status</th>
+                                <th>Priority</th>
+                                <th>Category</th>
+                                <th>Assigned To</th>
+                                <th>Created At</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for ticket in tickets %}
+                            <tr class="clickable-row" data-href="{{ url_for('view_ticket', TicketID=ticket.TicketID) }}">
+                                <td><a href="{{ url_for('view_ticket', TicketID=ticket.TicketID)}}" class="ticket-link">{{ ticket.ticketNumber }}</a></td>
+                                <td>{{ ticket.subject }}</td>
+                                <td>
+                                    <div class="status status-{{ ticket.status.name|lower|replace(' ', '-') if ticket.status else 'unknown' }}">
+                                        {{ ticket.status.name }}
+                                    </div>
+                                </td>
+                                <td data-order="
+                                    {% if ticket.priority.name == 'Critical' %}5
+                                    {% elif ticket.priority.name == 'Urgent' %}4
+                                    {% elif ticket.priority.name == 'High' %}3
+                                    {% elif ticket.priority.name == 'Medium' %}2
+                                    {% elif ticket.priority.name == 'Low' %}1
+                                    {% endif %}
+                                    ">
+                                    <div class="priority priority-{{ ticket.priority.name|lower|replace(' ', '-') if ticket.priority else 'unknown' }}">
+                                        {{ ticket.priority.name }}
+                                    </div>
+                                </td>
+                                <td>{{ ticket.category.name }}</td>
+                                <td>
+                                    <div class="{% if not ticket.assignee %}unassigned{% endif %}">
+                                        {{ ticket.assignee.username if ticket.assignee else 'Unassigned' }}
+                                    </div>
+                                </td>
+                                <td>{{ ticket.CreatedAt.strftime('%b %d, %Y, %I:%M %p') }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
     {% endif %}
@@ -71,17 +91,11 @@
 <script src="{{ url_for('static', filename='DataTables/datatables.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/ticketview.js') }}"></script>
 <script>
-//TODO: Implement date range filtering, make whole ticket row clickable
-// Also add styling to table. For example, if a priority is critical maybe may the row red or something
-// Or if it hasnt been assigned in a while since creation then flag 
+//TODO: Implement date range filtering
+//TODO: Make it so each column has correct order (Ex: Priority sorts from Low to Urgent, and not alphabetically)
 $(document).ready(function() {
     $('#ticketTable').DataTable({
-        ordering: false,
-        order: [
-            [2, 'asc'],   
-            [3, 'desc'], 
-            [6, 'desc'] 
-        ],
+        ordering: true,
         stateSave: false,
         responsive: true,
         columnControl: ['order', ['search']],
@@ -99,6 +113,13 @@ $(document).ready(function() {
             "zeroRecords": "No matching tickets found"
         }
     });
+});
+
+$('#ticketTable tbody').on('click', 'tr.clickable-row', function () {
+    const url = $(this).data('href');
+    if (url) {
+        window.location.href = url;
+    }
 });
 </script>
 
