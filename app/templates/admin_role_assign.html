@@ -13,8 +13,10 @@
         <a href="{{ url_for('admin_profile') }}">Profile</a>
         <a href="{{ url_for('logout') }}">Logout</a>
     </div>
+
     <div class="panel-content">
-        <h3>Configure Role</h3>
+        <h3>Assign Role to Users</h3>
+
         <form method="post" action="{{ url_for('admin_create_role_step2') }}">
             {{ form.hidden_tag() }}
             <input type="hidden" name="role_name" value="{{ role_name }}">
@@ -24,15 +26,28 @@
             {% endfor %}
 
             <div class="role-step2-header">
-                <a href="{{ url_for('admin_roles') }}">Back</a>
-                <button type="submit">Create Role</button>
+                <a href="{{ url_for('admin_roles') }}" class="role-step2-back">Back</a>
+
+                <div class="role-step2-actions">
+                    <button type="submit">Create Role</button>
+                </div>
             </div>
-            <input type="text" id="user-search" placeholder="Search User..." onkeyup="filterUsers()">
-            <div class="users-grid" id="users-grid">
+
+            <div class="role-user-search">
+                <input type="text" id="user-search" placeholder="Search user..." onkeyup="filterUsers()">
+            </div>
+
+            <div class="users-list" id="users-grid">
                 {% for user in agents %}
-                <label>
-                    <input type="checkbox" name="user_ids" value="{{ user.UserID }}">
-                    {{ user.email }}
+                <label class="user-row">
+                    <span class="user-check">
+                        <input type="checkbox" name="user_ids" value="{{ user.UserID }}">
+                    </span>
+
+                    <span class="user-info">
+                        <span class="user-name">{{ user.username }}</span>
+                        <span class="user-email">{{ user.email }}</span>
+                    </span>
                 </label>
                 {% endfor %}
             </div>
@@ -43,11 +58,11 @@
 <script>
 function filterUsers() {
     const filter = document.getElementById('user-search').value.toLowerCase();
-    const labels = document.querySelectorAll('#users-grid label');
+    const rows = document.querySelectorAll('#users-grid .user-row');
 
-    labels.forEach(label => {
-        const text = label.textContent.toLowerCase();
-        label.style.display = text.includes(filter) ? '' : 'none';
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(filter) ? '' : 'none';
     });
 }
 </script>

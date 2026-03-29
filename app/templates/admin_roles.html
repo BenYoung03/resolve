@@ -88,11 +88,12 @@
 <!-- Add Role Modal - Step 1 -->
 <div id="add-role-modal" class="modal">
   <div class="modal-content">
+     <button type="button" class="modal-close" onclick="document.getElementById('add-role-modal').style.display='none'">X</button>
+
     <h3>Configure Role</h3>
     <form method="post" action="{{ url_for('admin_create_role_step1') }}">
       {{ form.hidden_tag() }}
       {{ form.role_name(placeholder="Role Name") }}
-      <button type="submit">Next</button>
 
       <h4>Select Permissions</h4>
       <div class="permissions-grid">
@@ -152,12 +153,12 @@
           </label>
         </div>
       </div>
+
+      <div class="modal-actions modal-actions-split">
+        <button type="submit">Next</button>
+        <button type="button" onclick="document.getElementById('add-role-modal').style.display='none'">Cancel</button>
+      </div>
     </form>
-    <button
-      onclick="document.getElementById('add-role-modal').style.display = 'none'"
-    >
-      X
-    </button>
   </div>
 </div>
 

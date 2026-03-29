@@ -1,4 +1,3 @@
-
 * {
   box-sizing: border-box;
   margin: 0;
@@ -48,11 +47,17 @@ body {
 }
 
 /* Headings */
-.section-header, .panel-title {
+.section-header,
+.panel-title {
   display: flex;
   justify-content: space-between;
   margin-bottom: 10px;
   font-weight: bold;
+}
+
+.panel-title {
+  margin-bottom: 20px;
+  align-items: center;
 }
 
 /* Buttons */
@@ -73,7 +78,9 @@ label {
   margin-bottom: 3px;
 }
 
-input, select, textarea {
+input,
+select,
+textarea {
   width: 100%;
   padding: 5px;
   margin-bottom: 8px;
@@ -87,7 +94,8 @@ input, select, textarea {
   margin-bottom: 15px;
 }
 
-.issues-table th, .issues-table td {
+.issues-table th,
+.issues-table td {
   text-align: left;
   padding: 6px;
   border: 1px solid #ddd;
@@ -98,90 +106,252 @@ input, select, textarea {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.3);
+  background: rgba(0, 0, 0, 0.3);
   align-items: center;
   justify-content: center;
 }
 
 .modal-content {
   background: #fff;
-  padding: 15px;
   width: 90%;
-  max-width: 300px;
+  max-width: 420px;
   position: relative;
+  padding: 18px 14px 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
 }
 
-.modal-content button:last-child {
-  position: absolute;
-  top: 5px;
-  right: 5px;
+.modal-content h3 {
+  margin: 0 42px 14px 0;
+  font-size: 15px;
+  font-weight: bold;
+  line-height: 1.2;
 }
 
+.modal-content h4 {
+  margin: 12px 0 8px 0;
+  font-size: 13px;
+  font-weight: bold;
+  line-height: 1.2;
+}
+
+.modal-content input[type="text"],
+.modal-content input[type="email"],
+.modal-content input[type="password"],
+.modal-content select,
+.modal-content textarea {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 6px 8px;
+  margin-bottom: 0;
+  border: 1px solid #ccc;
+}
+
+.modal-content form {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  width: auto;
+}
 
 /* Preserved layout/helpers from updated functionality so newer admin templates still render correctly */
 .filter-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
 }
+
 .permissions-grid {
-    display: flex;
-    gap: 40px;
-    flex-wrap: wrap;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 6px;
+  margin-bottom: 0;
 }
+
 .perm-group {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
+
+.perm-group strong {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 14px;
+  font-weight: bold;
+}
+
 .roles-box {
-    width: 100%;
+  width: 100%;
 }
-.users-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-top: 10px;
-}
-.role-step2-header {
-    display: flex;
-    justify-content: flex-end;
-    gap: 10px;
-    margin-bottom: 20px;
-}
+
 .panel-content form {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 300px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 300px;
 }
+
 .panel-content .roles-box form,
 .panel-content .issues-table form,
 .panel-content .section-header form,
 .modal-content form {
-    width: auto;
+  width: auto;
 }
-.panel-title {
-    margin-bottom: 20px;
-    align-items: center;
+
+/* Checkboxes */
+.permissions-grid input[type="checkbox"],
+.perm-group input[type="checkbox"],
+.users-grid input[type="checkbox"],
+.user-check input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  flex-shrink: 0;
 }
-.modal-content {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-.permissions-grid input[type='checkbox'],
-.perm-group input[type='checkbox'],
-.users-grid input[type='checkbox'] {
-    width: auto;
-    margin-right: 6px;
-    margin-bottom: 0;
-}
+
 .perm-group label,
 .users-grid label {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    margin-bottom: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 0;
+  font-size: 14px;
+  line-height: 1.25;
+}
+
+/* Modal close button */
+.modal-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 32px;
+  height: 28px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Modal bottom buttons */
+.modal-actions {
+  display: flex;
+  gap: 0;
+  margin-top: 18px;
+}
+
+.modal-actions-split {
+  width: 100%;
+}
+
+.modal-actions-split button {
+  width: 50%;
+  padding: 8px 0;
+  border-radius: 0;
+  font-size: 14px;
+}
+
+.modal-actions-split button:first-child {
+  border-right: none;
+}
+
+/* Role Step 2 */
+.role-step2-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.role-step2-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.role-step2-back {
+  text-decoration: none;
+  color: #4b2aad;
+  font-size: 14px;
+}
+
+.role-step2-back:hover {
+  text-decoration: underline;
+}
+
+.role-step2-header button {
+  padding: 8px 16px;
+  min-width: 120px;
+}
+
+.role-user-search {
+  width: 100%;
+  margin-bottom: 14px;
+}
+
+.role-user-search input {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid #cfcfcf;
+  margin-bottom: 0;
+}
+
+.users-list {
+  border: 1px solid #d8d8d8;
+  background: #fff;
+  max-height: 260px;
+  overflow-y: auto;
+}
+
+.user-row {
+  display: grid;
+  grid-template-columns: 28px 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #ececec;
+  margin: 0;
+  cursor: pointer;
+}
+
+.user-row:last-child {
+  border-bottom: none;
+}
+
+.user-row:hover {
+  background: #f7f7f7;
+}
+
+.user-check {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.user-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  min-width: 0;
+  width: 100%;
+}
+
+.user-name {
+  font-weight: 600;
+  color: #222;
+  white-space: nowrap;
+}
+
+.user-email {
+  color: #666;
+  font-size: 13px;
+  text-align: right;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
