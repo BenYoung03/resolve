@@ -23,62 +23,165 @@ def role_required(*role):
     def decorator(f):
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            if not current_user.is_authenticated or not current_user.has_role(role):
+            if not current_user.is_authenticated or not current_user.has_role(*role):
                 flash('Access denied. Insufficient permissions.')
                 return redirect(url_for('index'))
             return f(*args, **kwargs)
         return decorated_function
     return decorator
 
+def role_or_permission_required(roles=None, permissions=None):
+    roles = roles or []
+    permissions = permissions or []
+
+    def decorator(f):
+        @wraps(f)
+        def decorated_function(*args, **kwargs):
+            if not current_user.is_authenticated:
+                flash('Access denied. Insufficient permissions.')
+                return redirect(url_for('index'))
+
+            if current_user.has_role(*roles) or current_user.has_permission(*permissions):
+                return f(*args, **kwargs)
+
+            flash('Access denied. Insufficient permissions.')
+            return redirect(url_for('index'))
+        return decorated_function
+    return decorator
+
+
+def can_view_all_tickets(user):
+    return user.has_role('Agent', 'Admin') or user.has_permission('view_all_tickets')
+
+
+def can_assign_tickets(user):
+    return user.has_role('Agent', 'Admin') or user.has_permission('assign_tickets')
+
+
+def can_be_assigned_tickets(user):
+    return user.has_role('Agent', 'Admin') or user.has_permission('ticket_agent')
+
+
+def can_update_ticket_priority(user):
+    return user.has_role('Agent', 'Admin') or user.has_permission('update_ticket_priority')
+
+
+def can_update_ticket_status(user):
+    return user.has_role('Agent', 'Admin') or user.has_permission('update_ticket_status')
+
+def can_use_assigned_queue(user):
+    return (
+        user.has_role('Agent', 'Admin') or
+        user.has_permission('assign_tickets', 'ticket_agent')
+    )
+
 @app.route('/')
 @app.route('/index')
 def index():
-
     if not current_user.is_authenticated:
         return redirect(url_for('login'))
-    # This currently finds only tickets that are not resolved or closed. Perhaps change logic later
-    elif current_user.has_role('Employee'):
-        tickets = (db.session.scalars(sa.select(Ticket).where(Ticket.CreatedBy == current_user.UserID, Ticket.StatusID.notin_([5, 6])).order_by(Ticket.CreatedAt.desc())).all())
+    elif can_view_all_tickets(current_user):
+        tickets = db.session.scalars(
+            sa.select(Ticket)
+            .where(Ticket.StatusID.notin_([5, 6]))
+            .order_by(Ticket.CreatedAt.desc())
+        ).all()
     else:
-        tickets = (db.session.scalars(sa.select(Ticket).where(Ticket.StatusID.notin_([5, 6])).order_by(Ticket.CreatedAt.desc())).all())
+        tickets = db.session.scalars(
+            sa.select(Ticket)
+            .where(
+                sa.and_(
+                    Ticket.CreatedBy == current_user.UserID,
+                    Ticket.StatusID.notin_([5, 6])
+                )
+            )
+            .order_by(Ticket.CreatedAt.desc())
+        ).all()
 
     return render_template('index.html', title='Home', tickets=tickets)
+
 
 @app.route('/index/closed')
 def closed_tickets():
     if not current_user.is_authenticated:
         tickets = []
-    elif current_user.has_role('Employee'):
-        tickets = (db.session.scalars(sa.select(Ticket).where(
-            sa.and_(Ticket.CreatedBy == current_user.UserID, Ticket.StatusID.in_([5, 6]))
-        ).order_by(Ticket.CreatedAt.desc())).all())
+    elif can_view_all_tickets(current_user):
+        tickets = db.session.scalars(
+            sa.select(Ticket)
+            .where(Ticket.StatusID.in_([5, 6]))
+            .order_by(Ticket.CreatedAt.desc())
+        ).all()
     else:
-        tickets = (db.session.scalars(sa.select(Ticket).where(Ticket.StatusID.in_([5, 6])).order_by(Ticket.CreatedAt.desc())).all())
+        tickets = db.session.scalars(
+            sa.select(Ticket)
+            .where(
+                sa.and_(
+                    Ticket.CreatedBy == current_user.UserID,
+                    Ticket.StatusID.in_([5, 6])
+                )
+            )
+            .order_by(Ticket.CreatedAt.desc())
+        ).all()
 
     return render_template('index.html', title='Closed Tickets', tickets=tickets)
+
 
 @app.route('/index/open')
 def open_tickets():
     if not current_user.is_authenticated:
         tickets = []
-    elif current_user.has_role('Employee'):
-        tickets = (db.session.scalars(sa.select(Ticket).where(
-            sa.and_(Ticket.CreatedBy == current_user.UserID, Ticket.StatusID.notin_([5,6]))
-        ).order_by(Ticket.CreatedAt.desc())).all())
+    elif can_view_all_tickets(current_user):
+        tickets = db.session.scalars(
+            sa.select(Ticket)
+            .where(Ticket.StatusID.notin_([5, 6]))
+            .order_by(Ticket.CreatedAt.desc())
+        ).all()
     else:
-        tickets = (db.session.scalars(sa.select(Ticket).where(Ticket.StatusID.notin_([5,6])).order_by(Ticket.CreatedAt.desc())).all())
+        tickets = db.session.scalars(
+            sa.select(Ticket)
+            .where(
+                sa.and_(
+                    Ticket.CreatedBy == current_user.UserID,
+                    Ticket.StatusID.notin_([5, 6])
+                )
+            )
+            .order_by(Ticket.CreatedAt.desc())
+        ).all()
 
     return render_template('index.html', title='Open Tickets', tickets=tickets)
 
-@app.route('/index/assigned/<int:UserID>', methods=['GET', 'POST'])
-@role_required("Agent", "Admin")
-def assigned_tickets(UserID):
-    if not current_user.is_authenticated:
-        tickets = []
-    else:
-        tickets = (db.session.scalars(sa.select(Ticket).where(Ticket.AssignedTo == current_user.UserID, Ticket.StatusID.notin_([5,6])).order_by(Ticket.CreatedAt.desc())).all())
+@app.route('/index/assigned')
+@login_required
+@role_or_permission_required(
+    roles=['Agent', 'Admin'],
+    permissions=['assign_tickets', 'ticket_agent']
+)
+def assigned_tickets():
+    tickets = db.session.scalars(
+        sa.select(Ticket).where(
+            sa.and_(
+                Ticket.AssignedTo == current_user.UserID,
+                Ticket.StatusID.notin_([5, 6])
+            )
+        ).order_by(Ticket.CreatedAt.desc())
+    ).all()
 
     return render_template('index.html', title='Assigned Tickets', tickets=tickets)
+
+# @login_required
+# @role_or_permission_required(
+#     roles=['Agent', 'Admin'],
+#     permissions=['assign_tickets', 'ticket_agent']
+# )
+
+
+# def assigned_tickets(UserID):
+#     if not current_user.is_authenticated:
+#         tickets = []
+#     else:
+#         tickets = (db.session.scalars(sa.select(Ticket).where(Ticket.AssignedTo == current_user.UserID, Ticket.StatusID.notin_([5,6])).order_by(Ticket.CreatedAt.desc())).all())
+
+#     return render_template('index.html', title='Assigned Tickets', tickets=tickets)
 
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -96,7 +199,7 @@ def login():
         if not user or not check_password_hash(user.password_hash, password):
             flash('Please check your login details and try again.')
             return redirect(url_for('login'))
-        
+
         # If details correct, run Flask-Login "login_user"
         login_user(user, remember=True)
         return redirect(url_for('index'))
@@ -130,13 +233,13 @@ def register():
         if existing_username:
             flash('Username already exists')
             return redirect(url_for('register'))
-        
+
         # Commit new user to database if no user already exists
         new_user = User(username=username, email=email, password_hash=generate_password_hash(password), roleId=1)
         db.session.add(new_user)
         db.session.commit()
         return redirect(url_for('login'))
-    
+
     return render_template('register.html', form=form)
 
 @app.route('/password-reset-request', methods=['GET', 'POST'])
@@ -151,7 +254,7 @@ def password_reset_request():
             passwordResetEmail(user)
         flash('If an account with that email exists, a password reset email has been sent.')
         return redirect(url_for('login'))
-    
+
     if request.method == 'POST' and not form.validate():
         for field_errors in form.errors.values():
             for error in field_errors:
@@ -172,7 +275,7 @@ def reset_password(token):
         db.session.commit()
         flash('Your password has been reset.')
         return redirect(url_for('login'))
-    
+
     if request.method == 'POST' and not form.validate():
         for field_errors in form.errors.values():
             for error in field_errors:
@@ -232,7 +335,7 @@ def create_ticket():
 
         flash(f'Ticket {newTicket.ticketNumber} created successfully.')
         return redirect(url_for('index'))
-    
+
     if request.method == "POST" and not form.validate():
         for field_errors in form.errors.values():
             for error in field_errors:
@@ -244,12 +347,21 @@ def create_ticket():
 @login_required
 def view_ticket(TicketID):
 
-    if current_user.has_role('Employee'):
-        ticket = db.session.scalar(sa.select(Ticket).where(Ticket.TicketID == TicketID))
-        if not ticket or ticket.CreatedBy != current_user.UserID:
-            flash('You do not have permission to view this ticket.')
-            return redirect(url_for('index'))
-        
+    currentTicket = db.session.scalar(sa.select(Ticket).where(Ticket.TicketID == TicketID))
+    if not currentTicket:
+        flash('Ticket not found.')
+        return redirect(url_for('index'))
+
+    allowed_to_view = (
+        can_view_all_tickets(current_user) or
+        currentTicket.CreatedBy == current_user.UserID or
+        currentTicket.AssignedTo == current_user.UserID
+    )
+
+    if not allowed_to_view:
+        flash('You do not have permission to view this ticket.')
+        return redirect(url_for('index'))
+
     addCommentForm = CommentForm()
     updateTicketForm = UpdateTicket()
 
@@ -257,10 +369,10 @@ def view_ticket(TicketID):
     updateTicketForm.status.choices = [(s.StatusID, s.name) for s in Status.query.all()]
     updateTicketForm.assignedTo.choices = [(0, 'Unassigned')] + [
         (u.UserID, u.username) 
-        for u in User.query.join(Role).filter(Role.name.in_(["Agent", "Admin"])).all()
+        for u in User.query.join(Role).all()
+        if can_be_assigned_tickets(u)
     ]
 
-    currentTicket = db.session.scalar(sa.select(Ticket).where(Ticket.TicketID == TicketID))
     comments = db.session.scalars(
         sa.select(TicketComment).where(TicketComment.TicketID == TicketID).order_by(TicketComment.CreatedAt.asc())
     ).all()
@@ -303,23 +415,41 @@ def view_ticket(TicketID):
 
         db.session.add(newComment)
         db.session.commit()
-        
+
         return redirect(url_for('view_ticket', TicketID=TicketID))
-    
+
     # TODO: Add more flash style error messages
     # TODO: Make it so other status' can only be applied upon assigning to an agent
     if updateTicketForm.validate_on_submit():
-        # Only agents and admins can update tickets
-        if not current_user.has_role(['Agent', 'Admin']):
-            flash('Access denied. Only agents and admins can update tickets.')
-            return redirect(url_for('view_ticket', TicketID=TicketID))
-        
         oldStatus = currentTicket.StatusID
         oldPriority = currentTicket.PriorityID
-        currentTicket.PriorityID = updateTicketForm.priority.data
-        currentTicket.StatusID = updateTicketForm.status.data
         oldAssigned = currentTicket.assignee.UserID if currentTicket.assignee else None
-        currentTicket.AssignedTo = updateTicketForm.assignedTo.data if updateTicketForm.assignedTo.data != 0 else None
+
+        newPriority = updateTicketForm.priority.data
+        newStatus = updateTicketForm.status.data
+        newAssigned = updateTicketForm.assignedTo.data if updateTicketForm.assignedTo.data != 0 else None
+
+        if oldPriority != newPriority and not can_update_ticket_priority(current_user):
+            flash('Access denied. You do not have permission to update priority.')
+            return redirect(url_for('view_ticket', TicketID=TicketID))
+
+        if oldStatus != newStatus and not can_update_ticket_status(current_user):
+            flash('Access denied. You do not have permission to update status.')
+            return redirect(url_for('view_ticket', TicketID=TicketID))
+
+        if oldAssigned != newAssigned and not can_assign_tickets(current_user):
+            flash('Access denied. You do not have permission to assign tickets.')
+            return redirect(url_for('view_ticket', TicketID=TicketID))
+
+        if newAssigned is not None:
+            assigned_user = db.session.get(User, newAssigned)
+            if not assigned_user or not can_be_assigned_tickets(assigned_user):
+                flash('Selected user cannot be assigned tickets.')
+                return redirect(url_for('view_ticket', TicketID=TicketID))
+
+        currentTicket.PriorityID = newPriority
+        currentTicket.StatusID = newStatus
+        currentTicket.AssignedTo = newAssigned
 
         # Makes it so ticket cannot be set to open if it is assigned
         if updateTicketForm.assignedTo.data != 0 and updateTicketForm.status.data == 1:
@@ -347,7 +477,7 @@ def view_ticket(TicketID):
             oldStatusName = db.session.scalar(sa.select(Status.name).where(Status.StatusID == oldStatus))
             newStatusName = db.session.scalar(sa.select(Status.name).where(Status.StatusID == currentTicket.StatusID))
             newAssigned = currentTicket.assignee.UserID if currentTicket.assignee else None
-            
+
             newActivity = ActivityLog(
                 UserID = current_user.UserID,
                 TicketID = currentTicket.TicketID,
@@ -361,7 +491,7 @@ def view_ticket(TicketID):
                 print(f"email failed to send")
             else:
                 ticketStatusChangeNotification(currentTicket, recipient, oldStatusName, newStatusName)
-        
+
         newAssigned = currentTicket.assignee.UserID if currentTicket.assignee else None
         if oldAssigned != newAssigned:
             newActivity = ActivityLog(
@@ -375,7 +505,7 @@ def view_ticket(TicketID):
             if newAssigned is not None:
                 recipient = currentTicket.assignee.email
                 ticketAssignedNotification(currentTicket, recipient)
-        
+
         if oldPriority != currentTicket.PriorityID:
             recipient = currentTicket.creator.email
             oldPriorityName = db.session.scalar(sa.select(Priority.name).where(Priority.PriorityID == oldPriority))
@@ -399,15 +529,29 @@ def view_ticket(TicketID):
     return render_template('ticketview.html', ticket_id=TicketID, ticket=currentTicket,
                            comments=comments, commentForm=addCommentForm, updateTicketForm=updateTicketForm,
                            ticketAge=ticketAge, show_confetti=request.args.get('confetti') == '1', activities=activities)
+
+
 @app.route('/admin')
 @login_required
-@role_required("Admin")
+@role_or_permission_required(
+    roles=['Admin'],
+    permissions=[
+        'view_roles', 'create_roles',
+        'view_users', 'create_users',
+        'view_clients',
+        'change_settings',
+        'view_profile'
+    ]
+)
 def admin_functionalities():
     return render_template('admin_functionalities.html')
 
 @app.route('/admin/users')
 @login_required
-@role_required("Admin")
+@role_or_permission_required(
+    roles=['Admin'],
+    permissions=['view_users', 'create_users']
+)
 def admin_users():
     users = db.session.scalars(sa.select(User).order_by(User.username.asc())).all()
 
@@ -435,7 +579,10 @@ def admin_users():
 
 @app.route('/admin/clients')
 @login_required
-@role_required("Admin")
+@role_or_permission_required(
+    roles=['Admin'],
+    permissions=['view_clients']
+)
 def admin_clients():
     clients = db.session.scalars(
         sa.select(User).join(Role).where(Role.name == "Employee").order_by(User.username.asc())
@@ -446,16 +593,23 @@ def admin_clients():
 
 @app.route('/admin/roles')
 @login_required
-@role_required("Admin")
+@role_or_permission_required(
+    roles=['Admin'],
+    permissions=['view_roles', 'create_roles']
+)
 def admin_roles():
     roles = db.session.scalars(sa.select(Role).order_by(Role.name.asc())).all()
     form = AdminRoleForm()
+    form.role.choices = []
     return render_template('admin_roles.html', roles=roles, form=form)
 
 
 @app.route('/admin/settings', methods=['GET', 'POST'])
 @login_required
-@role_required("Admin")
+@role_or_permission_required(
+    roles=['Admin'],
+    permissions=['change_settings']
+)
 def admin_settings():
     form = AdminSettingsForm()
     if form.validate_on_submit():
@@ -471,7 +625,10 @@ def admin_settings():
 
 @app.route('/admin/profile', methods=['GET', 'POST'])
 @login_required
-@role_required("Admin")
+@role_or_permission_required(
+    roles=['Admin'],
+    permissions=['view_profile']
+)
 def admin_profile():
     form = AdminProfileForm()
 
@@ -510,7 +667,10 @@ def admin_profile():
 
 @app.route('/admin/change-role/<int:user_id>', methods=['POST'])
 @login_required
-@role_required("Admin")
+@role_or_permission_required(
+    roles=['Admin'],
+    permissions=['create_users']
+)
 def admin_change_role(user_id):
     form = AdminRoleForm()
     form.role.choices = [
@@ -533,9 +693,13 @@ def admin_change_role(user_id):
     db.session.commit()
     flash(f'Role for {user.username} updated to {role.name}.')
     return redirect(url_for('admin_users'))
+
 @app.route('/admin/reset-password/<int:user_id>', methods=['POST'])
 @login_required
-@role_required("Admin")
+@role_or_permission_required(
+    roles=['Admin'],
+    permissions=['create_users']
+)
 def admin_reset_password(user_id):
     form = AdminResetPasswordForm()
 
@@ -555,7 +719,10 @@ def admin_reset_password(user_id):
 
 @app.route('/admin/new-user', methods=['POST'])
 @login_required
-@role_required("Admin")
+@role_or_permission_required(
+    roles=['Admin'],
+    permissions=['create_users']
+)
 def admin_new_user():
     form = AdminNewUserForm()
     form.role.choices = [
@@ -592,7 +759,10 @@ def admin_new_user():
 
 @app.route('/admin/delete-user/<int:user_id>', methods=['POST'])
 @login_required
-@role_required("Admin")
+@role_or_permission_required(
+    roles=['Admin'],
+    permissions=['create_users']
+)
 def admin_delete_user(user_id):
     user = db.session.get(User, user_id)
 
@@ -657,7 +827,10 @@ def admin_new_client():
 
 @app.route('/admin/toggle-all-roles/<int:active>', methods=['POST'])
 @login_required
-@role_required("Admin")
+@role_or_permission_required(
+    roles=['Admin'],
+    permissions=['create_roles']
+)
 def admin_toggle_all_roles(active):
     roles = db.session.scalars(sa.select(Role)).all()
     core_roles = {"Admin", "Agent", "Employee"}
@@ -672,7 +845,10 @@ def admin_toggle_all_roles(active):
 
 @app.route('/admin/toggle-role/<int:role_id>', methods=['POST'])
 @login_required
-@role_required("Admin")
+@role_or_permission_required(
+    roles=['Admin'],
+    permissions=['create_roles']
+)
 def admin_toggle_role(role_id):
     role = db.session.get(Role, role_id)
 
@@ -693,7 +869,10 @@ def admin_toggle_role(role_id):
 
 @app.route('/admin/edit-role/<int:role_id>', methods=['GET', 'POST'])
 @login_required
-@role_required("Admin")
+@role_or_permission_required(
+    roles=['Admin'],
+    permissions=['create_roles']
+)
 def admin_edit_role(role_id):
     role = db.session.get(Role, role_id)
     if not role:
@@ -705,6 +884,7 @@ def admin_edit_role(role_id):
 
     if request.method == 'GET':
         form.role_name.data = role.name
+        form.permissions.data = role.permission_list()
 
     if form.validate_on_submit():
         if role.name in {"Admin", "Agent", "Employee"}:
@@ -721,6 +901,14 @@ def admin_edit_role(role_id):
             return redirect(url_for('admin_edit_role', role_id=role_id))
 
         role.name = form.role_name.data
+        # role.set_permissions(request.form.getlist('permissions'))
+        permissions = request.form.getlist('permissions')
+
+        if 'assign_tickets' in permissions and 'update_ticket_status' not in permissions:
+            permissions.append('update_ticket_status')
+
+        role.set_permissions(permissions)
+        
         db.session.commit()
         flash('Role updated.')
         return redirect(url_for('admin_roles'))
@@ -729,7 +917,10 @@ def admin_edit_role(role_id):
 
 @app.route('/admin/delete-role/<int:role_id>', methods=['POST'])
 @login_required
-@role_required("Admin")
+@role_or_permission_required(
+    roles=['Admin'],
+    permissions=['create_roles']
+)
 def admin_delete_role(role_id):
     role = db.session.get(Role, role_id)
 
@@ -753,11 +944,16 @@ def admin_delete_role(role_id):
 
 @app.route('/admin/create-role', methods=['POST'])
 @login_required
-@role_required("Admin")
+@role_or_permission_required(
+    roles=['Admin'],
+    permissions=['create_roles']
+)
 def admin_create_role_step1():
     form = AdminRoleForm()
+    form.role.choices = []
     if not form.validate_on_submit():
-        flash('Invalid role form.')
+        print(form.errors)
+        flash(f'Invalid role form: {form.errors}')
         return redirect(url_for('admin_roles'))
 
     role_name = form.role_name.data
@@ -777,10 +973,18 @@ def admin_create_role_step1():
 
 @app.route('/admin/create-role/assign', methods=['POST'])
 @login_required
-@role_required("Admin")
+@role_or_permission_required(
+    roles=['Admin'],
+    permissions=['create_roles']
+)
 def admin_create_role_step2():
     role_name = (request.form.get('role_name') or '').strip()
     user_ids = request.form.getlist('user_ids')
+    # permissions = request.form.getlist('permissions')
+    permissions = request.form.getlist('permissions')
+
+    if 'assign_tickets' in permissions and 'update_ticket_status' not in permissions:
+        permissions.append('update_ticket_status')
 
     if not role_name:
         flash('Role name is required.')
@@ -792,6 +996,7 @@ def admin_create_role_step2():
         return redirect(url_for('admin_roles'))
 
     new_role = Role(name=role_name, active=True)
+    new_role.set_permissions(permissions)
     db.session.add(new_role)
     db.session.flush()
 
@@ -803,6 +1008,5 @@ def admin_create_role_step2():
             user.roleId = new_role.RoleID
 
     db.session.commit()
-    flash('Role created. Selected permissions were not saved because no permission table exists yet.')
+    flash('Role created.')
     return redirect(url_for('admin_roles'))
-

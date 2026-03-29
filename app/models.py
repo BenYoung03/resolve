@@ -16,8 +16,25 @@ class Role(db.Model):
     RoleID: so.Mapped[int] = so.mapped_column(primary_key=True)
     name: so.Mapped[str] = so.mapped_column(sa.String, nullable=False)
     active: so.Mapped[bool] = so.mapped_column(sa.Boolean, nullable=False, server_default=sa.true())
-    
+    permissions: so.Mapped[Optional[str]] = so.mapped_column(sa.Text, nullable=True, default="")
+
     users: so.Mapped[list["User"]] = so.relationship(back_populates="role")
+
+    def permission_list(self):
+        if not self.permissions:
+            return []
+        return [p.strip() for p in self.permissions.split(",") if p.strip()]
+
+    def has_permission(self, *permissions):
+        if len(permissions) == 1 and isinstance(permissions[0], (list, tuple, set)):
+            permissions = tuple(permissions[0])
+
+        current_permissions = set(self.permission_list())
+        return any(permission in current_permissions for permission in permissions)
+
+    def set_permissions(self, permissions):
+        cleaned = sorted({p.strip() for p in permissions if p and p.strip()})
+        self.permissions = ",".join(cleaned)
 
     def __repr__(self):
         return f"<Role {self.name}>"
@@ -68,6 +85,23 @@ class User(db.Model, UserMixin):
 
         return self.role.name in roles
 
+    def has_permission(self, *permissions):
+        if not self.role:
+            return False
+        return self.role.has_permission(*permissions)
+
+    def has_any_admin_access(self):
+        return (
+            self.has_role("Admin") or
+            self.has_permission(
+                "view_roles", "create_roles",
+                "view_users", "create_users",
+                "view_clients",
+                "change_settings",
+                "view_profile"
+            )
+        )
+
     def get_id(self):
         return str(self.UserID)
 
@@ -77,6 +111,7 @@ class User(db.Model, UserMixin):
             app.config['SECRET_KEY'], algorithm='HS256'
         )
     
+    @staticmethod
     def verify_reset_password_token(token):
         try:
             id = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])['reset_password']

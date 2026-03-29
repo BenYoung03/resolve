@@ -1,10 +1,12 @@
-{% extends "base.html" %} {% block extra_head %}
+{% extends "base.html" %}
+{% block extra_head %}
 <link
   rel="stylesheet"
   type="text/css"
   href="{{ url_for('static', filename='styles/admin_panel.css') }}"
 />
-{% endblock %} {% block content %}
+{% endblock %}
+{% block content %}
 <div class="panel-wrapper">
   <div class="panel-sidebar">
     <p><strong>Admin</strong></p>
@@ -15,6 +17,7 @@
     <a href="{{ url_for('admin_profile') }}">Profile</a>
     <a href="{{ url_for('logout') }}">Logout</a>
   </div>
+
   <div class="panel-content">
     <div class="section-header">
       <button
@@ -41,6 +44,7 @@
         <button type="submit">Enable All Roles</button>
       </form>
     </div>
+
     <div class="roles-box">
       <h3>Roles</h3>
       <table class="issues-table">
@@ -62,9 +66,7 @@
               </form>
             </td>
             <td>
-              <a href="{{ url_for('admin_edit_role', role_id=role.RoleID) }}"
-                >Edit</a
-              >
+              <a href="{{ url_for('admin_edit_role', role_id=role.RoleID) }}">Edit</a>
             </td>
             <td>
               <form
@@ -88,63 +90,66 @@
   <div class="modal-content">
     <h3>Configure Role</h3>
     <form method="post" action="{{ url_for('admin_create_role_step1') }}">
-      {{ form.hidden_tag() }} {{ form.role_name(placeholder="Role Name") }}
+      {{ form.hidden_tag() }}
+      {{ form.role_name(placeholder="Role Name") }}
       <button type="submit">Next</button>
+
       <h4>Select Permissions</h4>
       <div class="permissions-grid">
         <div class="perm-group">
-          <strong>Issue Management</strong>
-          <label
-            ><input type="checkbox" name="permissions" value="Create Issue" />
-            Create Issue</label
-          >
-          <label
-            ><input type="checkbox" name="permissions" value="Read Issue" />
-            Read Issue</label
-          >
-          <label
-            ><input type="checkbox" name="permissions" value="Write Issue" />
-            Write Issue</label
-          >
-          <label
-            ><input type="checkbox" name="permissions" value="Delete Issue" />
-            Delete Issue</label
-          >
-          <label
-            ><input type="checkbox" name="permissions" value="Assign Issue" />
-            Assign Issue</label
-          >
-          <label
-            ><input type="checkbox" name="permissions" value="Transfer Issue" />
-            Transfer Issue</label
-          >
-          <label
-            ><input type="checkbox" name="permissions" value="Comment Issue" />
-            Comment Issue</label
-          >
+          <strong>Ticket Permissions</strong>
+          <label>
+            <input type="checkbox" name="permissions" value="view_all_tickets" />
+            View all tickets
+          </label>
+          <label>
+            <input type="checkbox" id="assign_tickets_create" name="permissions" value="assign_tickets" />
+            Assign tickets
+          </label>
+          <label>
+            <input type="checkbox" name="permissions" value="ticket_agent" />
+            Ticket agent
+          </label>
+          <label>
+            <input type="checkbox" name="permissions" value="update_ticket_priority" />
+            Update ticket priority
+          </label>
+          <label>
+            <input type="checkbox" id="update_ticket_status_create" name="permissions" value="update_ticket_status" />
+            Update ticket status
+          </label>
         </div>
+
         <div class="perm-group">
-          <strong>Role Management</strong>
-          <label
-            ><input type="checkbox" name="permissions" value="Create Role" />
-            Create Role</label
-          >
-          <label
-            ><input type="checkbox" name="permissions" value="Read Role" /> Read
-            Role</label
-          >
-          <label
-            ><input type="checkbox" name="permissions" value="Update Role" />
-            Update Role</label
-          >
-          <label
-            ><input type="checkbox" name="permissions" value="Delete Role" />
-            Delete Role</label
-          >
-          <label
-            ><input type="checkbox" name="permissions" value="Manage Role" />
-            Manage Role</label
-          >
+          <strong>Admin Permissions</strong>
+          <label>
+            <input type="checkbox" name="permissions" value="view_roles" />
+            View roles
+          </label>
+          <label>
+            <input type="checkbox" name="permissions" value="create_roles" />
+            Create roles
+          </label>
+          <label>
+            <input type="checkbox" name="permissions" value="view_users" />
+            View users
+          </label>
+          <label>
+            <input type="checkbox" name="permissions" value="create_users" />
+            Create users
+          </label>
+          <label>
+            <input type="checkbox" name="permissions" value="view_clients" />
+            View clients
+          </label>
+          <label>
+            <input type="checkbox" name="permissions" value="change_settings" />
+            Change settings
+          </label>
+          <label>
+            <input type="checkbox" name="permissions" value="view_profile" />
+            View profile
+          </label>
         </div>
       </div>
     </form>
@@ -155,4 +160,25 @@
     </button>
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const assignBox = document.getElementById('assign_tickets_create');
+    const statusBox = document.getElementById('update_ticket_status_create');
+
+    if (!assignBox || !statusBox) return;
+
+    function syncStatusPermissionCreate() {
+        if (assignBox.checked) {
+            statusBox.checked = true;
+            statusBox.disabled = true;
+        } else {
+            statusBox.disabled = false;
+        }
+    }
+
+    assignBox.addEventListener('change', syncStatusPermissionCreate);
+    syncStatusPermissionCreate();
+});
+</script>
 {% endblock %}

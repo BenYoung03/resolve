@@ -8,11 +8,21 @@
 <div class="admin-func-wrapper">
   <h2>Admin Panel</h2>
   <div class="admin-buttons">
+    {% if current_user.has_role(['Admin']) or current_user.has_permission('view_users') or current_user.has_permission('create_users') %}
     <a href="{{ url_for('admin_users') }}">Users</a>
+    {% endif %}
+    {% if current_user.has_role(['Admin']) or current_user.has_permission('view_clients') %}
     <a href="{{ url_for('admin_clients') }}">Clients</a>
+    {% endif %}
+    {% if current_user.has_role(['Admin']) or current_user.has_permission('view_roles') or current_user.has_permission('create_roles') %}
     <a href="{{ url_for('admin_roles') }}">Roles</a>
+    {% endif %}
+    {% if current_user.has_role(['Admin']) or current_user.has_permission('change_settings') %}
     <a href="{{ url_for('admin_settings') }}">Settings</a>
+    {% endif %}
+    {% if current_user.has_role(['Admin']) or current_user.has_permission('view_profile') %}
     <a href="{{ url_for('admin_profile') }}">Profile</a>
+    {% endif %}
     <a href="{{ url_for('logout') }}">Logout</a>
   </div>
 </div>

@@ -6,17 +6,27 @@
 <div class="panel-wrapper">
     <div class="panel-sidebar">
         <p><strong>Admin</strong></p>
+        {% if current_user.has_role(['Admin']) or current_user.has_permission('view_users') or current_user.has_permission('create_users') %}
         <a href="{{ url_for('admin_users') }}">Users</a>
+        {% endif %}
+        {% if current_user.has_role(['Admin']) or current_user.has_permission('view_clients') %}
         <a href="{{ url_for('admin_clients') }}">Clients</a>
+        {% endif %}
+        {% if current_user.has_role(['Admin']) or current_user.has_permission('view_roles') or current_user.has_permission('create_roles') %}
         <a href="{{ url_for('admin_roles') }}">Roles</a>
+        {% endif %}
+        {% if current_user.has_role(['Admin']) or current_user.has_permission('change_settings') %}
         <a href="{{ url_for('admin_settings') }}">Settings</a>
+        {% endif %}
+        {% if current_user.has_role(['Admin']) or current_user.has_permission('view_profile') %}
         <a href="{{ url_for('admin_profile') }}">Profile</a>
+        {% endif %}
         <a href="{{ url_for('logout') }}">Logout</a>
     </div>
     <div class="panel-content">
         <div class="section-header">
             <h2>Internal Users</h2>
-            <button onclick="document.getElementById('new-user-modal').style.display='flex'">New User</button>
+            {% if current_user.has_role(['Admin']) or current_user.has_permission('create_users') %}<button onclick="document.getElementById('new-user-modal').style.display='flex'">New User</button>{% endif %}
         </div>
         <table class="issues-table">
             <thead>
@@ -34,8 +44,14 @@
                     <td>
                         <form method="post" action="{{ url_for('admin_change_role', user_id=user.UserID) }}">
                             {{ role_form.hidden_tag() }}
-                            {{ role_form.role() }}
-                            <button type="submit">Role</button>
+                            <select name="role">
+                                {% for value, label in role_form.role.choices %}
+                                    <option value="{{ value }}" {% if value == user.roleId %}selected{% endif %}>
+                                        {{ label }}
+                                    </option>
+                                {% endfor %}
+                            </select>
+                            <button type="submit">Change Role</button>
                         </form>
                     </td>
                     <td>

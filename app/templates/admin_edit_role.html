@@ -6,11 +6,21 @@
 <div class="panel-wrapper">
     <div class="panel-sidebar">
         <p><strong>Admin</strong></p>
+        {% if current_user.has_role(['Admin']) or current_user.has_permission('view_users') or current_user.has_permission('create_users') %}
         <a href="{{ url_for('admin_users') }}">Users</a>
+        {% endif %}
+        {% if current_user.has_role(['Admin']) or current_user.has_permission('view_clients') %}
         <a href="{{ url_for('admin_clients') }}">Clients</a>
+        {% endif %}
+        {% if current_user.has_role(['Admin']) or current_user.has_permission('view_roles') or current_user.has_permission('create_roles') %}
         <a href="{{ url_for('admin_roles') }}">Roles</a>
+        {% endif %}
+        {% if current_user.has_role(['Admin']) or current_user.has_permission('change_settings') %}
         <a href="{{ url_for('admin_settings') }}">Settings</a>
+        {% endif %}
+        {% if current_user.has_role(['Admin']) or current_user.has_permission('view_profile') %}
         <a href="{{ url_for('admin_profile') }}">Profile</a>
+        {% endif %}
         <a href="{{ url_for('logout') }}">Logout</a>
     </div>
 
@@ -20,6 +30,46 @@
             {{ form.hidden_tag() }}
             <label>Role Name:</label>
             {{ form.role_name(placeholder="Role Name") }}
+
+            <h4 style="margin-top: 18px;">Permissions</h4>
+            <div class="permissions-grid">
+                <div class="perm-group">
+                    <strong>Ticket Permissions</strong>
+                    {% for value, label in form.permissions.choices %}
+                        {% if value in ['view_all_tickets', 'assign_tickets', 'ticket_agent', 'update_ticket_priority', 'update_ticket_status'] %}
+                            {% if value == 'assign_tickets' %}
+                            <label>
+                                <input type="checkbox" id="assign_tickets" name="permissions" value="{{ value }}" {% if value in (form.permissions.data or []) %}checked{% endif %}>
+                                {{ label }}
+                            </label>
+                            {% elif value == 'update_ticket_status' %}
+                            <label>
+                                <input type="checkbox" id="update_ticket_status" name="permissions" value="{{ value }}" {% if value in (form.permissions.data or []) %}checked{% endif %}>
+                                {{ label }}
+                            </label>
+                            {% else %}
+                            <label>
+                                <input type="checkbox" name="permissions" value="{{ value }}" {% if value in (form.permissions.data or []) %}checked{% endif %}>
+                                {{ label }}
+                            </label>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                </div>
+
+                <div class="perm-group">
+                    <strong>Admin Permissions</strong>
+                    {% for value, label in form.permissions.choices %}
+                        {% if value in ['view_roles', 'create_roles', 'view_users', 'create_users', 'view_clients', 'change_settings', 'view_profile'] %}
+                        <label>
+                            <input type="checkbox" name="permissions" value="{{ value }}" {% if value in (form.permissions.data or []) %}checked{% endif %}>
+                            {{ label }}
+                        </label>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+            </div>
+
             <div style="margin-top: 12px;">
                 <button type="submit">Save</button>
                 <a href="{{ url_for('admin_roles') }}">Cancel</a>
@@ -27,4 +77,25 @@
         </form>
     </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const assignBox = document.getElementById('assign_tickets');
+    const statusBox = document.getElementById('update_ticket_status');
+
+    if (!assignBox || !statusBox) return;
+
+    function syncStatusPermission() {
+        if (assignBox.checked) {
+            statusBox.checked = true;
+            statusBox.disabled = true;
+        } else {
+            statusBox.disabled = false;
+        }
+    }
+
+    assignBox.addEventListener('change', syncStatusPermission);
+    syncStatusPermission();
+});
+</script>
 {% endblock %}

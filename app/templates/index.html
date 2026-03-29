@@ -6,15 +6,15 @@
 
 {% block content %}
 {% if current_user.is_authenticated %}
-    {% if current_user.has_role(['Employee', 'Agent', 'Admin']) %}
         <div class="ticket-container">
             <div class="left-menu">
                 <ul>
-                    {% if current_user.has_role(['Employee']) %}
+                    {% if current_user.has_role(['Agent', 'Admin']) or
+                        current_user.has_permission('ticket_agent') or
+                        current_user.has_permission('assign_tickets') %}
+                        <li><a href="{{ url_for('assigned_tickets') }}">Assigned To Me</a></li>
+                    {% else %}
                         <li><a href="/index">My Tickets</a></li>
-                    {% endif %}
-                    {% if current_user.has_role(['Agent', 'Admin']) %}
-                        <li><a href="{{ url_for('assigned_tickets', UserID=current_user.UserID)}}">Assigned To Me</a></li>
                     {% endif %}
                     <li><a href="/index/open">Open Tickets</a></li>
                     <li><a href="/index/closed">Closed Tickets</a></li>
@@ -22,17 +22,21 @@
                     <!--TODO: Maybe add fourth button for "Resolved Tickets" for Admins only-->
                 </ul>
             </div>
+
             <div class="right-menu">
                 <div class="ticket-buttons">
                     <button id="create-ticket">Submit a Ticket</button>
                     <div class="open-closed">
                         <a href="/index/open" id="open-tickets">Open Tickets</a>
                         <a href="/index/closed" id="closed-tickets">Closed Tickets</a>
-                        {% if current_user.has_role(['Employee', 'Agent', 'Admin']) %}
-                            <a href="{{ url_for('assigned_tickets', UserID=current_user.UserID)}}" id="assigned-tickets">Assigned To Me</a>
+                        {% if current_user.has_role(['Agent', 'Admin']) or
+                            current_user.has_permission('ticket_agent') or
+                            current_user.has_permission('assign_tickets') %}
+                            <a href="{{ url_for('assigned_tickets') }}" id="assigned-tickets">Assigned To Me</a>
                         {% endif %}
                     </div>
                 </div>
+
                 <!--TODO: Perhaps replace ticket table with some sort of grid-box styling-->
                 <table id="ticketTable">
                     <thead>
@@ -49,7 +53,7 @@
                     <tbody>
                         {% for ticket in tickets %}
                         <tr>
-                            <td><a href="{{ url_for('view_ticket', TicketID=ticket.TicketID)}}">{{ ticket.ticketNumber }}</a></td>
+                            <td><a href="{{ url_for('view_ticket', TicketID=ticket.TicketID) }}">{{ ticket.ticketNumber }}</a></td>
                             <td>{{ ticket.subject }}</td>
                             <td>{{ ticket.status.name }}</td>
                             <td>{{ ticket.priority.name }}</td>
@@ -62,11 +66,9 @@
                 </table>
             </div>
         </div>
-    {% endif %}
 {% else %}
     <p>Please create an account or login to get started!</p>
 {% endif %}
-
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="{{ url_for('static', filename='DataTables/datatables.min.js') }}"></script>
 <script src="{{ url_for('static', filename='js/ticketview.js') }}"></script>

@@ -8,7 +8,13 @@
 <div class="ticket-container">
             <div class="left-menu">
                 <ul>
-                    <li><a href="/index">My Tickets</a></li>
+                    {% if current_user.has_role(['Agent', 'Admin']) or
+                        current_user.has_permission('ticket_agent') or
+                        current_user.has_permission('assign_tickets') %}
+                        <li><a href="{{ url_for('assigned_tickets') }}">Assigned To Me</a></li>
+                    {% else %}
+                        <li><a href="/index">My Tickets</a></li>
+                    {% endif %}
                     <li><a href="/index/open">Open Tickets</a></li>
                     <li><a href="/index/closed">Closed Tickets</a></li>
                     <li><a href="/createticket">New Ticket</a></li>
@@ -70,7 +76,7 @@
                             <div class="description-text">{{ ticket.description }}</div>
                         </div>
                         <!--TODO: Maybe combine Activity and Comment container and make each toggleable-->
-                        {% if current_user.has_role(['Agent', 'Admin']) %}
+                        {% if current_user.has_role(['Agent', 'Admin']) or current_user.has_permission('view_all_tickets') or current_user.has_permission('ticket_agent') or current_user.has_permission('assign_tickets') %}
                         <div class="activity-log-container">
                             <h2>Activity Log</h2>
 
@@ -122,7 +128,7 @@
                                 {% endfor %}
 
                                 <div class="comment-item comment-form-row">
-                                    <div class="comment-avatar {% if current_user.has_role(['Admin', 'Agent']) %}comment-avatar-agent{% endif %}">
+                                    <div class="comment-avatar {% if current_user.has_role(['Admin', 'Agent']) or current_user.has_permission('ticket_agent') or current_user.has_permission('assign_tickets') %}comment-avatar-agent{% endif %}">
                                         {{ current_user.email[0]|upper if current_user.is_authenticated and current_user.email else 'U' }}
                                     </div>
 
@@ -141,7 +147,7 @@
                         </div>
                     </div>
                     <!--TODO: ADD ACTIVITY BOX SHOWING THINGS SUCH AS WHEN ASSIGNMENTS CHANGE OR PRIORITY CHANGES-->
-                    {% if current_user.has_role(['Agent', 'Admin']) %}
+                    {% if current_user.has_role(['Agent', 'Admin']) or current_user.has_permission('assign_tickets') or current_user.has_permission('update_ticket_priority') or current_user.has_permission('update_ticket_status') %}
                     <div class="update-ticket-container">
                         <h2>Update Ticket</h2>
                         
@@ -183,7 +189,7 @@
                             {{ updateTicketForm.submit(class="update-ticket-submit") }}
                         </form>
                     </div>
-                    {% elif current_user.has_role(['Employee']) %}
+                    {% else %}
                     <div class="activity-log-container-small">
                             <h2>Activity Log</h2>
 
@@ -213,7 +219,6 @@
 <script src="https://cdn.jsdelivr.net/npm/js-confetti@latest/dist/js-confetti.browser.js"></script>
 <script>
     const jsConfetti = new JSConfetti();
-
     {% if show_confetti %}
         jsConfetti.addConfetti({
             confettiColors: ['#1d4ed8', '#3b82f6', '#93c5fd', '#bfdbfe', '#dbeafe'],

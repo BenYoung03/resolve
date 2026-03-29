@@ -18,7 +18,11 @@
         <form method="post" action="{{ url_for('admin_create_role_step2') }}">
             {{ form.hidden_tag() }}
             <input type="hidden" name="role_name" value="{{ role_name }}">
-            <input type="hidden" name="permissions" value="{{ permissions }}">
+
+            {% for permission in permissions %}
+                <input type="hidden" name="permissions" value="{{ permission }}">
+            {% endfor %}
+
             <div class="role-step2-header">
                 <a href="{{ url_for('admin_roles') }}">Back</a>
                 <button type="submit">Create Role</button>
@@ -39,8 +43,11 @@
 <script>
 function filterUsers() {
     const filter = document.getElementById('user-search').value.toLowerCase();
-    document.querySelectorAll('#users-grid label').forEach(label => {
-        label.style.display = label.textContent.toLowerCase().includes(filter) ? '' : 'none';
+    const labels = document.querySelectorAll('#users-grid label');
+
+    labels.forEach(label => {
+        const text = label.textContent.toLowerCase();
+        label.style.display = text.includes(filter) ? '' : 'none';
     });
 }
 </script>

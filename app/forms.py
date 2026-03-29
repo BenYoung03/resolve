@@ -1,6 +1,21 @@
 from flask_wtf import FlaskForm
-from wtforms import SelectField, StringField, PasswordField, BooleanField, SubmitField, TextAreaField
+from wtforms import SelectField, SelectMultipleField, StringField, PasswordField, BooleanField, SubmitField, TextAreaField
 from wtforms.validators import DataRequired, Email, Length, EqualTo, InputRequired, ValidationError
+
+PERMISSION_CHOICES = [
+    ('view_all_tickets', 'View all tickets'),
+    ('assign_tickets', 'Assign tickets'),
+    ('ticket_agent', 'Ticket agent'),
+    ('update_ticket_priority', 'Update ticket priority'),
+    ('update_ticket_status', 'Update ticket status'),
+    ('view_roles', 'View roles'),
+    ('create_roles', 'Create roles'),
+    ('view_users', 'View users'),
+    ('create_users', 'Create users'),
+    ('view_clients', 'View clients'),
+    ('change_settings', 'Change settings'),
+    ('view_profile', 'View profile'),
+]
 
 class LoginForm(FlaskForm):
     email = StringField('Email Address', validators=[
@@ -107,13 +122,9 @@ class UpdateTicket(FlaskForm):
     submit = SubmitField("Update Ticket")
 
     def validate_resolutionReasoning(self, field):
-        if self.status.data == 5 and not field.data:
+        if self.status.data in [5, 6] and not field.data:
             raise ValidationError("Resolution reasoning is required when closing or resolving a ticket.")
         
-
-from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, SelectField
-from wtforms.validators import DataRequired, Email
 
 class AdminSettingsForm(FlaskForm):
     old_password = PasswordField('Old Password', validators=[DataRequired()])
@@ -132,9 +143,28 @@ class AdminNewClientForm(FlaskForm):
     password = PasswordField('Password', validators=[DataRequired()])
     submit = SubmitField('Create Client')
 
+# class AdminRoleForm(FlaskForm):
+#     role_name = StringField('Role Name', validators=[DataRequired()])
+#     role = SelectField('Role', coerce=int)
+#     permissions = SelectMultipleField('Permissions', choices=PERMISSION_CHOICES)
+#     submit = SubmitField('Save')
 class AdminRoleForm(FlaskForm):
     role_name = StringField('Role Name')
-    role = SelectField('Role', coerce=int)
+    role = SelectField('Role', coerce=int, choices=[], validate_choice=False)
+    permissions = SelectMultipleField('Permissions', choices=[
+        ('view_all_tickets', 'View all tickets'),
+        ('assign_tickets', 'Assign tickets'),
+        ('ticket_agent', 'Ticket agent'),
+        ('update_ticket_priority', 'Update ticket priority'),
+        ('update_ticket_status', 'Update ticket status'),
+        ('view_roles', 'View roles'),
+        ('create_roles', 'Create roles'),
+        ('view_users', 'View users'),
+        ('create_users', 'Create users'),
+        ('view_clients', 'View clients'),
+        ('change_settings', 'Change settings'),
+        ('view_profile', 'View profile'),
+    ])
     submit = SubmitField('Save')
 
 class AdminResetPasswordForm(FlaskForm):
