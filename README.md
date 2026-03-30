@@ -1,4 +1,9 @@
 <a id="readme-top"></a>
+
+<p align="center">
+  <img src="app/static/img/ResolveLogo.png" alt="Resolve Logo" width="220" />
+</p>
+
 # Resolve - IT Ticketing System
 
 Resolve is a web-based IT ticketing system designed to help organizations manage technical support requests efficiently. Users can create tickets, track progress, communicate with IT staff, and receive email notifications when ticket statuses change.

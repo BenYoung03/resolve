@@ -25,6 +25,11 @@ body {
     justify-content: flex-start;
 }
 
+.left-header img {
+    width: 250px;
+    height: 75px;
+}
+
 .middle-header {
     justify-content: center;
 }
