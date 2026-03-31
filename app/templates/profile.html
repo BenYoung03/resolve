@@ -5,56 +5,73 @@
 {% endblock %}
 
 {% block content %}
-    <div class="edit-profile-container">
-        <h2>Edit Profile</h2>
-        
-        <form action="" method="post" novalidate >
-            {{ profileForm.hidden_tag() }}
+    <div class="profile-container">
+        <div class="edit-profile-container">
+            <h2>Edit Profile</h2>
+            
+            <form action="" method="post" novalidate class="edit-profile-form">
+                {{ profileForm.hidden_tag() }}
 
-            {{ profileForm.username.label }}
-            {{ profileForm.username }}
+                <div class="form-element">
+                    {{ profileForm.username.label }}
+                    {{ profileForm.username }}
+                </div>
+                
+                <div class="form-element">
+                    {{ profileForm.email.label }}
+                    {{ profileForm.email }}
+                </div>
 
-            {{ profileForm.email.label }}
-            {{ profileForm.email }}
+                <div class="form-element notifications-element">
+                    {{ profileForm.notifications.label }}
+                    {{ profileForm.notifications }}
+                </div>
+            
+                {{ profileForm.submit() }}
 
-            {{ profileForm.submit() }}
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                    <ul class="flashed-message-list">
+                        {% for message in messages %}
+                            <li class="flashed-message-element">{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                {% endwith %}
+            </form>
+            <button id="toggleChangePassword">Change Password</button>
+            <form action="" method="post" novalidate class="change-password-form">
+                {{ passwordForm.hidden_tag() }}
 
-            {% with messages = get_flashed_messages() %}
-                {% if messages %}
-                <ul class="flashed-message-list">
-                    {% for message in messages %}
-                        <li class="flashed-message-element">{{ message }}</li>
-                    {% endfor %}
-                </ul>
-                {% endif %}
-            {% endwith %}
-        </form>
-        <button>Change Password</button>
-        <form action="" method="post" novalidate >
-            {{ passwordForm.hidden_tag() }}
+                <div class="form-element">
+                    {{ passwordForm.current_password.label }}
+                    {{ passwordForm.current_password }}
+                </div>
 
-            {{ passwordForm.current_password.label }}
-            {{ passwordForm.current_password }}
+                <div class="form-element">
+                    {{ passwordForm.new_password.label }}
+                    {{ passwordForm.new_password }}
+                </div>
+            
+                <div class="form-element">
+                    {{ passwordForm.confirm_new_password.label }}
+                    {{ passwordForm.confirm_new_password }}
+                </div>
 
-            {{ passwordForm.new_password.label }}
-            {{ passwordForm.new_password }}
+                {{ passwordForm.submit() }}
 
-            {{ passwordForm.confirm_new_password.label }}
-            {{ passwordForm.confirm_new_password }}
+                {% with messages = get_flashed_messages() %}
+                    {% if messages %}
+                    <ul class="flashed-message-list">
+                        {% for message in messages %}
+                            <li class="flashed-message-element">{{ message }}</li>
+                        {% endfor %}
+                    </ul>
+                    {% endif %}
+                {% endwith %}
 
-            {{ passwordForm.submit() }}
-
-            {% with messages = get_flashed_messages() %}
-                {% if messages %}
-                <ul class="flashed-message-list">
-                    {% for message in messages %}
-                        <li class="flashed-message-element">{{ message }}</li>
-                    {% endfor %}
-                </ul>
-                {% endif %}
-            {% endwith %}
-
-        </form>
-
+            </form>
+        </div>
     </div>
+<script src="{{ url_for('static', filename='js/profile.js') }}"></script>
 {% endblock %}

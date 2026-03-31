@@ -235,7 +235,12 @@ def register():
             return redirect(url_for('register'))
 
         # Commit new user to database if no user already exists
-        new_user = User(username=username, email=email, password_hash=generate_password_hash(password), roleId=1)
+        new_user = User(
+            username=username, 
+            email=email, 
+            password_hash=generate_password_hash(password), roleId=1,
+            notifications=True
+        )
         db.session.add(new_user)
         db.session.commit()
         return redirect(url_for('login'))
@@ -327,11 +332,14 @@ def create_ticket():
         db.session.add(newActivity)
 
         db.session.commit()
-        ticketCreated(newTicket, current_user.email)
+
+        if current_user.notifications:
+            ticketCreated(newTicket, current_user.email)
 
         agents = (db.session.scalars(sa.select(User).where(User.roleId.in_([2, 3]))).all())
         agentsEmails = [agent.email for agent in agents]
-        notifyAgentsOfNewTicket(newTicket, agentsEmails)
+        # Notify agents who have notifications enabled
+        notifyAgentsOfNewTicket(newTicket, [email for agent, email in zip(agents, agentsEmails) if agent.notifications])
 
         flash(f'Ticket {newTicket.ticketNumber} created successfully.')
         return redirect(url_for('index'))
@@ -405,14 +413,16 @@ def view_ticket(TicketID):
             UserID=current_user.UserID,
             CreatedAt=datetime.now()
         )
-        commentAddedNotification(
-            currentTicket,
-            currentTicket.creator.email,
-            current_user.email,
-            addCommentForm.comment.data,
-            newComment.CreatedAt,
-            current_user.role.name if current_user.role else None,
-        )
+
+        if currentTicket.creator.notifications:
+            commentAddedNotification(
+                currentTicket,
+                currentTicket.creator.email,
+                current_user.email,
+                addCommentForm.comment.data,
+                newComment.CreatedAt,
+                current_user.role.name if current_user.role else None,
+            )
 
         db.session.add(newComment)
         db.session.commit()
@@ -490,7 +500,7 @@ def view_ticket(TicketID):
 
             if app.config['MAIL_SUPPRESS_SEND']:
                 print(f"email failed to send")
-            else:
+            elif currentTicket.creator.notifications:
                 ticketStatusChangeNotification(currentTicket, recipient, oldStatusName, newStatusName)
 
         newAssigned = currentTicket.assignee.UserID if currentTicket.assignee else None
@@ -505,7 +515,8 @@ def view_ticket(TicketID):
             db.session.commit()
             if newAssigned is not None:
                 recipient = currentTicket.assignee.email
-                ticketAssignedNotification(currentTicket, recipient)
+                if currentTicket.assignee.notifications:
+                    ticketAssignedNotification(currentTicket, recipient)
 
         if oldPriority != currentTicket.PriorityID:
             recipient = currentTicket.creator.email
@@ -547,6 +558,7 @@ def view_profile(user_id):
     if request.method == 'GET':
         profileForm.username.data = user.username
         profileForm.email.data = user.email
+        profileForm.notifications.data = user.notifications
 
     if profileForm.validate_on_submit():
         duplicate_username = db.session.scalar(
@@ -570,6 +582,7 @@ def view_profile(user_id):
 
         user.username = profileForm.username.data
         user.email = profileForm.email.data
+        user.notifications = profileForm.notifications.data
         db.session.commit()
         
         flash('Profile updated.')

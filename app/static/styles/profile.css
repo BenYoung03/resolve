@@ -1,0 +1,82 @@
+.form-element.notifications-element {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+}
+
+.form-element.notifications-element label {
+    margin-bottom: 0;
+    margin-right: 8px;
+    font-weight: 600;
+    color: #333;
+    font-size: 15px;
+}
+.profile-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.edit-profile-container {
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    padding: 15px;
+    margin-bottom: 20px;
+    background-color: #f9f9f9;
+    margin-top: 20px;
+    width: 40%;
+    margin: 0 auto;
+}
+
+.edit-profile-form,
+.change-password-form {
+    display: flex;
+    flex-direction: column;
+    padding-top: 6px;
+    padding-left: 15px;
+    padding-right: 15px;
+}
+
+.edit-profile-form label,
+.change-password-form label {
+    margin-bottom: 5px;
+    font-weight: 600;
+    color: #333;
+    font-size: 15px;
+}
+
+.change-password-form {
+    display: none;
+}
+
+.edit-profile-container h2{
+    margin: 0;
+    border-bottom: 1px solid #ddd;
+    padding-left: 15px;
+    padding-bottom: 14px;
+}
+
+.form-element{
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 15px;
+}
+
+.form-element input[type="text"],
+.form-element input[type="password"]{
+    flex: 1;
+    min-height: 42px;
+    padding: 10px 14px;
+    border: 1px solid #d3d3d3;
+    border-radius: 6px;
+    font-size: 15px;
+    box-sizing: border-box;
+}
+
+.form-element input[type="text"]:focus {
+    outline: none;
+    border-color: #2f7de1;
+}
+

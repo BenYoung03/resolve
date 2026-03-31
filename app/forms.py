@@ -200,6 +200,7 @@ class EditProfileForm(FlaskForm):
         DataRequired(),
         Email(message='Please enter a valid email address.')
     ])
+    notifications = BooleanField('Email Notifications?')
     submit = SubmitField('Save Changes')
 
 class ChangePasswordForm(FlaskForm):
