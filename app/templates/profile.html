@@ -5,9 +5,31 @@
 {% endblock %}
 
 {% block content %}
-    <div class="profile-container">
-        <h1>{{ user.username }}'s Profile</h1>
-        <p><strong>Email:</strong> {{ user.email }}</p>
-        <p><strong>Role:</strong> {{ user.role.name if user.role else 'No Role' }}</p>
+    <div class="edit-profile-container">
+        <h2>Edit Profile</h2>
+        
+        <form action="" method="post" novalidate >
+            {{ profileForm.hidden_tag() }}
+
+            {{ profileForm.username.label }}
+            {{ profileForm.username }}
+
+            {{ profileForm.email.label }}
+            {{ profileForm.email }}
+
+            {{ profileForm.submit() }}
+
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                <ul class="flashed-message-list">
+                    {% for message in messages %}
+                        <li class="flashed-message-element">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            {% endwith %}
+
+        </form>
+
     </div>
 {% endblock %}

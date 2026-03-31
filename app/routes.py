@@ -5,7 +5,7 @@ import sqlalchemy as sa
 from app.forms import (
     CommentForm, LoginForm, RegistrationForm, CreateTicketForm, UpdateTicket,
     AdminSettingsForm, AdminProfileForm, AdminNewClientForm, AdminRoleForm,
-    AdminResetPasswordForm, AdminNewUserForm, PasswordResetForm, ResetPasswordForm
+    AdminResetPasswordForm, AdminNewUserForm, PasswordResetForm, ResetPasswordForm, EditProfileForm, ChangePasswordForm
 )
 from app.models import TicketComment, User, Role, Category, Status, Priority, Ticket, ActivityLog
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -531,16 +531,51 @@ def view_ticket(TicketID):
                            comments=comments, commentForm=addCommentForm, updateTicketForm=updateTicketForm,
                            ticketAge=ticketAge, show_confetti=request.args.get('confetti') == '1', activities=activities)
 
-@app.route('/profile/<int:user_id>')
+@app.route('/profile/<int:user_id>', methods=['GET', 'POST'])
 @login_required
 def view_profile(user_id):
+    passwordForm = ChangePasswordForm()
+    profileForm = EditProfileForm()
+
     user = db.session.scalars(sa.select(User).where(User.UserID == user_id)).first()
     if user and user.UserID != current_user.UserID and not current_user.has_permission('view_profile'):
         flash('Access denied. You do not have permission to view this profile.')
         return redirect(url_for('index'))
     if not user:
         flash('User not found.')
-    return render_template('profile.html', user=user)
+    
+    if request.method == 'GET':
+        profileForm.username.data = user.username
+        profileForm.email.data = user.email
+
+    if profileForm.validate_on_submit():
+        duplicate_username = db.session.scalar(
+            sa.select(User).where(
+                sa.and_(User.username == profileForm.username.data, User.UserID != user.UserID)
+            )
+        )
+        duplicate_email = db.session.scalar(
+            sa.select(User).where(
+                sa.and_(User.email == profileForm.email.data, User.UserID != user.UserID)
+            )
+        )
+
+        if duplicate_username:
+            flash('Username already exists.')
+            return redirect(url_for('view_profile', user_id=user_id))
+
+        if duplicate_email:
+            flash('Email already exists.')
+            return redirect(url_for('view_profile', user_id=user_id))
+
+        user.username = profileForm.username.data
+        user.email = profileForm.email.data
+        db.session.commit()
+        
+        flash('Profile updated.')
+        return redirect(url_for('view_profile', user_id=user_id))
+
+    return render_template('profile.html', user=user, passwordForm=passwordForm, profileForm=profileForm, can_view_profile=current_user.has_permission('view_profile'), can_change_settings=current_user.has_permission('change_settings'))
 
 
 @app.route('/admin')
