@@ -28,6 +28,31 @@
                 </ul>
                 {% endif %}
             {% endwith %}
+        </form>
+        <button>Change Password</button>
+        <form action="" method="post" novalidate >
+            {{ passwordForm.hidden_tag() }}
+
+            {{ passwordForm.current_password.label }}
+            {{ passwordForm.current_password }}
+
+            {{ passwordForm.new_password.label }}
+            {{ passwordForm.new_password }}
+
+            {{ passwordForm.confirm_new_password.label }}
+            {{ passwordForm.confirm_new_password }}
+
+            {{ passwordForm.submit() }}
+
+            {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                <ul class="flashed-message-list">
+                    {% for message in messages %}
+                        <li class="flashed-message-element">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            {% endwith %}
 
         </form>
 

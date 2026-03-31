@@ -575,6 +575,16 @@ def view_profile(user_id):
         flash('Profile updated.')
         return redirect(url_for('view_profile', user_id=user_id))
 
+    if passwordForm.validate_on_submit():
+        if not check_password_hash(user.password_hash, passwordForm.current_password.data):
+            flash('Current password is incorrect.')
+            return redirect(url_for('view_profile', user_id=user_id))
+        if passwordForm.new_password.data != passwordForm.confirm_new_password.data:
+            flash('New passwords do not match.')
+        user.password_hash = generate_password_hash(passwordForm.new_password.data)
+        db.session.commit()
+        flash('Password updated.')
+
     return render_template('profile.html', user=user, passwordForm=passwordForm, profileForm=profileForm, can_view_profile=current_user.has_permission('view_profile'), can_change_settings=current_user.has_permission('change_settings'))
 
 
