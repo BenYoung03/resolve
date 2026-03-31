@@ -27,7 +27,7 @@
                     {{ profileForm.notifications }}
                 </div>
             
-                {{ profileForm.submit() }}
+                {{ profileForm.submit(class="edit-profile-submit") }}
 
                 {% with messages = get_flashed_messages() %}
                     {% if messages %}
@@ -39,12 +39,14 @@
                     {% endif %}
                 {% endwith %}
             </form>
-            <button id="toggleChangePassword">Change Password</button>
+            <button id="toggleChangePassword" class="change-password-toggle">Change Password</button>
+            <h2 class="change-password-header">Security</h2>
             <form action="" method="post" novalidate class="change-password-form">
+                
                 {{ passwordForm.hidden_tag() }}
 
                 <div class="form-element">
-                    {{ passwordForm.current_password.label }}
+                    {{ passwordForm.current_password.label(class="current-password") }}
                     {{ passwordForm.current_password }}
                 </div>
 
@@ -58,7 +60,7 @@
                     {{ passwordForm.confirm_new_password }}
                 </div>
 
-                {{ passwordForm.submit() }}
+                {{ passwordForm.submit(class="change-password-submit") }}
 
                 {% with messages = get_flashed_messages() %}
                     {% if messages %}

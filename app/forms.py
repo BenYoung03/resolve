@@ -204,7 +204,7 @@ class EditProfileForm(FlaskForm):
     submit = SubmitField('Save Changes')
 
 class ChangePasswordForm(FlaskForm):
-    current_password = PasswordField('Old Password', validators=[DataRequired()])
+    current_password = PasswordField('Current Password', validators=[DataRequired()])
     new_password = PasswordField('New Password', validators=[
         DataRequired(),
         Length(min=6, message='Password must be at least 6 characters long.')
