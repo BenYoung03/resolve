@@ -213,4 +213,4 @@ class ChangePasswordForm(FlaskForm):
         DataRequired(),
         EqualTo('new_password', message='Passwords must match.')
     ])
-    submit = SubmitField('Change Password')
+    submit = SubmitField('Save Changes')
