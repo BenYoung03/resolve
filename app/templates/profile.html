@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block extra_head %}
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/profile.css') }}">
+{% endblock %}
+
+{% block content %}
+    <div class="profile-container">
+        <h1>{{ user.username }}'s Profile</h1>
+        <p><strong>Email:</strong> {{ user.email }}</p>
+        <p><strong>Role:</strong> {{ user.role.name if user.role else 'No Role' }}</p>
+    </div>
+{% endblock %}

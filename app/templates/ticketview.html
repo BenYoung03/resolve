@@ -79,7 +79,8 @@
                             <h2>Description</h2>
                             <div class="description-text">{{ ticket.description }}</div>
                         </div>
-                        <!--TODO: Maybe combine Activity and Comment container and make each toggleable-->
+                        <!--TODO: Maybe combine Activity and Comment container and make each toggleable
+                        Also maybe include time since activity as a field (i.e. activity occured 20 seconds ago)-->
                         {% if current_user.has_role(['Agent', 'Admin']) or current_user.has_permission('view_all_tickets') or current_user.has_permission('ticket_agent') or current_user.has_permission('assign_tickets') %}
                         <div class="activity-log-container">
                             <h2>Activity Log</h2>
@@ -150,7 +151,6 @@
                             </div>
                         </div>
                     </div>
-                    <!--TODO: ADD ACTIVITY BOX SHOWING THINGS SUCH AS WHEN ASSIGNMENTS CHANGE OR PRIORITY CHANGES-->
                     {% if current_user.has_role(['Agent', 'Admin']) or current_user.has_permission('assign_tickets') or current_user.has_permission('update_ticket_priority') or current_user.has_permission('update_ticket_status') %}
                     <div class="update-ticket-container">
                         <h2>Update Ticket</h2>

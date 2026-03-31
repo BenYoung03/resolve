@@ -531,6 +531,17 @@ def view_ticket(TicketID):
                            comments=comments, commentForm=addCommentForm, updateTicketForm=updateTicketForm,
                            ticketAge=ticketAge, show_confetti=request.args.get('confetti') == '1', activities=activities)
 
+@app.route('/profile/<int:user_id>')
+@login_required
+def view_profile(user_id):
+    user = db.session.scalars(sa.select(User).where(User.UserID == user_id)).first()
+    if user and user.UserID != current_user.UserID and not current_user.has_permission('view_profile'):
+        flash('Access denied. You do not have permission to view this profile.')
+        return redirect(url_for('index'))
+    if not user:
+        flash('User not found.')
+    return render_template('profile.html', user=user)
+
 
 @app.route('/admin')
 @login_required
