@@ -31,8 +31,7 @@
 }
 
 .edit-profile-container,
-.ticket-overview,
-.activity-log-container {
+.ticket-overview {
     border: 1px solid #ddd;
     border-radius: 5px;
     padding: 15px;
@@ -40,6 +39,8 @@
     background-color: #f9f9f9;
     margin-top: 20px;
     margin: 0;
+    padding-left: 0;
+    padding-right: 0;
 }
 
 .edit-profile-container {
@@ -219,6 +220,7 @@ input:checked + .slider:before {
 .overview-icon{
     width: 20px;
     height: 20px;
+    padding-left: 15px;
 }
 
 .ticket-link {
