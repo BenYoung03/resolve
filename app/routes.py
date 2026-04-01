@@ -539,8 +539,8 @@ def view_ticket(TicketID):
         return redirect(url_for('view_ticket', TicketID=TicketID))
 
     return render_template('ticketview.html', ticket_id=TicketID, ticket=currentTicket,
-                           comments=comments, commentForm=addCommentForm, updateTicketForm=updateTicketForm,
-                           ticketAge=ticketAge, show_confetti=request.args.get('confetti') == '1', activities=activities)
+                            comments=comments, commentForm=addCommentForm, updateTicketForm=updateTicketForm,
+                            ticketAge=ticketAge, show_confetti=request.args.get('confetti') == '1', activities=activities)
 
 @app.route('/profile/<int:user_id>', methods=['GET', 'POST'])
 @login_required
@@ -645,10 +645,17 @@ def view_profile(user_id):
         )
     )
 
+    activities = db.session.scalars(
+        sa.select(ActivityLog).where(
+            ActivityLog.UserID == user.UserID)
+            .order_by(ActivityLog.CreatedAt.desc())
+            .limit(5)
+        ).all()
+
 
     return render_template('profile.html', user=user, passwordForm=passwordForm, profileForm=profileForm, can_view_profile=current_user.has_permission('view_profile'), can_change_settings=current_user.has_permission('change_settings')
-                           , assigned_to_me_count=assigned_to_me_count, unassigned_count = unassigned_count, resolved_count=resolved_count,
-                           tickets_created_count=tickets_created_count, open_tickets_count=open_tickets_count, resolved_count_employee=resolved_count_employee)
+                            , assigned_to_me_count=assigned_to_me_count, unassigned_count = unassigned_count, resolved_count=resolved_count,
+                            tickets_created_count=tickets_created_count, open_tickets_count=open_tickets_count, resolved_count_employee=resolved_count_employee, activities=activities)
 
 
 @app.route('/admin')

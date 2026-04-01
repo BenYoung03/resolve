@@ -2,51 +2,72 @@
 
 {% block extra_head %}
     <link rel="stylesheet" href="{{ url_for('static', filename='styles/profile.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/ticketIndividual.css') }}">
 {% endblock %}
 
 {% block content %}
     <div class="profile-container">
-        <div class="ticket-overview">
-            <h2>Ticket Overview</h2>
-            <!--FOR SUPPORT STAFF-->
-            {% if current_user.has_role(['Agent', 'Admin']) or
-                        current_user.has_permission('ticket_agent') or
-                        current_user.has_permission('assign_tickets') %}
-            <div class="overview-element">
-                <img class="overview-icon" src="{{url_for('static', filename='img/user.png')}}"/>
-                <div class="overview-title">Assigned to Me:</div>
-                <div class="overview-info">{{ assigned_to_me_count }}</div>
-            </div>
-            <div class="overview-element">
-                <img class="overview-icon" src="{{url_for('static', filename='img/warning.png')}}"/>
-                <div class="overview-title">Unassigned Tickets:</div>
-                <div class="overview-info">{{ unassigned_count }}</div>
-            </div>
-            <div class="overview-element">
-                <img class="overview-icon" src="{{url_for('static', filename='img/checked.png')}}"/>
-                <div class="overview-title">Resolved Tickets:</div>
-                <div class="overview-info">{{ resolved_count }}</div>
-            </div>
+        <div class="left-section">
+            <div class="ticket-overview">
+                <h2>Ticket Overview</h2>
+                <!--FOR SUPPORT STAFF-->
+                {% if current_user.has_role(['Agent', 'Admin']) or
+                            current_user.has_permission('ticket_agent') or
+                            current_user.has_permission('assign_tickets') %}
+                <div class="overview-element">
+                    <img class="overview-icon" src="{{url_for('static', filename='img/user.png')}}"/>
+                    <div class="overview-title">Assigned to Me:</div>
+                    <div class="overview-info">{{ assigned_to_me_count }}</div>
+                </div>
+                <div class="overview-element">
+                    <img class="overview-icon" src="{{url_for('static', filename='img/warning.png')}}"/>
+                    <div class="overview-title">Unassigned Tickets:</div>
+                    <div class="overview-info">{{ unassigned_count }}</div>
+                </div>
+                <div class="overview-element">
+                    <img class="overview-icon" src="{{url_for('static', filename='img/checked.png')}}"/>
+                    <div class="overview-title">Resolved Tickets:</div>
+                    <div class="overview-info">{{ resolved_count }}</div>
+                </div>
 
-            <!--FOR USERS-->
-            {% else %}
-            <div class="overview-element">
-                <img class="overview-icon" src="{{url_for('static', filename='img/user.png')}}"/>
-                <div class="overview-title">Tickets Created:</div>
-                <div class="overview-info">{{ tickets_created_count }}</div>
-            </div>
-            <div class="overview-element">
-                <img class="overview-icon" src="{{url_for('static', filename='img/messages.png')}}"/>
-                <div class="overview-title">Open Tickets:</div>
-                <div class="overview-info">{{ open_tickets_count }}</div>
-            </div>
-            <div class="overview-element">
-                <img class="overview-icon" src="{{url_for('static', filename='img/checked.png')}}"/>
-                <div class="overview-title">Resolved Tickets:</div>
-                <div class="overview-info">{{ resolved_count_employee }}</div>
-            </div>
-            {% endif %}
+                <!--FOR USERS-->
+                {% else %}
+                <div class="overview-element">
+                    <img class="overview-icon" src="{{url_for('static', filename='img/user.png')}}"/>
+                    <div class="overview-title">Tickets Created:</div>
+                    <div class="overview-info">{{ tickets_created_count }}</div>
+                </div>
+                <div class="overview-element">
+                    <img class="overview-icon" src="{{url_for('static', filename='img/messages.png')}}"/>
+                    <div class="overview-title">Open Tickets:</div>
+                    <div class="overview-info">{{ open_tickets_count }}</div>
+                </div>
+                <div class="overview-element">
+                    <img class="overview-icon" src="{{url_for('static', filename='img/checked.png')}}"/>
+                    <div class="overview-title">Resolved Tickets:</div>
+                    <div class="overview-info">{{ resolved_count_employee }}</div>
+                </div>
+                {% endif %}
 
+            </div>
+            <div class="activity-log-container">
+                <h2>Activity Log</h2>
+
+                <div class="activity-list">
+                {% for activity in activities %}
+                    <div class="activity-item">
+                        <div class="activity-content">
+                            <div class="activity-author"><a href="{{ url_for('view_ticket', TicketID=activity.ticket.TicketID)}}" class="ticket-link">{{ activity.ticket.ticketNumber }}</a></div>
+                            <div class="activity-separator">|</div>
+                            <div class="activity-meta activity-date">
+                                {{ activity.CreatedAt.strftime('%b %d, %Y, %I:%M %p') if activity.CreatedAt else 'Unknown' }}
+                            </div>
+                            <div class="activity-text">{{ activity.action }}</div>
+                        </div>
+                    </div>
+                {% endfor %}
+                </div>
+            </div>
         </div>
         <div class="edit-profile-container">
             <h2>Edit Profile</h2>
@@ -121,5 +142,6 @@
             </form>
         </div>
     </div>
+</div>
 <script src="{{ url_for('static', filename='js/profile.js') }}"></script>
 {% endblock %}

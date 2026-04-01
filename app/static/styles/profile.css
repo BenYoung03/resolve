@@ -23,16 +23,27 @@
     margin: 0 auto;
 }
 
+.left-section {
+    display: flex;
+    flex-direction: column;
+    width: 40%;
+    gap: 15px;
+}
+
 .edit-profile-container,
-.ticket-overview {
+.ticket-overview,
+.activity-log-container {
     border: 1px solid #ddd;
     border-radius: 5px;
     padding: 15px;
     margin-bottom: 20px;
     background-color: #f9f9f9;
     margin-top: 20px;
-    width: 40%;
     margin: 0;
+}
+
+.edit-profile-container {
+    width: 40%;
 }
 
 .edit-profile-form,
@@ -57,7 +68,8 @@
 }
 
 .edit-profile-container h2,
-.ticket-overview h2 {
+.ticket-overview h2,
+.activity-log-container h2 {
     margin: 0;
     border-bottom: 1px solid #ddd;
     padding-left: 15px;
@@ -207,4 +219,20 @@ input:checked + .slider:before {
 .overview-icon{
     width: 20px;
     height: 20px;
+}
+
+.ticket-link {
+    font-weight: 400;
+    color: #2f7de1;
+    text-decoration: none;
+}
+
+.ticket-link:hover {
+    font-weight: 600;
+    color: #2563eb;
+}
+
+.activity-text {
+    flex-basis: 100%;
+    display: block;
 }
