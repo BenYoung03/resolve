@@ -13,13 +13,18 @@
 }
 .profile-container {
     display: flex;
-    flex-direction: column;
-    align-items: center;
+    flex-direction: row;
+    align-items: flex-start;
     justify-content: center;
+    flex-wrap: wrap;
+    gap: 24px;
     padding: 20px;
+    max-width: 1400px;
+    margin: 0 auto;
 }
 
-.edit-profile-container {
+.edit-profile-container,
+.ticket-overview {
     border: 1px solid #ddd;
     border-radius: 5px;
     padding: 15px;
@@ -27,7 +32,7 @@
     background-color: #f9f9f9;
     margin-top: 20px;
     width: 40%;
-    margin: 0 auto;
+    margin: 0;
 }
 
 .edit-profile-form,
@@ -51,7 +56,8 @@
     display: none;
 }
 
-.edit-profile-container h2{
+.edit-profile-container h2,
+.ticket-overview h2 {
     margin: 0;
     border-bottom: 1px solid #ddd;
     padding-left: 15px;
