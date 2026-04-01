@@ -24,7 +24,11 @@
 
                 <div class="form-element notifications-element">
                     {{ profileForm.notifications.label }}
-                    {{ profileForm.notifications }}
+                    <label class="switch">
+                        {{ profileForm.notifications }}
+                        <span class="slider round"></span>
+                    </label>
+                    
                 </div>
             
                 {{ profileForm.submit(class="edit-profile-submit") }}
