@@ -8,7 +8,7 @@
 body {
   font-family: Arial, sans-serif;
   color: #333;
-  background: #f6f4e5; ;
+  background: #f0f0f0; 
 }
 
 
@@ -41,7 +41,7 @@ body {
   display: block;
   padding: 10px;
   text-decoration: none;
-  background: #4f46e5;
+  background: #3f84e5;
   color: #fff;
   border-radius: 4px;
   font-weight: normal;
@@ -49,16 +49,16 @@ body {
 }
 
 .admin-buttons a:hover {
-  background: #4338ca;
+  background: #261bc4;
 }
 
 
 .admin-buttons a[href*="logout"] {
-  background: #dc2626;
+  background: #b20d30;
 }
 
 .admin-buttons a[href*="logout"]:hover {
-  background: #b91c1c;
+  background: #941401;
 }
 
 

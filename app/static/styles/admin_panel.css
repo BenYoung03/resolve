@@ -1,12 +1,12 @@
 :root {
-    --bg-main: #f6f4e5;       /* yellow background */
-    --panel-bg: #ffffff;
-    --accent: #4f46e5;        /* purple */
-    --accent-dark: #4338ca;
-    --accent-soft: #e6d9f2;
-    --text-dark: #243333;
-    --border-soft: #ddd5f2;
-    --button-red: #dc2626;
+    --bg-main: #f0f0f0;
+    --panel-bg: #f0f0f0;      
+    --accent: #3f84e5;
+    --accent-dark: #2e1a6c;
+    --accent-soft: #f0f0f0;
+    --text-dark: #000000;
+    --border-soft: #c8c1c1;
+    --button-red: #b20d30;;
 }
 
 
