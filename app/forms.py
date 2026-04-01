@@ -1,5 +1,6 @@
 from flask_wtf import FlaskForm
 from wtforms import SelectField, StringField, PasswordField, BooleanField, SubmitField, TextAreaField
+
 from wtforms.validators import DataRequired, Email, Length, EqualTo, InputRequired, ValidationError
 
 class LoginForm(FlaskForm):
@@ -125,7 +126,6 @@ class AdminNewRoleForm(FlaskForm):
 
 
 
-
 class AdminSettingsForm(FlaskForm):
     site_name = StringField('Site Name', validators=[DataRequired()])
     old_password = PasswordField('Old Password', validators=[DataRequired()])
@@ -140,6 +140,9 @@ class AdminSettingsForm(FlaskForm):
 
 
 class AdminProfileForm(FlaskForm):
-    username = StringField("Username", validators=[DataRequired()])
-    email = StringField("Email")
-    submit = SubmitField("Save")
+    username = StringField('Username', validators=[DataRequired()])
+    email = StringField('Email', validators=[DataRequired()])
+    submit = SubmitField('Update')
+
+
+

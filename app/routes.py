@@ -7,6 +7,8 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import login_user, logout_user, login_required, current_user
 from datetime import datetime
 from functools import wraps
+from app.forms import AdminNewClientForm, AdminNewRoleForm, AdminChangeRoleForm, AdminResetPasswordForm, AdminSettingsForm, AdminProfileForm  
+
 
 from flask_mail import Message
 from app import mail
@@ -435,3 +437,26 @@ def admin_settings():
         flash('Settings saved successfully!', 'success')
         return redirect(url_for('admin_settings'))
     return render_template('admin_settings.html', title='Admin Settings', form=form)
+
+
+@app.route('/admin/profile', methods=['GET', 'POST'])
+def admin_profile():
+    form = AdminProfileForm()
+    if form.validate_on_submit():
+        # Example: update current admin profile
+        current_user.name = form.name.data
+        current_user.email = form.email.data
+        db.session.commit()
+        flash("Profile updated successfully!", "success")
+        return redirect(url_for('admin_profile'))
+
+    return render_template('admin_profile.html', title='Admin Profile', form=form)
+
+@app.route('/admin/roles/create', methods=['GET', 'POST'])
+@login_required
+def admin_create_role_step1():
+    form = CreateRoleForm()
+    if form.validate_on_submit():
+        # handle creating the role
+        pass
+    return render_template('admin_create_role.html', form=form)

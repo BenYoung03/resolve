@@ -1,8 +1,4 @@
-/* =========================
-   Admin Panel - Minimal Buttons
-   ========================= */
 
-/* Base */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -15,7 +11,7 @@ body {
   background: #f5f7fa;
 }
 
-/* Wrapper */
+
 .admin-func-wrapper {
   max-width: 800px;
   margin: 40px auto;
@@ -26,21 +22,21 @@ body {
   text-align: center;
 }
 
-/* Title */
+
 .admin-func-wrapper h2 {
   font-size: 1.6rem;
   margin-bottom: 20px;
   font-weight: bold;
 }
 
-/* Button Grid */
+
 .admin-buttons {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 10px;
 }
 
-/* Buttons */
+
 .admin-buttons a {
   display: block;
   padding: 10px;
@@ -56,7 +52,7 @@ body {
   background: #4338ca;
 }
 
-/* Logout button */
+
 .admin-buttons a[href*="logout"] {
   background: #dc2626;
 }
@@ -65,7 +61,7 @@ body {
   background: #b91c1c;
 }
 
-/* Mobile */
+
 @media (max-width: 600px) {
   .admin-func-wrapper {
     margin: 20px 10px;
