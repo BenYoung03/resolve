@@ -20,6 +20,8 @@ $env:TEST_ADMIN_USERNAME = $AdminUsername
 $env:TEST_ADMIN_EMAIL = $AdminEmail
 $env:TEST_ADMIN_PASSWORD = $AdminPassword
 
+$env:TEST_ADMIN_NOTIFICATIONS = "0"
+
 $seedScript = @'
 import os
 
@@ -68,10 +70,12 @@ with app.app_context():
 
     role_by_name = {role.name: role for role in role_rows}
 
+
     admin = User(
         username=os.getenv("TEST_ADMIN_USERNAME", "testadmin"),
         email=os.getenv("TEST_ADMIN_EMAIL", "testadmin@example.com"),
         roleId=role_by_name["Admin"].RoleID,
+        notifications=bool(int(os.getenv("TEST_ADMIN_NOTIFICATIONS", "0")))
     )
     admin.set_password(os.getenv("TEST_ADMIN_PASSWORD", "Admin123!"))
 

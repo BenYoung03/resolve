@@ -19,6 +19,16 @@
                     <li><a href="/index/open">Open Tickets</a></li>
                     <li><a href="/index/closed">Closed Tickets</a></li>
                     <li><a href="/createticket">New Ticket</a></li>
+                    <!--TODO: Improve styling for this flashed message-->
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                        <ul class="flashed-message-list">
+                            {% for message in messages %}
+                                <li class="flashed-message-element">{{ message }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    {% endwith %}
                     <!--TODO: Maybe add fourth button for "Resolved Tickets" for Admins only-->
                 </ul>
             </div>

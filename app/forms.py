@@ -190,3 +190,27 @@ class AdminNewUserForm(FlaskForm):
     ])
     role = SelectField('Role', coerce=int, validators=[DataRequired()])
     submit = SubmitField('Create User')
+
+class EditProfileForm(FlaskForm):
+    username = StringField('Username', validators=[
+        DataRequired(),
+        Length(min=3, max=15, message='Username must be between 3 and 15 characters.')
+    ])
+    email = StringField('Email', validators=[
+        DataRequired(),
+        Email(message='Please enter a valid email address.')
+    ])
+    notifications = BooleanField('Email Notifications?')
+    submit = SubmitField('Save Changes')
+
+class ChangePasswordForm(FlaskForm):
+    current_password = PasswordField('Current Password', validators=[DataRequired()])
+    new_password = PasswordField('New Password', validators=[
+        DataRequired(),
+        Length(min=6, message='Password must be at least 6 characters long.')
+    ])
+    confirm_new_password = PasswordField('Confirm New Password', validators=[
+        DataRequired(),
+        EqualTo('new_password', message='Passwords must match.')
+    ])
+    submit = SubmitField('Save Changes')

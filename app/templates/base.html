@@ -25,6 +25,7 @@
                         {% if current_user.has_any_admin_access() %}
                             <a href="/admin">Admin</a>
                         {% endif %}
+                        <a href="{{ url_for('view_profile', user_id=current_user.UserID) }}">{{ current_user.username }}</a>
                     {% else %}
                     <a href="/login">Login</a>
                     <a href="/register">Register</a>

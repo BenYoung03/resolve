@@ -47,6 +47,7 @@ class User(db.Model, UserMixin):
     email: so.Mapped[Optional[str]] = so.mapped_column(sa.String)
     password_hash: so.Mapped[Optional[str]] = so.mapped_column(sa.String)
     roleId: so.Mapped[int] = so.mapped_column(sa.ForeignKey("Roles.RoleID"), nullable=False)
+    notifications: so.Mapped[bool] = so.mapped_column(sa.Boolean, nullable=False, server_default=sa.true())
 
     role: so.Mapped["Role"] = so.relationship(back_populates="users")
 

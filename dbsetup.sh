@@ -5,6 +5,7 @@ DB_NAME="${1:-database}"
 ADMIN_USERNAME="${2:-testadmin}"
 ADMIN_EMAIL="${3:-testadmin@resolve.com}"
 ADMIN_PASSWORD="${4:-Admin123!}"
+ADMIN_NOTIFICATIONS="${5:-0}"
 
 ROOT_PATH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 DB_FILE_PATH="$ROOT_PATH/${DB_NAME}.db"
@@ -71,6 +72,7 @@ with app.app_context():
         username=os.getenv("TEST_ADMIN_USERNAME", "testadmin"),
         email=os.getenv("TEST_ADMIN_EMAIL", "testadmin@example.com"),
         roleId=role_by_name["Admin"].RoleID,
+        notifications=bool(int(os.getenv("TEST_ADMIN_NOTIFICATIONS", "0")))
     )
     admin.set_password(os.getenv("TEST_ADMIN_PASSWORD", "Admin123!"))
 
