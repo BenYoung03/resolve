@@ -31,16 +31,19 @@
             <!--FOR USERS-->
             {% else %}
             <div class="overview-element">
-                <div>Tickets Created:</div>
-                <div>TEST1</div>
+                <img class="overview-icon" src="{{url_for('static', filename='img/user.png')}}"/>
+                <div class="overview-title">Tickets Created:</div>
+                <div class="overview-info">{{ tickets_created_count }}</div>
             </div>
             <div class="overview-element">
-                <div>Open Tickets:</div>
-                <div>EST2</div>
+                <img class="overview-icon" src="{{url_for('static', filename='img/messages.png')}}"/>
+                <div class="overview-title">Open Tickets:</div>
+                <div class="overview-info">{{ open_tickets_count }}</div>
             </div>
             <div class="overview-element">
-                <div>Resolved Tickets:</div>
-                <div>TEST3</div>
+                <img class="overview-icon" src="{{url_for('static', filename='img/checked.png')}}"/>
+                <div class="overview-title">Resolved Tickets:</div>
+                <div class="overview-info">{{ resolved_count_employee }}</div>
             </div>
             {% endif %}
 

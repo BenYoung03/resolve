@@ -624,8 +624,31 @@ def view_profile(user_id):
             )
         )
     )
+
+    tickets_created_count = db.session.scalar(sa.select(sa.func.count()).where(Ticket.CreatedBy == user.UserID))
+
+    open_tickets_count = db.session.scalar(
+        sa.select(sa.func.count()).where(
+            sa.and_(
+                Ticket.CreatedBy == user.UserID,
+                Ticket.StatusID.notin_([5, 6])
+            )
+        )
+    )
+
+    resolved_count_employee = db.session.scalar(
+        sa.select(sa.func.count()).where(
+            sa.and_(
+                Ticket.CreatedBy == user.UserID,
+                Ticket.StatusID == 5
+            )
+        )
+    )
+
+
     return render_template('profile.html', user=user, passwordForm=passwordForm, profileForm=profileForm, can_view_profile=current_user.has_permission('view_profile'), can_change_settings=current_user.has_permission('change_settings')
-                           , assigned_to_me_count=assigned_to_me_count, unassigned_count = unassigned_count, resolved_count=resolved_count)
+                           , assigned_to_me_count=assigned_to_me_count, unassigned_count = unassigned_count, resolved_count=resolved_count,
+                           tickets_created_count=tickets_created_count, open_tickets_count=open_tickets_count, resolved_count_employee=resolved_count_employee)
 
 
 @app.route('/admin')
