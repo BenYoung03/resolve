@@ -31,10 +31,10 @@
             <label>Role Name:</label>
             {{ form.role_name(placeholder="Role Name") }}
 
-            <h4 style="margin-top: 18px;">Permissions</h4>
+            <h4 style="margin-top: 18px;">Permissions:</h4>
             <div class="permissions-grid">
                 <div class="perm-group">
-                    <strong>Ticket Permissions</strong>
+                    <strong><font color="Purple">Ticket Permissions</font></strong>
                     {% for value, label in form.permissions.choices %}
                         {% if value in ['view_all_tickets', 'assign_tickets', 'ticket_agent', 'update_ticket_priority', 'update_ticket_status'] %}
                             {% if value == 'assign_tickets' %}
@@ -56,9 +56,9 @@
                         {% endif %}
                     {% endfor %}
                 </div>
-
+<br><br>
                 <div class="perm-group">
-                    <strong>Admin Permissions</strong>
+                    <strong><font color="Purple">Admin Permissions</font></strong>
                     {% for value, label in form.permissions.choices %}
                         {% if value in ['view_roles', 'create_roles', 'view_users', 'create_users', 'view_clients', 'change_settings', 'view_profile'] %}
                         <label>
@@ -69,7 +69,7 @@
                     {% endfor %}
                 </div>
             </div>
-
+<br>
             <div style="margin-top: 12px;">
                 <button type="submit">Save</button>
                 <a href="{{ url_for('admin_roles') }}">Cancel</a>
