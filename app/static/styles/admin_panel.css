@@ -1,357 +1,192 @@
-* {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
+:root {
+    --bg-main: #f6f4e5;       /* yellow background */
+    --panel-bg: #ffffff;
+    --accent: #4f46e5;        /* purple */
+    --accent-dark: #4338ca;
+    --accent-soft: #e6d9f2;
+    --text-dark: #243333;
+    --border-soft: #ddd5f2;
+    --button-red: #dc2626;
 }
+
+
 
 body {
-  font-family: Arial, sans-serif;
-  font-size: 14px;
-  color: #333;
-  background: #f8f8f8;
+    margin: 0;
+    font-family: Arial, Helvetica, sans-serif;
+    background: var(--bg-main);
+    color: var(--text-dark);
 }
 
-/* Layout */
+
+
 .panel-wrapper {
-  display: flex;
-  min-height: 100vh;
+    display: flex;
+    min-height: calc(100vh - 80px);
+    max-width: 1200px;
+    margin: 30px auto;
 }
+
+
 
 .panel-sidebar {
-  width: 180px;
-  background: #eee;
-  padding: 15px;
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
+    width: 220px;
+    padding: 20px;
+    background: var(--panel-bg);
+    border-right: 1px solid var(--border-soft);
 }
 
 .panel-sidebar p {
-  font-weight: bold;
-  margin-bottom: 5px;
+    font-weight: bold;
+    margin-bottom: 15px;
 }
 
 .panel-sidebar a {
-  text-decoration: none;
-  color: #333;
-  padding: 5px;
+    display: block;
+    padding: 8px 10px;
+    margin-bottom: 5px;
+    text-decoration: none;
+    color: var(--text-dark);
+    border-radius: 6px;
 }
 
 .panel-sidebar a:hover {
-  text-decoration: underline;
+    background: var(--accent-soft);
+    color: var(--accent-dark);
 }
+
+.panel-sidebar a[href*="logout"] {
+    color: var(--button-red);
+}
+
 
 .panel-content {
-  flex: 1;
-  padding: 15px;
+    flex: 1;
+    background: var(--panel-bg);
+    padding: 25px;
+    border-left: 1px solid var(--border-soft);
 }
 
-/* Headings */
-.section-header,
-.panel-title {
-  display: flex;
-  justify-content: space-between;
-  margin-bottom: 10px;
-  font-weight: bold;
+
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
 }
 
-.panel-title {
-  margin-bottom: 20px;
-  align-items: center;
+.section-header h2 {
+    margin: 0;
 }
 
-/* Buttons */
+
+
 button {
-  padding: 5px 10px;
-  border: 1px solid #333;
-  background: #fff;
-  cursor: pointer;
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: bold;
 }
 
 button:hover {
-  background: #eee;
+    background: var(--accent-dark);
 }
 
-/* Forms */
-label {
-  display: block;
-  margin-bottom: 3px;
+button.logout {
+    background: var(--button-red);
 }
 
-input,
-select,
-textarea {
-  width: 100%;
-  padding: 5px;
-  margin-bottom: 8px;
-  border: 1px solid #ccc;
-}
 
-/* Tables */
+
 .issues-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-bottom: 15px;
+    width: 100%;
+    border-collapse: collapse;
 }
 
 .issues-table th,
 .issues-table td {
-  text-align: left;
-  padding: 6px;
-  border: 1px solid #ddd;
+    padding: 10px;
+    border-bottom: 1px solid var(--border-soft);
+    text-align: left;
 }
 
-/* Modals */
+.issues-table th {
+    background: var(--accent-soft);
+}
+
+
+
+form label {
+    font-weight: bold;
+    margin-top: 10px;
+    display: block;
+}
+
+form input,
+form select {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    margin-bottom: 12px;
+    border-radius: 5px;
+    border: 1px solid var(--border-soft);
+    box-sizing: border-box;
+}
+
+
 .modal {
-  display: none;
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.3);
-  align-items: center;
-  justify-content: center;
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.3);
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
 }
 
 .modal-content {
-  background: #fff;
-  width: 90%;
-  max-width: 420px;
-  position: relative;
-  padding: 18px 14px 14px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 0;
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    width: 420px;
+    max-width: 90%;
+    position: relative;
 }
 
-.modal-content h3 {
-  margin: 0 42px 14px 0;
-  font-size: 15px;
-  font-weight: bold;
-  line-height: 1.2;
-}
-
-.modal-content h4 {
-  margin: 12px 0 8px 0;
-  font-size: 13px;
-  font-weight: bold;
-  line-height: 1.2;
-}
-
-.modal-content input[type="text"],
-.modal-content input[type="email"],
-.modal-content input[type="password"],
-.modal-content select,
-.modal-content textarea {
-  width: 100%;
-  box-sizing: border-box;
-  padding: 6px 8px;
-  margin-bottom: 0;
-  border: 1px solid #ccc;
-}
-
-.modal-content form {
-  display: flex;
-  flex-direction: column;
-  gap: 0;
-  width: auto;
-}
-
-/* Preserved layout/helpers from updated functionality so newer admin templates still render correctly */
-.filter-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.permissions-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  margin-top: 6px;
-  margin-bottom: 0;
-}
-
-.perm-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.perm-group strong {
-  display: block;
-  margin-bottom: 2px;
-  font-size: 14px;
-  font-weight: bold;
-}
-
-.roles-box {
-  width: 100%;
-}
-
-.panel-content form {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 300px;
-}
-
-.panel-content .roles-box form,
-.panel-content .issues-table form,
-.panel-content .section-header form,
-.modal-content form {
-  width: auto;
-}
-
-/* Checkboxes */
-.permissions-grid input[type="checkbox"],
-.perm-group input[type="checkbox"],
-.users-grid input[type="checkbox"],
-.user-check input[type="checkbox"] {
-  width: 16px;
-  height: 16px;
-  margin: 0;
-  flex-shrink: 0;
-}
-
-.perm-group label,
-.users-grid label {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 0;
-  font-size: 14px;
-  line-height: 1.25;
-}
-
-/* Modal close button */
 .modal-close {
-  position: absolute;
-  top: 8px;
-  right: 8px;
-  width: 32px;
-  height: 28px;
-  padding: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: var(--button-red);
+    padding: 5px 10px;
 }
 
-/* Modal bottom buttons */
-.modal-actions {
-  display: flex;
-  gap: 0;
-  margin-top: 18px;
-}
 
-.modal-actions-split {
-  width: 100%;
-}
 
-.modal-actions-split button {
-  width: 50%;
-  padding: 8px 0;
-  border-radius: 0;
-  font-size: 14px;
-}
+@media (max-width: 800px) {
 
-.modal-actions-split button:first-child {
-  border-right: none;
-}
+    .panel-wrapper {
+        flex-direction: column;
+        margin: 10px;
+    }
 
-/* Role Step 2 */
-.role-step2-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 18px;
-}
+    .panel-sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid var(--border-soft);
+    }
 
-.role-step2-actions {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
+    .panel-content {
+        border-left: none;
+    }
 
-.role-step2-back {
-  text-decoration: none;
-  color: #4b2aad;
-  font-size: 14px;
-}
-
-.role-step2-back:hover {
-  text-decoration: underline;
-}
-
-.role-step2-header button {
-  padding: 8px 16px;
-  min-width: 120px;
-}
-
-.role-user-search {
-  width: 100%;
-  margin-bottom: 14px;
-}
-
-.role-user-search input {
-  width: 100%;
-  padding: 8px 10px;
-  border: 1px solid #cfcfcf;
-  margin-bottom: 0;
-}
-
-.users-list {
-  border: 1px solid #d8d8d8;
-  background: #fff;
-  max-height: 260px;
-  overflow-y: auto;
-}
-
-.user-row {
-  display: grid;
-  grid-template-columns: 28px 1fr;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 12px;
-  border-bottom: 1px solid #ececec;
-  margin: 0;
-  cursor: pointer;
-}
-
-.user-row:last-child {
-  border-bottom: none;
-}
-
-.user-row:hover {
-  background: #f7f7f7;
-}
-
-.user-check {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.user-info {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 14px;
-  min-width: 0;
-  width: 100%;
-}
-
-.user-name {
-  font-weight: 600;
-  color: #222;
-  white-space: nowrap;
-}
-
-.user-email {
-  color: #666;
-  font-size: 13px;
-  text-align: right;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+    .section-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
 }
