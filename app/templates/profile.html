@@ -7,36 +7,39 @@
 {% block content %}
     <div class="profile-container">
         <div class="ticket-overview">
-            
+            <h2>Ticket Overview</h2>
             <!--FOR SUPPORT STAFF-->
             {% if current_user.has_role(['Agent', 'Admin']) or
                         current_user.has_permission('ticket_agent') or
                         current_user.has_permission('assign_tickets') %}
             <div class="overview-element">
-                <h2>Assigned to Me:</h2>
-                <div>TEST</div>
+                <img class="overview-icon" src="{{url_for('static', filename='img/user.png')}}"/>
+                <div class="overview-title">Assigned to Me:</div>
+                <div class="overview-info">{{ assigned_to_me_count }}</div>
             </div>
             <div class="overview-element">
-                <h2>Open Tickets:</h2>
-                <div>TEST</div>
+                <img class="overview-icon" src="{{url_for('static', filename='img/warning.png')}}"/>
+                <div class="overview-title">Unassigned Tickets:</div>
+                <div class="overview-info">{{ unassigned_count }}</div>
             </div>
             <div class="overview-element">
-                <h2>Resolved Tickets:</h2>
-                <div>TEST</div>
+                <img class="overview-icon" src="{{url_for('static', filename='img/checked.png')}}"/>
+                <div class="overview-title">Resolved Tickets:</div>
+                <div class="overview-info">{{ resolved_count }}</div>
             </div>
 
             <!--FOR USERS-->
             {% else %}
             <div class="overview-element">
-                <h2>Tickets Created:</h2>
+                <div>Tickets Created:</div>
                 <div>TEST1</div>
             </div>
             <div class="overview-element">
-                <h2>Open Tickets:</h2>
+                <div>Open Tickets:</div>
                 <div>EST2</div>
             </div>
             <div class="overview-element">
-                <h2>Resolved Tickets:</h2>
+                <div>Resolved Tickets:</div>
                 <div>TEST3</div>
             </div>
             {% endif %}

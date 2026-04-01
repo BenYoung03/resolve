@@ -184,4 +184,27 @@ input:checked + .slider:before {
     border-radius: 50%;
 }
 
+.overview-element {
+    margin: 15px 0 15px 0;
+    display: flex;
+    border-bottom: 1px solid #ddd;
+    padding-bottom: 10px;
+}
 
+.overview-title {
+    margin-left: 15px;
+    font-weight: 600;
+    color: #333;
+}
+
+.overview-info {
+    margin-left: auto;
+    margin-right: 15px;
+    font-size: 15px;
+    color: #555;
+}
+
+.overview-icon{
+    width: 20px;
+    height: 20px;
+}
