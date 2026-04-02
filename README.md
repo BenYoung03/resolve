@@ -121,6 +121,64 @@ With Resolve, Users are able to create tickets by filling out the create ticket 
 
 ![Ticket Form](README%20Images/NewTicket.png)
 
+This code snippet shows the route that is run when a ticket is created. The category and priority select field in the CreateTicketForm are populated dynamically using information from the database. On form submission, the data from the form is read and used to create a new ticket. This ticket is then created and added to the database. Before committing the new ticket to the database, a ticket number is generated, in the format of the TicketID with leading 0s appended to the text "ID-". db.session.flush() is used so the TicketID is available before committing the ticket to the database. A new ActivityLog entry is also created, tracking the user who created the ticket, the associated TicketID, the action, being ticket creation, and the time of the activity. If the user has email notifications enabled, a notification email is sent indicating that the ticket was successfully created. Agents with email notifications enabled are also subsequently notified upon creation.
+
+```python
+@app.route('/createticket', methods=['GET', 'POST'])
+@login_required
+def create_ticket():
+    form = CreateTicketForm()
+
+    form.category.choices = [(c.CategoryID, c.name) for c in Category.query.all()]
+    form.priority.choices = [(p.PriorityID, p.name) for p in Priority.query.all()]
+    if form.validate_on_submit():
+        newTicket = Ticket(
+            subject=form.subject.data,
+            description=form.description.data,
+            CategoryID=form.category.data,
+            PriorityID=form.priority.data,
+            StatusID=1,  # Sets status to open by default
+            CreatedBy=current_user.UserID,
+            AssignedTo=None,
+            CreatedAt=datetime.now(),
+            ClosedAt=None
+        )
+
+        db.session.add(newTicket)
+        db.session.flush() 
+
+        newTicket.ticketNumber = f"ID-{newTicket.TicketID:06d}"
+
+        newActivity = ActivityLog(
+            UserID = newTicket.CreatedBy,
+            TicketID = newTicket.TicketID,
+            action = "Ticket created",
+            CreatedAt=datetime.now(),
+        )
+
+        db.session.add(newActivity)
+
+        db.session.commit()
+
+        if current_user.notifications:
+            ticketCreated(newTicket, current_user.email)
+
+        agents = (db.session.scalars(sa.select(User).where(User.roleId.in_([2, 3]))).all())
+        agentsEmails = [agent.email for agent in agents]
+        # Notify agents who have notifications enabled
+        notifyAgentsOfNewTicket(newTicket, [email for agent, email in zip(agents, agentsEmails) if agent.notifications])
+
+        flash(f'Ticket {newTicket.ticketNumber} created successfully.')
+        return redirect(url_for('index'))
+
+    if request.method == "POST" and not form.validate():
+        for field_errors in form.errors.values():
+            for error in field_errors:
+                flash(error, "warning")
+
+    return render_template('newticket.html', form=form)
+```
+
 Users are able to view tickets on the home page of Resolve. The home page features buttons that allow users to submit a new ticket and filter tickets by open, closed, and ticket assignment if the user is an agent/admin. The table that contains the ticket information is built using the DataTables library. Users are able to filter each column as well as search for individual tickets as a result. 
 
 ![Home Page](README%20Images/HomePage.png)
