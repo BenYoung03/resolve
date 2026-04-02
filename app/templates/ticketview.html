@@ -84,10 +84,28 @@
                         {% if current_user.has_role(['Agent', 'Admin']) or current_user.has_permission('view_all_tickets') or current_user.has_permission('ticket_agent') or current_user.has_permission('assign_tickets') %}
                         <div class="activity-log-container">
                             <h2>Activity Log</h2>
-
+                            <div class="filters-container">
+                                <button class="activity-filter active" data-filter="all">All</button>
+                                <button class="activity-filter" data-filter="status">Status Changes</button>
+                                <button class="activity-filter" data-filter="assignment">Assignments</button>
+                                <button class="activity-filter" data-filter="resolved">Resolutions</button>
+                                <button class="activity-filter" data-filter="priority">Priority Changes</button>
+                            </div>
                             <div class="activity-list">
                                 {% for activity in activities %}
-                                    <div class="activity-item">
+                                {% set activity_type = 'system' %}
+
+                                {% if 'Status' in activity.action %}
+                                    {% set activity_type = 'status' %}
+                                {% elif 'assigned' in activity.action or 'unassigned' in activity.action %}
+                                    {% set activity_type = 'assignment' %}
+                                {% elif 'resolved' in activity.action %}
+                                    {% set activity_type = 'resolved' %}
+                                {% elif 'Priority' in activity.action %}
+                                    {% set activity_type = 'priority' %}
+                                {% endif %}
+                                
+                                    <div class="activity-item" data-type="{{ activity_type }}">
                                         <div class="activity-content">
                                             <div class="activity-author">{{ activity.user.username if activity.user and activity.user.username else (activity.user.email if activity.user else 'Unknown User') }}</div>
                                             <div class="activity-separator">|</div>
@@ -196,10 +214,27 @@
                     {% else %}
                     <div class="activity-log-container-small">
                             <h2>Activity Log</h2>
-
+                            <div class="filters-container">
+                                <button class="activity-filter active" data-filter="all">All</button>
+                                <button class="activity-filter" data-filter="status">Status Changes</button>
+                                <button class="activity-filter" data-filter="assignment">Assignments</button>
+                                <button class="activity-filter" data-filter="resolved">Resolutions</button>
+                                <button class="activity-filter" data-filter="priority">Priority Changes</button>
+                            </div>
                             <div class="activity-list">
                                 {% for activity in activities %}
-                                    <div class="activity-item">
+                                {% set activity_type = 'system' %}
+
+                                {% if 'Status' in activity.action %}
+                                    {% set activity_type = 'status' %}
+                                {% elif 'assigned' in activity.action or 'unassigned' in activity.action %}
+                                    {% set activity_type = 'assignment' %}
+                                {% elif 'resolved' in activity.action %}
+                                    {% set activity_type = 'resolved' %}
+                                {% elif 'Priority' in activity.action %}
+                                    {% set activity_type = 'priority' %}
+                                {% endif %}
+                                    <div class="activity-item" data-type="{{ activity_type }}">
                                         <div class="activity-content">
                                             <div class="activity-author">{{ activity.user.username if activity.user and activity.user.username else (activity.user.email if activity.user else 'Unknown User') }}</div>
                                             <div class="activity-separator">|</div>
@@ -207,7 +242,7 @@
                                                 {{ activity.CreatedAt.strftime('%b %d, %Y, %I:%M %p') if activity.CreatedAt else 'Unknown' }}
                                             </div>
                                             <div class="activity-separator">|</div>
-                                            <div class="activity-text">{{ activity.action }}</div>
+                                            <div class="activity-text small">{{ activity.action }}</div>
                                         </div>
                                     </div>
                                 {% endfor %}

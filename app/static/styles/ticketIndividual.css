@@ -100,6 +100,11 @@
     padding-right: 0;
 }
 
+.activity-text.small {
+    flex-basis: 100%;
+    display: block;
+}
+
 .ticket-summary-left{
     width: 69%;
 }
@@ -388,7 +393,8 @@
 }
 
 .comment-submit,
-.update-ticket-submit {
+.update-ticket-submit,
+.activity-filter {
     background-color: #2f7de1;
     color: white;
     border: none;
@@ -397,6 +403,29 @@
     font-size: 15px;
     cursor: pointer;
     min-width: 95px;
+}
+
+.activity-filter{
+    background-color: transparent;
+    color: #2f7de1;
+    border: 1px solid #2f7de1;
+    padding: 6px 12px;
+    font-size: 14px;
+    min-width: auto;
+}
+
+.activity-filter.active,
+.activity-filter:hover {
+    background-color: #2f7de1;
+    color: white;
+}
+
+.filters-container{
+    margin: 5px 0 0 15px;
+}
+
+.activity-log-container-small > .filters-container > .activity-filter{
+    margin-top: 5px;
 }
 
 .update-ticket-submit {
@@ -478,4 +507,5 @@
 .status-element{
     margin-bottom: 15px;
 }
+
 
