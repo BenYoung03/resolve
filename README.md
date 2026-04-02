@@ -142,6 +142,41 @@ Resolve also features automated email notifications, which keep users informed a
 
 ![Password Reset](README%20Images/PasswordReset.png)
 
+The following is a code snippet showing one of the Flask Mail email templates. This function sends an email to the agent that a ticket has been assigned too. Using python threads, we have implemented aysnchronous email sending. The sendAsyncEmail function is passed the application context and the Flask Mail message object and the message is then sent as a background thread. This allows users to continue using Resolve while the email sends in the background.
+
+```python
+def ticketAssignedNotification(ticket, recipient):
+    msg = Message(
+        subject=f"Ticket Has Been Assigned To You: {ticket.ticketNumber}",
+        recipients=[recipient]
+    )
+
+    msg.body = f"""
+    Hello {ticket.assignee.username},
+
+    A support ticket has been assigned to you.
+
+    Ticket Details:
+    Ticket Number: {ticket.ticketNumber}
+    Subject: {ticket.subject}
+    Category: {ticket.category.name}
+    Priority: {ticket.priority.name}
+    Created: {ticket.CreatedAt.strftime('%b %d, %Y, %I:%M %p')}
+
+    Please log in to Resolve Ticketing to review the ticket.
+
+    Thank you,
+    Resolve Ticketing
+    """
+
+    msg.html = render_template(
+        'email/ticketAssigned.html',
+        ticket=ticket
+    )
+
+    Thread(target=sendAsyncEmail, args=(app, msg)).start()
+```
+
 ### Profile Page
 
 Resolve also features a profile page. This profile page allows users to modify their account information. This information includes email, username and password. Furthermore, users are able to view information related to tickets. Support staff are able to view the number of tickets assigned to them, the number of unassigned tickets that are open, and the amount of tickets they have resolved since their account has been created.
