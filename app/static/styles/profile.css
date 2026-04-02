@@ -112,7 +112,8 @@
 }
 
 .edit-profile-submit:hover,
-.change-password-submit:hover {
+.change-password-submit:hover,
+.change-password-toggle:hover {
     background-color: #2563eb;
 }
 
