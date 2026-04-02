@@ -142,6 +142,16 @@ Resolve also features automated email notifications, which keep users informed a
 
 ![Password Reset](README%20Images/PasswordReset.png)
 
+### Profile Page
+
+Resolve also features a profile page. This profile page allows users to modify their account information. This information includes email, username and password. Furthermore, users are able to view information related to tickets. Support staff are able to view the number of tickets assigned to them, the number of unassigned tickets that are open, and the amount of tickets they have resolved since their account has been created.
+
+Users without any ticket modification permissions (i.e. employees) can see how many tickets they have created, how many of those tickets are open, and how many of their tickets they have created have been resolved.
+
+Furthermore, all users are able to view the last five actions they have performed on tickets via the profile activity log. For example, agents can see the last tickets they have assigned, changed the status of, etc.
+
+![Profile Page](README%20Images/Profile.png)
+
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 # Contact
