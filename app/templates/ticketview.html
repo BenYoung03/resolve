@@ -207,7 +207,7 @@
                                                 {{ activity.CreatedAt.strftime('%b %d, %Y, %I:%M %p') if activity.CreatedAt else 'Unknown' }}
                                             </div>
                                             <div class="activity-separator">|</div>
-                                            <div class="activity-text">{{ activity.action }}</div>
+                                            <div class="activity-text small">{{ activity.action }}</div>
                                         </div>
                                     </div>
                                 {% endfor %}
