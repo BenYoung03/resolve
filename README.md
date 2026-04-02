@@ -152,6 +152,31 @@ Furthermore, all users are able to view the last five actions they have performe
 
 ![Profile Page](README%20Images/Profile.png)
 
+The following is the HTML template code for the ticket overview. This is a great demonstration on how Resolve handles role based access via Jinja templates.
+
+```html
+<div class="ticket-overview">
+    <h2>Ticket Overview</h2>
+
+    {% if current_user.has_role(['Agent', 'Admin']) or
+          current_user.has_permission('ticket_agent') or
+          current_user.has_permission('assign_tickets') %}
+        <!--Support Staff-->
+        <div class="overview-element">
+            <div class="overview-title">Assigned to Me:</div>
+            <div class="overview-info">{{ assigned_to_me_count }}</div>
+        </div>
+        <!--Remaining overview here...-->
+    {% else %}
+        <!--Employees-->
+        <div class="overview-element">
+            <div class="overview-title">Tickets Created:</div>
+            <div class="overview-info">{{ tickets_created_count }}</div>
+        </div>
+        <!--Remaining overview here...-->
+    {% endif %}
+</div>
+```
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 # Contact
