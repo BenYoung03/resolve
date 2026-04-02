@@ -430,7 +430,6 @@ def view_ticket(TicketID):
         return redirect(url_for('view_ticket', TicketID=TicketID))
 
     # TODO: Add more flash style error messages
-    # TODO: Make it so other status' can only be applied upon assigning to an agent
     if updateTicketForm.validate_on_submit():
         oldStatus = currentTicket.StatusID
         oldPriority = currentTicket.PriorityID
@@ -457,7 +456,15 @@ def view_ticket(TicketID):
             if not assigned_user or not can_be_assigned_tickets(assigned_user):
                 flash('Selected user cannot be assigned tickets.')
                 return redirect(url_for('view_ticket', TicketID=TicketID))
+            
+        if newAssigned is None and newStatus not in [1, 6]:  
+            flash('Unassigned tickets must have status Open or Closed')
+            return redirect(url_for('view_ticket', TicketID=TicketID))
 
+        if newStatus not in [5,6] and oldStatus in [5,6]:
+            currentTicket.ClosedAt = None
+            currentTicket.ResolutionReasoning = None
+            
         currentTicket.PriorityID = newPriority
         currentTicket.StatusID = newStatus
         currentTicket.AssignedTo = newAssigned
@@ -472,8 +479,13 @@ def view_ticket(TicketID):
         elif updateTicketForm.status.data not in [5, 6]:
             currentTicket.ClosedAt = None
 
-        if updateTicketForm.resolutionReasoning.data:
-            currentTicket.ResolutionReasoning = updateTicketForm.resolutionReasoning.data
+        if newStatus in [5, 6]:
+            if updateTicketForm.resolutionReasoning.data:
+                currentTicket.ResolutionReasoning = updateTicketForm.resolutionReasoning.data
+        else:
+            currentTicket.ResolutionReasoning = None
+
+        if updateTicketForm.resolutionReasoning.data and newStatus in [5, 6]:
             newActivity = ActivityLog(
                 UserID = current_user.UserID,
                 TicketID = currentTicket.TicketID,
