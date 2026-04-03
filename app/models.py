@@ -39,9 +39,11 @@ class Role(db.Model):
     def __repr__(self):
         return f"<Role {self.name}>"
 
+# User model
 class User(db.Model, UserMixin):
     __tablename__ = "User"
 
+    # Each user has an ID, username, email, password hash, role, and notification preference
     UserID: so.Mapped[int] = so.mapped_column(primary_key=True)
     username: so.Mapped[Optional[str]] = so.mapped_column(sa.String)
     email: so.Mapped[Optional[str]] = so.mapped_column(sa.String)
@@ -49,6 +51,7 @@ class User(db.Model, UserMixin):
     roleId: so.Mapped[int] = so.mapped_column(sa.ForeignKey("Roles.RoleID"), nullable=False)
     notifications: so.Mapped[bool] = so.mapped_column(sa.Boolean, nullable=False, server_default=sa.true())
 
+    # Relationships to other models
     role: so.Mapped["Role"] = so.relationship(back_populates="users")
 
     created_tickets: so.Mapped[list["Ticket"]] = so.relationship(
@@ -69,12 +72,14 @@ class User(db.Model, UserMixin):
         back_populates="user"
     )
 
+    # Set and check the password hash for the user
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
         
+    # Checks if a user has an indicated role
     def has_role(self, *roles):
         if len(roles) == 1:
             if isinstance(roles[0], str):
@@ -86,11 +91,13 @@ class User(db.Model, UserMixin):
 
         return self.role.name in roles
 
+    # Checks if a user has any of the indicated permissions
     def has_permission(self, *permissions):
         if not self.role:
             return False
         return self.role.has_permission(*permissions)
 
+    # Checks if a user has any admin access
     def has_any_admin_access(self):
         return (
             self.has_role("Admin") or
@@ -106,12 +113,14 @@ class User(db.Model, UserMixin):
     def get_id(self):
         return str(self.UserID)
 
+    # Gets the password reset token for the user and appends it to the URL for resetting the password
     def get_reset_password_token(self, expires_in=600):
         return jwt.encode(
             {'reset_password': self.UserID, 'exp': time() + expires_in},
             app.config['SECRET_KEY'], algorithm='HS256'
         )
     
+    # Verifies the password reset token and returns the user associated with the token if valid
     @staticmethod
     def verify_reset_password_token(token):
         try:
@@ -123,8 +132,7 @@ class User(db.Model, UserMixin):
     def __repr__(self):
         return f"<User {self.username or self.email}>"
 
-
-
+# Ticket category model
 class Category(db.Model):
     __tablename__ = "TicketCategories"
 
@@ -137,7 +145,7 @@ class Category(db.Model):
         return f"<Category {self.name}>"
 
 
-
+# Ticket priority model
 class Priority(db.Model):
     __tablename__ = "TicketPriority"
 
@@ -149,8 +157,7 @@ class Priority(db.Model):
     def __repr__(self):
         return f"<Priority {self.name}>"
 
-
-
+# Ticket status model
 class Status(db.Model):
     __tablename__ = "TicketStatus"
 
@@ -162,16 +169,17 @@ class Status(db.Model):
     def __repr__(self):
         return f"<Status {self.name}>"
 
-
-
+# Ticket model
 class Ticket(db.Model):
     __tablename__ = "Tickets"
 
+    # Each ticket has an ID, number, subject and description
     TicketID: so.Mapped[int] = so.mapped_column(primary_key=True, autoincrement=True)
     ticketNumber: so.Mapped[Optional[str]] = so.mapped_column(sa.String)
     subject: so.Mapped[Optional[str]] = so.mapped_column(sa.String)
     description: so.Mapped[Optional[str]] = so.mapped_column(sa.Text)
 
+    # Each ticket is also associated with a category, status, priority, creator, and assignee
     CategoryID: so.Mapped[int] = so.mapped_column(
         sa.ForeignKey("TicketCategories.CategoryID"),
         nullable=False
@@ -193,6 +201,7 @@ class Ticket(db.Model):
         nullable=True
     )
 
+    # Further ticket fields include resolution and timestamps for creation and closure
     ResolutionReasoning: so.Mapped[Optional[str]] = so.mapped_column(sa.Text)
     CreatedAt: so.Mapped[datetime] = so.mapped_column(sa.DateTime, nullable=False)
     ClosedAt: so.Mapped[Optional[datetime]] = so.mapped_column(sa.DateTime, nullable=True)
@@ -224,6 +233,7 @@ class Ticket(db.Model):
     def __repr__(self):
         return f"<Ticket {self.TicketID}: {self.subject}>"
 
+# Ticket comment model
 class TicketComment(db.Model):
     __tablename__ = "TicketComment"
 
@@ -246,6 +256,7 @@ class TicketComment(db.Model):
     def __repr__(self):
         return f"<TicketComment {self.CommentID}>"
 
+# Activity log model
 class ActivityLog(db.Model):
     __tablename__ = "ActivityLog"
 

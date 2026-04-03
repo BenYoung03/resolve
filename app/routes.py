@@ -209,7 +209,7 @@ def login():
             return redirect(url_for('login'))
 
         # If details correct, run Flask-Login "login_user"
-        login_user(user, remember=True)
+        login_user(user, remember=form.remember_me.data)
         return redirect(url_for('index'))
 
     return render_template('login.html', form=form)
@@ -280,7 +280,7 @@ def password_reset_request():
 def reset_password(token):
     if current_user.is_authenticated:
         return redirect(url_for('index'))
-    # Verify the token and get the user associated with it
+    # Verify the token and get the user associated with it. Token is passed from the password reset email that is generated when a user requests a password reset.
     user = User.verify_reset_password_token(token)
     if not user:
         flash('Invalid or expired token. Please try again.')
@@ -599,6 +599,7 @@ def view_profile(user_id):
     passwordForm = ChangePasswordForm()
     profileForm = EditProfileForm()
 
+    # Gets the user. If the current user does not match the profile they are attempting to view then flash access denied message
     user = db.session.scalars(sa.select(User).where(User.UserID == user_id)).first()
     if user and user.UserID != current_user.UserID and not current_user.has_permission('view_profile'):
         flash('Access denied. You do not have permission to view this profile.')
@@ -606,12 +607,15 @@ def view_profile(user_id):
     if not user:
         flash('User not found.')
     
+    # Prepopulate the profile form with the current user data on page load
     if request.method == 'GET':
         profileForm.username.data = user.username
         profileForm.email.data = user.email
         profileForm.notifications.data = user.notifications
 
     if profileForm.validate_on_submit():
+
+        # Checks for duplicate emails and usernames upon attempt to change email or username
         duplicate_username = db.session.scalar(
             sa.select(User).where(
                 sa.and_(User.username == profileForm.username.data, User.UserID != user.UserID)
@@ -623,6 +627,7 @@ def view_profile(user_id):
             )
         )
 
+        # Flash Error message if duplicate
         if duplicate_username:
             flash('Username already exists.')
             return redirect(url_for('view_profile', user_id=user_id))
@@ -631,6 +636,7 @@ def view_profile(user_id):
             flash('Email already exists.')
             return redirect(url_for('view_profile', user_id=user_id))
 
+        # Set user data to the form data and commit to database
         user.username = profileForm.username.data
         user.email = profileForm.email.data
         user.notifications = profileForm.notifications.data
@@ -640,15 +646,19 @@ def view_profile(user_id):
         return redirect(url_for('view_profile', user_id=user_id))
 
     if passwordForm.validate_on_submit():
+        # If the password hash generated from the current password does not match the password hash in the database, flash error message indicating password is incorrect
         if not check_password_hash(user.password_hash, passwordForm.current_password.data):
             flash('Current password is incorrect.')
             return redirect(url_for('view_profile', user_id=user_id))
+        # Flash error message if passwords do not match
         if passwordForm.new_password.data != passwordForm.confirm_new_password.data:
             flash('New passwords do not match.')
+        # Generate new password hash and commit to database
         user.password_hash = generate_password_hash(passwordForm.new_password.data)
         db.session.commit()
         flash('Password updated.')
 
+    # Gets number of tickets assigned to user
     assigned_to_me_count = db.session.scalar(
         sa.select(sa.func.count()).where(
             sa.and_(
@@ -658,6 +668,7 @@ def view_profile(user_id):
         )
     )
 
+    # Get number of tickets that are unassigned
     unassigned_count = db.session.scalar(
         sa.select(sa.func.count()).where(
             sa.and_(
@@ -667,6 +678,7 @@ def view_profile(user_id):
         )
     )
 
+    # Get number of tickets the user has resolved
     resolved_count = db.session.scalar(
         sa.select(sa.func.count()).where(
             sa.and_(
@@ -676,8 +688,10 @@ def view_profile(user_id):
         )
     )
 
+    # Get number of tickets the user has created
     tickets_created_count = db.session.scalar(sa.select(sa.func.count()).where(Ticket.CreatedBy == user.UserID))
 
+    # Get number of tickets the user has created that is open
     open_tickets_count = db.session.scalar(
         sa.select(sa.func.count()).where(
             sa.and_(
@@ -687,6 +701,7 @@ def view_profile(user_id):
         )
     )
 
+    # Get number of tickets the user has created that has been resolved
     resolved_count_employee = db.session.scalar(
         sa.select(sa.func.count()).where(
             sa.and_(
@@ -696,6 +711,7 @@ def view_profile(user_id):
         )
     )
 
+    # Get last 5 activities in the activity log associated with the user
     activities = db.session.scalars(
         sa.select(ActivityLog).where(
             ActivityLog.UserID == user.UserID)

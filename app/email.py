@@ -1,3 +1,6 @@
+# Contains all of the preset email notifications that are sent upon certain actions, such as ticket creation, ticket status change, and password reset requests. 
+# Each function takes in the relevant information for the email being sent and uses Flask-Mail to send the email asynchronously in a separate thread.
+
 from flask_mail import Message
 from app import mail
 from threading import Thread
@@ -5,16 +8,19 @@ from flask import render_template, url_for
 
 from app import app
 
+# Sends email asynchronously in a separate thread to avoid blocking the main application thread
 def sendAsyncEmail(app, msg):
     with app.app_context():
         mail.send(msg)
 
+# Email that is sent upon a ticket status change to the user who created the ticket
 def ticketStatusChangeNotification(ticket, recipient, oldStatus, newStatus):
     msg = Message(
         subject=f"Update for Ticket {ticket.ticketNumber}",
         recipients=[recipient]
     )
 
+    # Plaintext template to fall back upon if user cannot receive HTML emails
     msg.body = f"""
     Hello,
 
@@ -29,6 +35,7 @@ def ticketStatusChangeNotification(ticket, recipient, oldStatus, newStatus):
     Thank you,
     Resolve Ticketing
     """
+    # Renders HTML template for ticket status change email
     msg.html = render_template(
         'email/ticketStatusChange.html',
         ticket=ticket,
@@ -36,14 +43,17 @@ def ticketStatusChangeNotification(ticket, recipient, oldStatus, newStatus):
         newStatus=newStatus
     )
 
+    # Starts a new thread to send the email asynchronously
     Thread(target=sendAsyncEmail, args=(app, msg)).start()
 
+# Email notification that is sent upon ticket resolution to the user who created the ticket. 
 def ticketResolvedNotification(ticket, recipient):
     msg = Message(
         subject=f"{ticket.ticketNumber} resolved",
         recipients=[recipient]
     )
 
+    # Plaintext fallback template for ticket resolved email
     msg.body = f"""
     Hello,
 
@@ -60,13 +70,16 @@ def ticketResolvedNotification(ticket, recipient):
     Thank you,
     Resolve Ticketing
     """
+    # Renders HTML template for ticket resolved email
     msg.html = render_template(
         'email/ticketResolved.html',
         ticket=ticket
     )
 
+    # Starts a new thread to send the email asynchronously
     Thread(target=sendAsyncEmail, args=(app, msg)).start()
 
+# Email notification that is sent upon ticket creation to the user who created the ticket
 def ticketCreated(ticket, recipient):
     msg = Message(
         subject=f"Ticket Created: {ticket.ticketNumber}",
@@ -101,15 +114,18 @@ def ticketCreated(ticket, recipient):
 
     Thread(target=sendAsyncEmail, args=(app, msg)).start()
 
+# Email notification that is sent to agents when a new ticket is created
 def notifyAgentsOfNewTicket(ticket, recipients):
     if not recipients:
         return
 
     msg = Message(
         subject=f"New Ticket Created: {ticket.ticketNumber}",
+        # Sends to all agents that have notifications enabled
         recipients=recipients
     )
 
+    # Plaintext fallback template for new ticket creation notification email to agents
     msg.body = f"""
     Hello Agent,
 
@@ -127,19 +143,23 @@ def notifyAgentsOfNewTicket(ticket, recipients):
     Thank you,
     Resolve Ticketing
     """
+    # Renders HTML template for new ticket creation notification email to agents
     msg.html = render_template(
         'email/notifyAgentsOfNewTicket.html',
         ticket=ticket
     )
 
+    # Starts a new thread to send the email asynchronously
     Thread(target=sendAsyncEmail, args=(app, msg)).start()
 
+# Email template notifying an agent that a ticket has been assigned to them.
 def ticketAssignedNotification(ticket, recipient):
     msg = Message(
         subject=f"Ticket Has Been Assigned To You: {ticket.ticketNumber}",
         recipients=[recipient]
     )
 
+    # Plaintext fallback template for ticket assignment notification email to agents
     msg.body = f"""
     Hello {ticket.assignee.username},
 
@@ -158,19 +178,24 @@ def ticketAssignedNotification(ticket, recipient):
     Resolve Ticketing
     """
 
+    # Renders HTML template for ticket assignment notification email to agents
     msg.html = render_template(
         'email/ticketAssigned.html',
         ticket=ticket
     )
 
+    # Starts a new thread to send the email asynchronously
     Thread(target=sendAsyncEmail, args=(app, msg)).start()
 
-def commentAddedNotification(ticket, recipient, commentAuthor, commentText, commentCreatedAt=None, commenterRole=None):
+# Email notification that is sent to the ticket creator upon a new comment being added to their ticket
+# Uses comment author, text, who created the comment and the commenter role to render the email template differently based on whether the comment was made by an agent or the ticket creator themselves.
+def commentAddedNotification(ticket, recipient, commentAuthor, commentText, commentCreatedAt, commenterRole):
     msg = Message(
         subject=f"New Comment Added: {ticket.ticketNumber}",
         recipients=[recipient]
     )
 
+    # Plaintext fallback template for new comment added notification email to ticket creator
     msg.body = f"""
     Hello {ticket.creator.username},
 
@@ -188,6 +213,7 @@ def commentAddedNotification(ticket, recipient, commentAuthor, commentText, comm
     Resolve Ticketing
     """
 
+    # Renders HTML template for new comment added notification email to ticket creator
     msg.html = render_template(
         'email/commentAdded.html',
         ticket=ticket,
@@ -197,15 +223,19 @@ def commentAddedNotification(ticket, recipient, commentAuthor, commentText, comm
         commenterRole=commenterRole
     )
 
+    # Starts a new thread to send the email asynchronously
     Thread(target=sendAsyncEmail, args=(app, msg)).start()
 
+# Password reset email template that is sent to users who request a password reset
 def passwordResetEmail(user):
+    # Gets the users password reset token
     token = user.get_reset_password_token()
     msg = Message(
         subject="Password Reset Request",
         recipients=[user.email]
     )
 
+    # Plaintext fallback template for password reset email
     msg.body = f"""Hello {user.username},
 
     We received a request to reset your password.
@@ -216,8 +246,11 @@ def passwordResetEmail(user):
     Thank you,
     Resolve Ticketing
     """
-    msg.html = render_template('email/resetPassword.html', user=user, token=token)
+    # Renders HTML template for password reset email. Includes the reset link with the token.
+    msg.html = render_template(
+        'email/resetPassword.html', 
+        user=user, 
+        token=token)
     Thread(target=sendAsyncEmail, args=(app, msg)).start()
 
-# TODO: ADD WELCOME EMAIL AFTER REGISTRATION
     
