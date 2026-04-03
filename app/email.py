@@ -9,7 +9,6 @@ def sendAsyncEmail(app, msg):
     with app.app_context():
         mail.send(msg)
 
-#TODO: Update stylings for message using HTML instead of plaintext
 def ticketStatusChangeNotification(ticket, recipient, oldStatus, newStatus):
     msg = Message(
         subject=f"Update for Ticket {ticket.ticketNumber}",
@@ -35,6 +34,35 @@ def ticketStatusChangeNotification(ticket, recipient, oldStatus, newStatus):
         ticket=ticket,
         oldStatus=oldStatus,
         newStatus=newStatus
+    )
+
+    Thread(target=sendAsyncEmail, args=(app, msg)).start()
+
+def ticketResolvedNotification(ticket, recipient):
+    msg = Message(
+        subject=f"{ticket.ticketNumber} resolved",
+        recipients=[recipient]
+    )
+
+    msg.body = f"""
+    Hello,
+
+    Your ticket has been resolved.
+
+    Ticket Details:
+    Ticket: {ticket.ticketNumber}
+    Subject: {ticket.subject}
+    Resolution: {ticket.ResolutionReasoning}
+    Agent: {ticket.assignee.email}
+
+    If you have any issues, please contact the agent or leave a comment to have the ticket reopened.
+
+    Thank you,
+    Resolve Ticketing
+    """
+    msg.html = render_template(
+        'email/ticketResolved.html',
+        ticket=ticket
     )
 
     Thread(target=sendAsyncEmail, args=(app, msg)).start()

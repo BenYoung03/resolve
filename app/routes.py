@@ -15,7 +15,7 @@ from functools import wraps
 
 from flask_mail import Message
 from app import mail
-from app.email import notifyAgentsOfNewTicket, ticketAssignedNotification, ticketCreated, ticketStatusChangeNotification, passwordResetEmail, commentAddedNotification
+from app.email import notifyAgentsOfNewTicket, ticketAssignedNotification, ticketCreated, ticketResolvedNotification, ticketStatusChangeNotification, passwordResetEmail, commentAddedNotification
 
 #Role required route. If you place @role_required("Role here") under any of the routes, the user will
 #Have to have that role to run the route
@@ -486,14 +486,19 @@ def view_ticket(TicketID):
             currentTicket.ResolutionReasoning = None
 
         if updateTicketForm.resolutionReasoning.data and newStatus in [5, 6]:
+            recipient = currentTicket.creator.email
             newActivity = ActivityLog(
                 UserID = current_user.UserID,
                 TicketID = currentTicket.TicketID,
                 action = f"Ticket resolved by {current_user.username} with resolution reasoning: {updateTicketForm.resolutionReasoning.data}",
                 CreatedAt=datetime.now(),
             )
+            # TODO: Send Email indicating resolution
             db.session.add(newActivity)
             db.session.commit()
+
+            if currentTicket.creator.notifications:
+                ticketResolvedNotification(currentTicket, recipient)
 
         if oldStatus != currentTicket.StatusID and currentTicket.StatusID not in [5]:
             recipient = currentTicket.creator.email
