@@ -39,6 +39,7 @@
                     <div class="open-closed">
                         <a href="/index/open" id="open-tickets">Open Tickets</a>
                         <a href="/index/closed" id="closed-tickets">Closed Tickets</a>
+                        <!--Display assigned to me button if agent/admin perms present-->
                         {% if current_user.has_role(['Agent', 'Admin']) or
                             current_user.has_permission('ticket_agent') or
                             current_user.has_permission('assign_tickets') %}
@@ -60,7 +61,9 @@
                             </tr>
                         </thead>
                         <tbody>
+                            <!--Display each tickets information in a row in the datatables table-->
                             {% for ticket in tickets %}
+                            <!--Makes each row clickable instead of just the ticketID-->
                             <tr class="clickable-row" data-href="{{ url_for('view_ticket', TicketID=ticket.TicketID) }}">
                                 <td><a href="{{ url_for('view_ticket', TicketID=ticket.TicketID)}}" class="ticket-link">{{ ticket.ticketNumber }}</a></td>
                                 <td>{{ ticket.subject }}</td>
@@ -69,6 +72,7 @@
                                         {{ ticket.status.name }}
                                     </div>
                                 </td>
+                                <!--TODO: Fix bug that makes this portion flip the column header styling. It is here to ensure that priorities are handled when filtering in the correct order-->
                                 <td data-order="
                                     {% if ticket.priority.name == 'Critical' %}5
                                     {% elif ticket.priority.name == 'Urgent' %}4
@@ -103,7 +107,6 @@
 <script src="{{ url_for('static', filename='js/ticketview.js') }}"></script>
 <script>
 //TODO: Implement date range filtering
-//TODO: Make it so each column has correct order (Ex: Priority sorts from Low to Urgent, and not alphabetically)
 $(document).ready(function() {
     $('#ticketTable').DataTable({
         ordering: true,

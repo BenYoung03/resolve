@@ -147,6 +147,7 @@
     margin-top: 85px;          
 }
 
+/* Styling for different ticket statuses */
 #ticket-status.status-open{ 
     background: #2f7de1;
 }

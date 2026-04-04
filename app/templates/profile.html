@@ -50,6 +50,7 @@
                 {% endif %}
 
             </div>
+            <!--Displays an activity log similar to the individual ticket log. The only difference being ticket number is displayed instead of the user with a clickable link-->
             <div class="activity-log-container">
                 <h2>Activity Log</h2>
 
@@ -71,7 +72,7 @@
         </div>
         <div class="edit-profile-container">
             <h2>Edit Profile</h2>
-            
+            <!--Form for editing a profile with username, email and notification preferences as an input-->
             <form action="" method="post" novalidate class="edit-profile-form">
                 {{ profileForm.hidden_tag() }}
 
@@ -108,6 +109,7 @@
             </form>
             <button id="toggleChangePassword" class="change-password-toggle">Change Password</button>
             <h2 class="change-password-header">Security</h2>
+            <!--Form to change the users password-->
             <form action="" method="post" novalidate class="change-password-form">
                 
                 {{ passwordForm.hidden_tag() }}

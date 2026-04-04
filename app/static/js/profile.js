@@ -1,3 +1,5 @@
+// JavaScript for handling the toggle change password form on the profile page
+
 var toggleChangePassword = document.getElementById("toggleChangePassword");
 var changePasswordForm = document.querySelector(".change-password-form");
 var changePasswordHeader = document.querySelector(".change-password-header");
