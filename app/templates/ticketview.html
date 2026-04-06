@@ -31,11 +31,12 @@
                                 <h1 class="ticket-number">{{ ticket.ticketNumber }}</h1>
                                 <h2>{{ ticket.subject }}</h2>
                             </div>
-
+                            <!--Gets the ticket status and adds the status name to the class list for styling purposes-->
                             <div id="ticket-status" class="status-{{ ticket.status.name|lower|replace(' ', '-') if ticket.status else 'unknown' }}">{{ ticket.status.name if ticket.status else 'Unknown' }}</div>
                         </div>
                         <div class="ticket-information">
                             <div class="information-element"><strong>Priority:</strong> 
+                                <!--Gets the ticket priority and adds the priority name to the class list for styling purposes-->
                                 <div class="priority priority-{{ ticket.priority.name|lower|replace(' ', '-') if ticket.priority else 'unknown' }}">
                                     {{ ticket.priority.name if ticket.priority else 'Unknown' }}
                                 </div>
@@ -55,6 +56,7 @@
                                 <strong>Ticket Age:</strong>
                                 <div>{{ ticketAge }}</div>
                             </div>
+                            <!--If the ticket has been resolved, display resolution details-->
                             {% if ticket.status and ticket.status.name == 'Resolved' %}
                                 <div class="status-element">
                                     <strong>Resolution At:</strong>
@@ -79,14 +81,34 @@
                             <h2>Description</h2>
                             <div class="description-text">{{ ticket.description }}</div>
                         </div>
-                        <!--TODO: Maybe combine Activity and Comment container and make each toggleable-->
+                        <!--If the user is an agent or admin or has agent perms display the large activity log above the comments field-->
                         {% if current_user.has_role(['Agent', 'Admin']) or current_user.has_permission('view_all_tickets') or current_user.has_permission('ticket_agent') or current_user.has_permission('assign_tickets') %}
                         <div class="activity-log-container">
                             <h2>Activity Log</h2>
-
+                            <div class="filters-container">
+                                <!--Filter buttons that filter by each activity type-->
+                                <button class="activity-filter active" data-filter="all">All</button>
+                                <button class="activity-filter" data-filter="status">Status Changes</button>
+                                <button class="activity-filter" data-filter="assignment">Assignments</button>
+                                <button class="activity-filter" data-filter="resolved">Resolutions</button>
+                                <button class="activity-filter" data-filter="priority">Priority Changes</button>
+                            </div>
                             <div class="activity-list">
                                 {% for activity in activities %}
-                                    <div class="activity-item">
+                                {% set activity_type = 'system' %}
+
+                                {% if 'Status' in activity.action %}
+                                    {% set activity_type = 'status' %}
+                                {% elif 'assigned' in activity.action or 'unassigned' in activity.action %}
+                                    {% set activity_type = 'assignment' %}
+                                {% elif 'resolved' in activity.action %}
+                                    {% set activity_type = 'resolved' %}
+                                {% elif 'Priority' in activity.action %}
+                                    {% set activity_type = 'priority' %}
+                                {% endif %}
+                                
+                                    <!--Sets the activity type based on the contents of the activity action-->
+                                    <div class="activity-item" data-type="{{ activity_type }}">
                                         <div class="activity-content">
                                             <div class="activity-author">{{ activity.user.username if activity.user and activity.user.username else (activity.user.email if activity.user else 'Unknown User') }}</div>
                                             <div class="activity-separator">|</div>
@@ -108,6 +130,7 @@
 
                                 {% for comment in ticket.comments %}
                                 {% set commenter_role = comment.user.role.name if comment.user and comment.user.role else '' %}
+                                <!--Use the commenters role to apply different styling based on if they are an agent or admin versus an employee-->
                                 <div class="comment-item">
                                     <div class="comment-avatar {% if commenter_role == 'Admin' or commenter_role == 'Agent' %}comment-avatar-agent{% endif %}">
                                         {{ comment.user.email[0]|upper if comment.user and comment.user.email else 'U' }}
@@ -150,11 +173,11 @@
                             </div>
                         </div>
                     </div>
-                    <!--TODO: ADD ACTIVITY BOX SHOWING THINGS SUCH AS WHEN ASSIGNMENTS CHANGE OR PRIORITY CHANGES-->
                     {% if current_user.has_role(['Agent', 'Admin']) or current_user.has_permission('assign_tickets') or current_user.has_permission('update_ticket_priority') or current_user.has_permission('update_ticket_status') %}
                     <div class="update-ticket-container">
                         <h2>Update Ticket</h2>
                         
+                        <!--Form to update ticket priority, status or assignee for agents or admins only-->
                         <form action="" method="post" novalidate class="update-ticket-form">
                             {{ updateTicketForm.hidden_tag() }}
 
@@ -164,14 +187,13 @@
                             {{ updateTicketForm.assignedTo.label }}
                             {{ updateTicketForm.assignedTo(class="update-select", id="assigned-select") }}
 
-                            <!--TODO: Make it so that you can only change ticket status if the ticket has been assigned. Also make it so that when a ticket is assigned, 
-                            Open is removed as an option for status-->
                             {{ updateTicketForm.status.label }} 
                             {{ updateTicketForm.status(class="update-select", id="status-select") }}
 
                             {{ updateTicketForm.resolutionReasoning.label(class="resolution-reasoning-label") }}
                             {{ updateTicketForm.resolutionReasoning(class="resolution-reasoning-input", placeholder="Enter reasoning for resolution here...") }}
 
+                            <!--Display resolution reasoning form errors-->
                             {% if updateTicketForm.resolutionReasoning.errors %}
                                 <div class="error-message">
                                     {% for error in updateTicketForm.resolutionReasoning.errors %}
@@ -180,6 +202,7 @@
                                 </div>
                             {% endif %}
 
+                            <!--Flash any form errors (i.e. ticket cannot be Open and assigned)-->
                             {% with messages = get_flashed_messages() %}
                                 {% if messages %}
                                 <ul class="flashed-message-list">
@@ -194,12 +217,30 @@
                         </form>
                     </div>
                     {% else %}
+                    <!--The smaller activity container. This is displayed in place of the update ticket form for all users with no agent or admin perms. Same functionality as the larger activity log container just a smaller container-->
                     <div class="activity-log-container-small">
                             <h2>Activity Log</h2>
-
+                            <div class="filters-container">
+                                <button class="activity-filter active" data-filter="all">All</button>
+                                <button class="activity-filter" data-filter="status">Status Changes</button>
+                                <button class="activity-filter" data-filter="assignment">Assignments</button>
+                                <button class="activity-filter" data-filter="resolved">Resolutions</button>
+                                <button class="activity-filter" data-filter="priority">Priority Changes</button>
+                            </div>
                             <div class="activity-list">
                                 {% for activity in activities %}
-                                    <div class="activity-item">
+                                {% set activity_type = 'system' %}
+
+                                {% if 'Status' in activity.action %}
+                                    {% set activity_type = 'status' %}
+                                {% elif 'assigned' in activity.action or 'unassigned' in activity.action %}
+                                    {% set activity_type = 'assignment' %}
+                                {% elif 'resolved' in activity.action %}
+                                    {% set activity_type = 'resolved' %}
+                                {% elif 'Priority' in activity.action %}
+                                    {% set activity_type = 'priority' %}
+                                {% endif %}
+                                    <div class="activity-item" data-type="{{ activity_type }}">
                                         <div class="activity-content">
                                             <div class="activity-author">{{ activity.user.username if activity.user and activity.user.username else (activity.user.email if activity.user else 'Unknown User') }}</div>
                                             <div class="activity-separator">|</div>
@@ -207,7 +248,7 @@
                                                 {{ activity.CreatedAt.strftime('%b %d, %Y, %I:%M %p') if activity.CreatedAt else 'Unknown' }}
                                             </div>
                                             <div class="activity-separator">|</div>
-                                            <div class="activity-text">{{ activity.action }}</div>
+                                            <div class="activity-text small">{{ activity.action }}</div>
                                         </div>
                                     </div>
                                 {% endfor %}
@@ -215,7 +256,6 @@
                         </div> 
                     {% endif %}
                 </div>
-
             </div>
         </div>
     </div>

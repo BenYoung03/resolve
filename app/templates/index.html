@@ -19,6 +19,15 @@
                     <li><a href="/index/open">Open Tickets</a></li>
                     <li><a href="/index/closed">Closed Tickets</a></li>
                     <li><a href="/createticket">New Ticket</a></li>
+                    {% with messages = get_flashed_messages() %}
+                        {% if messages %}
+                        <ul class="flashed-message-list">
+                            {% for message in messages %}
+                                <li class="flashed-message-element">{{ message }}</li>
+                            {% endfor %}
+                        </ul>
+                        {% endif %}
+                    {% endwith %}
                     <!--TODO: Maybe add fourth button for "Resolved Tickets" for Admins only-->
                 </ul>
             </div>
@@ -29,6 +38,7 @@
                     <div class="open-closed">
                         <a href="/index/open" id="open-tickets">Open Tickets</a>
                         <a href="/index/closed" id="closed-tickets">Closed Tickets</a>
+                        <!--Display assigned to me button if agent/admin perms present-->
                         {% if current_user.has_role(['Agent', 'Admin']) or
                             current_user.has_permission('ticket_agent') or
                             current_user.has_permission('assign_tickets') %}
@@ -50,7 +60,9 @@
                             </tr>
                         </thead>
                         <tbody>
+                            <!--Display each tickets information in a row in the datatables table-->
                             {% for ticket in tickets %}
+                            <!--Makes each row clickable instead of just the ticketID-->
                             <tr class="clickable-row" data-href="{{ url_for('view_ticket', TicketID=ticket.TicketID) }}">
                                 <td><a href="{{ url_for('view_ticket', TicketID=ticket.TicketID)}}" class="ticket-link">{{ ticket.ticketNumber }}</a></td>
                                 <td>{{ ticket.subject }}</td>
@@ -93,7 +105,6 @@
 <script src="{{ url_for('static', filename='js/ticketview.js') }}"></script>
 <script>
 //TODO: Implement date range filtering
-//TODO: Make it so each column has correct order (Ex: Priority sorts from Low to Urgent, and not alphabetically)
 $(document).ready(function() {
     $('#ticketTable').DataTable({
         ordering: true,

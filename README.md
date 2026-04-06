@@ -121,6 +121,64 @@ With Resolve, Users are able to create tickets by filling out the create ticket 
 
 ![Ticket Form](README%20Images/NewTicket.png)
 
+This code snippet shows the route that is run when a ticket is created. The category and priority select field in the CreateTicketForm are populated dynamically using information from the database. On form submission, the data from the form is read and used to create a new ticket. This ticket is then created and added to the database. Before committing the new ticket to the database, a ticket number is generated, in the format of the TicketID with leading 0s appended to the text "ID-". db.session.flush() is used so the TicketID is available before committing the ticket to the database. A new ActivityLog entry is also created, tracking the user who created the ticket, the associated TicketID, the action, being ticket creation, and the time of the activity. If the user has email notifications enabled, a notification email is sent indicating that the ticket was successfully created. Agents with email notifications enabled are also subsequently notified upon creation.
+
+```python
+@app.route('/createticket', methods=['GET', 'POST'])
+@login_required
+def create_ticket():
+    form = CreateTicketForm()
+
+    form.category.choices = [(c.CategoryID, c.name) for c in Category.query.all()]
+    form.priority.choices = [(p.PriorityID, p.name) for p in Priority.query.all()]
+    if form.validate_on_submit():
+        newTicket = Ticket(
+            subject=form.subject.data,
+            description=form.description.data,
+            CategoryID=form.category.data,
+            PriorityID=form.priority.data,
+            StatusID=1,  # Sets status to open by default
+            CreatedBy=current_user.UserID,
+            AssignedTo=None,
+            CreatedAt=datetime.now(),
+            ClosedAt=None
+        )
+
+        db.session.add(newTicket)
+        db.session.flush() 
+
+        newTicket.ticketNumber = f"ID-{newTicket.TicketID:06d}"
+
+        newActivity = ActivityLog(
+            UserID = newTicket.CreatedBy,
+            TicketID = newTicket.TicketID,
+            action = "Ticket created",
+            CreatedAt=datetime.now(),
+        )
+
+        db.session.add(newActivity)
+
+        db.session.commit()
+
+        if current_user.notifications:
+            ticketCreated(newTicket, current_user.email)
+
+        agents = (db.session.scalars(sa.select(User).where(User.roleId.in_([2, 3]))).all())
+        agentsEmails = [agent.email for agent in agents]
+        # Notify agents who have notifications enabled
+        notifyAgentsOfNewTicket(newTicket, [email for agent, email in zip(agents, agentsEmails) if agent.notifications])
+
+        flash(f'Ticket {newTicket.ticketNumber} created successfully.')
+        return redirect(url_for('index'))
+
+    if request.method == "POST" and not form.validate():
+        for field_errors in form.errors.values():
+            for error in field_errors:
+                flash(error, "warning")
+
+    return render_template('newticket.html', form=form)
+```
+
 Users are able to view tickets on the home page of Resolve. The home page features buttons that allow users to submit a new ticket and filter tickets by open, closed, and ticket assignment if the user is an agent/admin. The table that contains the ticket information is built using the DataTables library. Users are able to filter each column as well as search for individual tickets as a result. 
 
 ![Home Page](README%20Images/HomePage.png)
@@ -142,6 +200,76 @@ Resolve also features automated email notifications, which keep users informed a
 
 ![Password Reset](README%20Images/PasswordReset.png)
 
+The following is a code snippet showing one of the Flask Mail email templates. This function sends an email to the agent that a ticket has been assigned too. Using python threads, we have implemented aysnchronous email sending. The sendAsyncEmail function is passed the application context and the Flask Mail message object and the message is then sent as a background thread. This allows users to continue using Resolve while the email sends in the background.
+
+```python
+def ticketAssignedNotification(ticket, recipient):
+    msg = Message(
+        subject=f"Ticket Has Been Assigned To You: {ticket.ticketNumber}",
+        recipients=[recipient]
+    )
+
+    msg.body = f"""
+    Hello {ticket.assignee.username},
+
+    A support ticket has been assigned to you.
+
+    Ticket Details:
+    Ticket Number: {ticket.ticketNumber}
+    Subject: {ticket.subject}
+    Category: {ticket.category.name}
+    Priority: {ticket.priority.name}
+    Created: {ticket.CreatedAt.strftime('%b %d, %Y, %I:%M %p')}
+
+    Please log in to Resolve Ticketing to review the ticket.
+
+    Thank you,
+    Resolve Ticketing
+    """
+
+    msg.html = render_template(
+        'email/ticketAssigned.html',
+        ticket=ticket
+    )
+
+    Thread(target=sendAsyncEmail, args=(app, msg)).start()
+```
+
+### Profile Page
+
+Resolve also features a profile page. This profile page allows users to modify their account information. This information includes email, username and password. Furthermore, users are able to view information related to tickets. Support staff are able to view the number of tickets assigned to them, the number of unassigned tickets that are open, and the amount of tickets they have resolved since their account has been created.
+
+Users without any ticket modification permissions (i.e. employees) can see how many tickets they have created, how many of those tickets are open, and how many of their tickets they have created have been resolved.
+
+Furthermore, all users are able to view the last five actions they have performed on tickets via the profile activity log. For example, agents can see the last tickets they have assigned, changed the status of, etc.
+
+![Profile Page](README%20Images/Profile.png)
+
+The following is the HTML template code for the ticket overview. This is a great demonstration on how Resolve handles role based access via Jinja templates.
+
+```html
+<div class="ticket-overview">
+    <h2>Ticket Overview</h2>
+
+    {% if current_user.has_role(['Agent', 'Admin']) or
+          current_user.has_permission('ticket_agent') or
+          current_user.has_permission('assign_tickets') %}
+        <!--Support Staff-->
+        <div class="overview-element">
+            <div class="overview-title">Assigned to Me:</div>
+            <div class="overview-info">{{ assigned_to_me_count }}</div>
+        </div>
+        <!--Remaining overview here...-->
+    {% else %}
+        <!--Employees-->
+        <div class="overview-element">
+            <div class="overview-title">Tickets Created:</div>
+            <div class="overview-info">{{ tickets_created_count }}</div>
+        </div>
+        <!--Remaining overview here...-->
+    {% endif %}
+</div>
+```
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 # Contact

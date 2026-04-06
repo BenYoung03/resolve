@@ -73,38 +73,30 @@
 
 						<tr>
 							<td class="email-content">
-								<div class="email-opener">New Ticket Created</div>
+								<div class="email-opener">{{ ticket.ticketNumber }} Resolved</div>
 
                                 <div class="email-line">
-									Hello Agent,
+									Hello,
 								</div>
 
 								<div class="email-line">
-									A new support ticket has been created.
+									Your ticket has been resolved.
 								</div>
 
 								<div class="email-line">
-									Ticket Details:
-								</div>
-
-								<div class="email-line">
-									<strong>Ticket Number:</strong> {{ ticket.ticketNumber }}
+									<strong>Ticket:</strong> {{ ticket.ticketNumber }}
 								</div>
 
 								<div class="email-line">
 									<strong>Subject:</strong> {{ ticket.subject }}
 								</div>
 
-                                <div class="email-line">
-									<strong>Category:</strong> {{ ticket.category.name }}
+								<div class="email-line">
+									<strong>Resolution :</strong> {{ ticket.ResolutionReasoning }}
 								</div>
 
-                                <div class="email-line">
-									<strong>Priority:</strong> {{ ticket.priority.name }}
-								</div>
-
-                                <div class="email-line">
-									<strong>Created:</strong> {{ ticket.CreatedAt.strftime('%b %d, %Y, %I:%M %p') }}
+								<div class="email-line">
+									<strong>Agent:</strong> {{ ticket.assignee.email }}
 								</div>
 
 								<div class="email-button">
@@ -113,10 +105,11 @@
 									</a>
 								</div>
 						
-                                <div class="email-line">
-									Please log in to Resolve Ticketing to review and assign the ticket.
-								</div>
                                 
+								<div class="email-line">
+									If you have any issues, please contact the agent or leave a comment to have the ticket reopened.
+								</div>
+
 								<div class="email-line">
 									Thank you,
 								</div>

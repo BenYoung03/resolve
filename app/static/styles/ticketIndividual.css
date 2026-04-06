@@ -27,6 +27,7 @@
     padding: 0;
 }
 
+/*Left menu styling which includes styling for the links and the container itself*/
 .left-menu {
     position: sticky;
     top: 0;
@@ -68,6 +69,7 @@
     border-bottom: none;
 }
 
+/*Border, padding and margin styling for each of the containers on the ticket page*/
 .ticket-summary,
 .description-container,
 .comments-container, 
@@ -83,27 +85,34 @@
 
 .ticket-summary{
     display: flex;
-    width: 100%;
+    width: 99%;
 }
 
 .description-container,
 .comments-container,
-.update-ticket-container,
 .activity-log-container{
     width: 100%;
     padding-left: 0;
     padding-right: 0;
 }
 
-.activity-log-container-small {
+.activity-log-container-small,
+.update-ticket-container {
     padding-left: 0;
     padding-right: 0;
 }
 
+.activity-text.small {
+    flex-basis: 100%;
+    display: block;
+}
+
+/*Ticket summary left is the left side of the summary header which contains general information about the ticket*/
 .ticket-summary-left{
     width: 69%;
 }
 
+/*Ticket summary right is the right side of ticket summary which contains resolution information and ticket age*/
 .ticket-summary-right{
     width: 28%;
     display: flex;
@@ -131,6 +140,21 @@
     border-bottom: none;
 }
 
+/*Styling for the bottom half container which contains the activity log container, comments, update ticket form, etc.*/
+.bottom-container {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    width: 100%;
+}
+
+/*Left container takes up the first 70% of the bottom container and contains activity log, description, etc.*/
+.left-container{
+    width: 70%;
+    display: flex;
+    flex-direction: column;
+}
+
 #ticket-status{
     padding: 6px 12px;
     border-radius: 6px;
@@ -142,6 +166,7 @@
     margin-top: 85px;          
 }
 
+/* Styling for different ticket statuses */
 #ticket-status.status-open{ 
     background: #2f7de1;
 }
@@ -223,6 +248,8 @@
 .description-text {
     padding-top: 6px;
 }
+
+/*Header styling for all the containers*/
 
 .description-container h2,
 .comments-container h2,
@@ -388,7 +415,8 @@
 }
 
 .comment-submit,
-.update-ticket-submit {
+.update-ticket-submit,
+.activity-filter {
     background-color: #2f7de1;
     color: white;
     border: none;
@@ -397,6 +425,29 @@
     font-size: 15px;
     cursor: pointer;
     min-width: 95px;
+}
+
+.activity-filter{
+    background-color: transparent;
+    color: #2f7de1;
+    border: 1px solid #2f7de1;
+    padding: 6px 12px;
+    font-size: 14px;
+    min-width: auto;
+}
+
+.activity-filter.active,
+.activity-filter:hover {
+    background-color: #2f7de1;
+    color: white;
+}
+
+.filters-container{
+    margin: 5px 0 0 15px;
+}
+
+.activity-log-container-small > .filters-container > .activity-filter{
+    margin-top: 5px;
 }
 
 .update-ticket-submit {
@@ -408,19 +459,7 @@
     background-color: #2563eb;
 }
 
-.bottom-container {
-    display: flex;
-    gap: 20px;
-    align-items: flex-start;
-    width: 100%;
-}
-
-.left-container{
-    width: 70%;
-    display: flex;
-    flex-direction: column;
-}
-
+/*Width of 30% for the update ticket container or the small activity log which coincides directly with the left container, filling 100% of the space */
 .update-ticket-container,
 .activity-log-container-small {
     width: 30%;
@@ -478,4 +517,5 @@
 .status-element{
     margin-bottom: 15px;
 }
+
 

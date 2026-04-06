@@ -18,6 +18,7 @@ PERMISSION_CHOICES = [
 ]
 
 class LoginForm(FlaskForm):
+    # Login form with email, password, remember me checkbox, and submit button
     email = StringField('Email Address', validators=[
         DataRequired(),
         Email(message='Please enter a valid email address.')
@@ -27,6 +28,7 @@ class LoginForm(FlaskForm):
     submit = SubmitField('Sign In')
 
 class RegistrationForm(FlaskForm):
+    # Registration form with username, email, password, confirm password, and submit button
     username = StringField('Username', validators=[
         DataRequired(),
         Length(min=3, max=15, message='Username must be between 3 and 15 characters.')
@@ -47,6 +49,7 @@ class RegistrationForm(FlaskForm):
     submit = SubmitField('Register')
 
 class PasswordResetForm(FlaskForm):
+    # Password reset form with email field and submit button
     email = StringField('Email Address', validators=[
         DataRequired(),
         Email(message='Please enter a valid email address.')
@@ -54,6 +57,7 @@ class PasswordResetForm(FlaskForm):
     submit = SubmitField('Request Password Reset')
 
 class ResetPasswordForm(FlaskForm):
+    # Password reset form with new password, confirm password, and submit button
     password = PasswordField('Password', validators=[
         DataRequired(),
         Length(min=6, message='Password must be at least 6 characters long.')
@@ -64,6 +68,7 @@ class ResetPasswordForm(FlaskForm):
     submit = SubmitField('Reset Password')
 
 class CreateTicketForm(FlaskForm):
+    # Takes subject, description, category, priority, and submit button from user input and uses that info to create a ticket
     subject = StringField(
         "Subject",
         validators=[DataRequired(), Length(min=3, max=200, message="Subject must be between 3 and 200 characters long")]
@@ -71,6 +76,7 @@ class CreateTicketForm(FlaskForm):
 
     description = TextAreaField(
         "Description",
+        # Description must be at least 10 characters to ensure proper level of detail
         validators=[DataRequired(), Length(min=10, message="Description must be 10 characters long")]
     )
 
@@ -96,6 +102,7 @@ class CommentForm(FlaskForm):
     submit = SubmitField("Add Comment")
 
 class UpdateTicket(FlaskForm):
+    # Form for updating a ticket's status, priority, assignee, and resolution reasoning
     status = SelectField(
         "Status",
         coerce=int,
@@ -121,8 +128,9 @@ class UpdateTicket(FlaskForm):
 
     submit = SubmitField("Update Ticket")
 
+    # Does not validate the form if a ticket is being resolved without a resolution reasoning
     def validate_resolutionReasoning(self, field):
-        if self.status.data in [5, 6] and not field.data:
+        if self.status.data in [5] and not field.data:
             raise ValidationError("Resolution reasoning is required when closing or resolving a ticket.")
         
 
@@ -190,3 +198,29 @@ class AdminNewUserForm(FlaskForm):
     ])
     role = SelectField('Role', coerce=int, validators=[DataRequired()])
     submit = SubmitField('Create User')
+
+class EditProfileForm(FlaskForm):
+    # Form for users to edit their profile information, including username, email, and notification preferences
+    username = StringField('Username', validators=[
+        DataRequired(),
+        Length(min=3, max=15, message='Username must be between 3 and 15 characters.')
+    ])
+    email = StringField('Email', validators=[
+        DataRequired(),
+        Email(message='Please enter a valid email address.')
+    ])
+    notifications = BooleanField('Email Notifications?')
+    submit = SubmitField('Save Changes')
+
+class ChangePasswordForm(FlaskForm):
+    # Change password form for user profile page
+    current_password = PasswordField('Current Password', validators=[DataRequired()])
+    new_password = PasswordField('New Password', validators=[
+        DataRequired(),
+        Length(min=6, message='Password must be at least 6 characters long.')
+    ])
+    confirm_new_password = PasswordField('Confirm New Password', validators=[
+        DataRequired(),
+        EqualTo('new_password', message='Passwords must match.')
+    ])
+    submit = SubmitField('Save Changes')

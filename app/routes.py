@@ -5,7 +5,7 @@ import sqlalchemy as sa
 from app.forms import (
     CommentForm, LoginForm, RegistrationForm, CreateTicketForm, UpdateTicket,
     AdminSettingsForm, AdminProfileForm, AdminNewClientForm, AdminRoleForm,
-    AdminResetPasswordForm, AdminNewUserForm, PasswordResetForm, ResetPasswordForm
+    AdminResetPasswordForm, AdminNewUserForm, PasswordResetForm, ResetPasswordForm, EditProfileForm, ChangePasswordForm
 )
 from app.models import TicketComment, User, Role, Category, Status, Priority, Ticket, ActivityLog
 from werkzeug.security import generate_password_hash, check_password_hash
@@ -15,7 +15,7 @@ from functools import wraps
 
 from flask_mail import Message
 from app import mail
-from app.email import notifyAgentsOfNewTicket, ticketAssignedNotification, ticketCreated, ticketStatusChangeNotification, passwordResetEmail, commentAddedNotification
+from app.email import notifyAgentsOfNewTicket, ticketAssignedNotification, ticketCreated, ticketResolvedNotification, ticketStatusChangeNotification, passwordResetEmail, commentAddedNotification
 
 #Role required route. If you place @role_required("Role here") under any of the routes, the user will
 #Have to have that role to run the route
@@ -80,6 +80,7 @@ def can_use_assigned_queue(user):
 def index():
     if not current_user.is_authenticated:
         return redirect(url_for('login'))
+    # Gets all tickets not resolved or closed
     elif can_view_all_tickets(current_user):
         tickets = db.session.scalars(
             sa.select(Ticket)
@@ -87,6 +88,7 @@ def index():
             .order_by(Ticket.CreatedAt.desc())
         ).all()
     else:
+        # Gets all tickets created by the user that are not resolved or closed
         tickets = db.session.scalars(
             sa.select(Ticket)
             .where(
@@ -105,6 +107,7 @@ def index():
 def closed_tickets():
     if not current_user.is_authenticated:
         tickets = []
+        # Gets all closed/resolved tickets
     elif can_view_all_tickets(current_user):
         tickets = db.session.scalars(
             sa.select(Ticket)
@@ -112,6 +115,7 @@ def closed_tickets():
             .order_by(Ticket.CreatedAt.desc())
         ).all()
     else:
+        # Gets all closed/resolved tickets created by the user
         tickets = db.session.scalars(
             sa.select(Ticket)
             .where(
@@ -130,6 +134,7 @@ def closed_tickets():
 def open_tickets():
     if not current_user.is_authenticated:
         tickets = []
+        # Gets all open tickets that are not resolved or closed
     elif can_view_all_tickets(current_user):
         tickets = db.session.scalars(
             sa.select(Ticket)
@@ -137,6 +142,7 @@ def open_tickets():
             .order_by(Ticket.CreatedAt.desc())
         ).all()
     else:
+        # Gets all open tickets that are not resolved or closed created by the user
         tickets = db.session.scalars(
             sa.select(Ticket)
             .where(
@@ -152,11 +158,13 @@ def open_tickets():
 
 @app.route('/index/assigned')
 @login_required
+# Users must be an agent or admin or be able to assign tickets/have the ticket agent permission
 @role_or_permission_required(
     roles=['Agent', 'Admin'],
     permissions=['assign_tickets', 'ticket_agent']
 )
 def assigned_tickets():
+    # Gets all tickets assigned to the user that are not resolved or closed
     tickets = db.session.scalars(
         sa.select(Ticket).where(
             sa.and_(
@@ -201,7 +209,7 @@ def login():
             return redirect(url_for('login'))
 
         # If details correct, run Flask-Login "login_user"
-        login_user(user, remember=True)
+        login_user(user, remember=form.remember_me.data)
         return redirect(url_for('index'))
 
     return render_template('login.html', form=form)
@@ -235,7 +243,12 @@ def register():
             return redirect(url_for('register'))
 
         # Commit new user to database if no user already exists
-        new_user = User(username=username, email=email, password_hash=generate_password_hash(password), roleId=1)
+        new_user = User(
+            username=username, 
+            email=email, 
+            password_hash=generate_password_hash(password), roleId=1,
+            notifications=True
+        )
         db.session.add(new_user)
         db.session.commit()
         return redirect(url_for('login'))
@@ -250,11 +263,13 @@ def password_reset_request():
 
     if form.validate_on_submit():
         user = db.session.scalar(sa.select(User).where(User.email == form.email.data))
+        # If there is a user matching the provided email, send them the password reset email
         if user:
             passwordResetEmail(user)
         flash('If an account with that email exists, a password reset email has been sent.')
         return redirect(url_for('login'))
 
+    # Flash errors if form was submitted but not validated
     if request.method == 'POST' and not form.validate():
         for field_errors in form.errors.values():
             for error in field_errors:
@@ -265,17 +280,20 @@ def password_reset_request():
 def reset_password(token):
     if current_user.is_authenticated:
         return redirect(url_for('index'))
+    # Verify the token and get the user associated with it. Token is passed from the password reset email that is generated when a user requests a password reset.
     user = User.verify_reset_password_token(token)
     if not user:
         flash('Invalid or expired token. Please try again.')
         return redirect(url_for('login'))
     form = ResetPasswordForm()
+    # Set new password on form submission
     if form.validate_on_submit():
         user.set_password(form.password.data)
         db.session.commit()
         flash('Your password has been reset.')
         return redirect(url_for('login'))
 
+    # Flash errors if form was submitted but not validated
     if request.method == 'POST' and not form.validate():
         for field_errors in form.errors.values():
             for error in field_errors:
@@ -297,9 +315,11 @@ def logout():
 def create_ticket():
     form = CreateTicketForm()
 
+    # Populate create ticket form category and priority selection choices
     form.category.choices = [(c.CategoryID, c.name) for c in Category.query.all()]
     form.priority.choices = [(p.PriorityID, p.name) for p in Priority.query.all()]
     if form.validate_on_submit():
+        # Creates new ticket with form data
         newTicket = Ticket(
             subject=form.subject.data,
             description=form.description.data,
@@ -312,11 +332,15 @@ def create_ticket():
             ClosedAt=None
         )
 
+        # Add ticket to the database and flush so that the ticket ID is generated but not committed to the database
+
         db.session.add(newTicket)
         db.session.flush() 
 
+        # Generates ticket number in format ID-000001 with leading zeros based on the ticket ID and adds it to the ticket
         newTicket.ticketNumber = f"ID-{newTicket.TicketID:06d}"
 
+        # Log new activity for ticket creation
         newActivity = ActivityLog(
             UserID = newTicket.CreatedBy,
             TicketID = newTicket.TicketID,
@@ -324,18 +348,23 @@ def create_ticket():
             CreatedAt=datetime.now(),
         )
 
+        # Commit new activity to the database
         db.session.add(newActivity)
-
         db.session.commit()
-        ticketCreated(newTicket, current_user.email)
 
+        # If the user who created the ticket has notifications enabled, push an email notification about creation 
+        if current_user.notifications:
+            ticketCreated(newTicket, current_user.email)
+
+        # Gets all agents and admins and sends them an email if they have notifications enabled
         agents = (db.session.scalars(sa.select(User).where(User.roleId.in_([2, 3]))).all())
         agentsEmails = [agent.email for agent in agents]
-        notifyAgentsOfNewTicket(newTicket, agentsEmails)
+        notifyAgentsOfNewTicket(newTicket, [email for agent, email in zip(agents, agentsEmails) if agent.notifications])
 
         flash(f'Ticket {newTicket.ticketNumber} created successfully.')
         return redirect(url_for('index'))
 
+    # flash form validation errors
     if request.method == "POST" and not form.validate():
         for field_errors in form.errors.values():
             for error in field_errors:
@@ -347,17 +376,20 @@ def create_ticket():
 @login_required
 def view_ticket(TicketID):
 
+    # Get current ticket
     currentTicket = db.session.scalar(sa.select(Ticket).where(Ticket.TicketID == TicketID))
     if not currentTicket:
         flash('Ticket not found.')
         return redirect(url_for('index'))
 
+    # User can view ticket if they have the view all tickets permission, or if they created the ticket or are assigned the ticket
     allowed_to_view = (
         can_view_all_tickets(current_user) or
         currentTicket.CreatedBy == current_user.UserID or
         currentTicket.AssignedTo == current_user.UserID
     )
 
+    # flash error message if not allowed to view
     if not allowed_to_view:
         flash('You do not have permission to view this ticket.')
         return redirect(url_for('index'))
@@ -365,6 +397,7 @@ def view_ticket(TicketID):
     addCommentForm = CommentForm()
     updateTicketForm = UpdateTicket()
 
+    # populate update ticket from with priorities and choices from the database. Also get all users who can be assigned tickets
     updateTicketForm.priority.choices = [(p.PriorityID, p.name) for p in Priority.query.all()]
     updateTicketForm.status.choices = [(s.StatusID, s.name) for s in Status.query.all()]
     updateTicketForm.assignedTo.choices = [(0, 'Unassigned')] + [
@@ -373,14 +406,17 @@ def view_ticket(TicketID):
         if can_be_assigned_tickets(u)
     ]
 
+    # Get all comments associated with the ticket
     comments = db.session.scalars(
         sa.select(TicketComment).where(TicketComment.TicketID == TicketID).order_by(TicketComment.CreatedAt.asc())
     ).all()
-    #TODO: Add Activity pagination for better UI
+    #Get all activities associated with the ticket
+    #TODO: Pagination for activities if time
     activities = db.session.scalars(
         sa.select(ActivityLog).where(ActivityLog.TicketID == TicketID).order_by(ActivityLog.CreatedAt.desc())
     ).all()
 
+    # Calculate ticket age by finding the difference between the current time and the ticket creation time. If the ticket is closed, find the difference between the closed time and the creation time. 
     temp = (currentTicket.ClosedAt if currentTicket.ClosedAt else datetime.now()) - currentTicket.CreatedAt    
     totalSeconds = int(temp.total_seconds())
     hours = totalSeconds // 3600
@@ -392,6 +428,7 @@ def view_ticket(TicketID):
     else:
         ticketAge = f"{hours}h {minutes}m"
 
+    # If loading the page, get the current ticket info and prepopulate the modify ticket form options with the current data
     if request.method == 'GET':
         updateTicketForm.priority.data = currentTicket.PriorityID
         updateTicketForm.status.data = currentTicket.StatusID
@@ -399,29 +436,36 @@ def view_ticket(TicketID):
         updateTicketForm.resolutionReasoning.data = currentTicket.ResolutionReasoning or ""
 
     if addCommentForm.validate_on_submit():
+        # Create new comment on comment form submission
         newComment = TicketComment(
             comment=addCommentForm.comment.data,
             TicketID=TicketID,
             UserID=current_user.UserID,
             CreatedAt=datetime.now()
         )
-        commentAddedNotification(
-            currentTicket,
-            currentTicket.creator.email,
-            current_user.email,
-            addCommentForm.comment.data,
-            newComment.CreatedAt,
-            current_user.role.name if current_user.role else None,
-        )
 
+        # Send email updating ticket creator about new comment if they have notifications enabled.
+        if currentTicket.creator.notifications:
+            commentAddedNotification(
+                currentTicket,
+                currentTicket.creator.email,
+                current_user.email,
+                addCommentForm.comment.data,
+                newComment.CreatedAt,
+                current_user.role.name if current_user.role else None,
+            )
+
+        # Commit to DB
         db.session.add(newComment)
         db.session.commit()
 
         return redirect(url_for('view_ticket', TicketID=TicketID))
 
     # TODO: Add more flash style error messages
-    # TODO: Make it so other status' can only be applied upon assigning to an agent
+
+    # All of the actions that take place upon update ticket form submission (there is a lot)
     if updateTicketForm.validate_on_submit():
+        # Track old status, priority and assigned for comparison with the new data
         oldStatus = currentTicket.StatusID
         oldPriority = currentTicket.PriorityID
         oldAssigned = currentTicket.assignee.UserID if currentTicket.assignee else None
@@ -430,6 +474,7 @@ def view_ticket(TicketID):
         newStatus = updateTicketForm.status.data
         newAssigned = updateTicketForm.assignedTo.data if updateTicketForm.assignedTo.data != 0 else None
 
+        # Permission handling to check if the user can update the priority, status or assignee
         if oldPriority != newPriority and not can_update_ticket_priority(current_user):
             flash('Access denied. You do not have permission to update priority.')
             return redirect(url_for('view_ticket', TicketID=TicketID))
@@ -442,12 +487,19 @@ def view_ticket(TicketID):
             flash('Access denied. You do not have permission to assign tickets.')
             return redirect(url_for('view_ticket', TicketID=TicketID))
 
+        # Check if the assigned user can be assigned tickets
         if newAssigned is not None:
             assigned_user = db.session.get(User, newAssigned)
             if not assigned_user or not can_be_assigned_tickets(assigned_user):
                 flash('Selected user cannot be assigned tickets.')
                 return redirect(url_for('view_ticket', TicketID=TicketID))
-
+            
+        # Flashes error if user tries to set an unassigned ticket to a status other than open or closed
+        if newAssigned is None and newStatus not in [1, 6]:  
+            flash('Unassigned tickets must have status Open or Closed')
+            return redirect(url_for('view_ticket', TicketID=TicketID))
+            
+        # Update ticket with new data from the form
         currentTicket.PriorityID = newPriority
         currentTicket.StatusID = newStatus
         currentTicket.AssignedTo = newAssigned
@@ -457,43 +509,51 @@ def view_ticket(TicketID):
             flash("Assigned tickets cannot have status 'Open'")
             return redirect(url_for("view_ticket", TicketID=TicketID))
 
-        if updateTicketForm.status.data in [5, 6] and not currentTicket.ClosedAt:
-            currentTicket.ClosedAt = datetime.now()
-        elif updateTicketForm.status.data not in [5, 6]:
+        # Sets closed at date and resolution reasoning if the ticket is being closed or resolved
+        if newStatus in [5, 6]:
+            if not currentTicket.ClosedAt:
+                currentTicket.ClosedAt = datetime.now()
+            if updateTicketForm.resolutionReasoning.data:
+                currentTicket.ResolutionReasoning = updateTicketForm.resolutionReasoning.data
+                recipient = currentTicket.creator.email
+                newActivity = ActivityLog(
+                    UserID = current_user.UserID,
+                    TicketID = currentTicket.TicketID,
+                    action = f"Ticket resolved by {current_user.username} with resolution reasoning: {updateTicketForm.resolutionReasoning.data}",
+                    CreatedAt=datetime.now(),
+                )
+                db.session.add(newActivity)
+                db.session.commit()
+
+                if currentTicket.creator.notifications:
+                    ticketResolvedNotification(currentTicket, recipient)
+        else:
             currentTicket.ClosedAt = None
+            currentTicket.ResolutionReasoning = None
 
-        if updateTicketForm.resolutionReasoning.data:
-            currentTicket.ResolutionReasoning = updateTicketForm.resolutionReasoning.data
-            newActivity = ActivityLog(
-                UserID = current_user.UserID,
-                TicketID = currentTicket.TicketID,
-                action = f"Ticket resolved by {current_user.username} with resolution reasoning: {updateTicketForm.resolutionReasoning.data}",
-                CreatedAt=datetime.now(),
-            )
-            db.session.add(newActivity)
-            db.session.commit()
-
+        # If status is being changed and new status is not resolved, then send an email to the creator if notifications are enabled and create new activity log
         if oldStatus != currentTicket.StatusID and currentTicket.StatusID not in [5]:
             recipient = currentTicket.creator.email
             oldStatusName = db.session.scalar(sa.select(Status.name).where(Status.StatusID == oldStatus))
             newStatusName = db.session.scalar(sa.select(Status.name).where(Status.StatusID == currentTicket.StatusID))
-            newAssigned = currentTicket.assignee.UserID if currentTicket.assignee else None
 
+            # Create new activity and commit
             newActivity = ActivityLog(
                 UserID = current_user.UserID,
                 TicketID = currentTicket.TicketID,
                 action = f"Status changed from {oldStatusName} to {newStatusName}",
                 CreatedAt=datetime.now(),
             )
+
             db.session.add(newActivity)
             db.session.commit()
 
             if app.config['MAIL_SUPPRESS_SEND']:
                 print(f"email failed to send")
-            else:
+            elif currentTicket.creator.notifications:
                 ticketStatusChangeNotification(currentTicket, recipient, oldStatusName, newStatusName)
 
-        newAssigned = currentTicket.assignee.UserID if currentTicket.assignee else None
+        # If assignment has changed, log a new activity for ticket assignment and send an email to the new assignee if they have notifications enabled.
         if oldAssigned != newAssigned:
             newActivity = ActivityLog(
                 UserID = current_user.UserID,
@@ -505,8 +565,10 @@ def view_ticket(TicketID):
             db.session.commit()
             if newAssigned is not None:
                 recipient = currentTicket.assignee.email
-                ticketAssignedNotification(currentTicket, recipient)
+                if currentTicket.assignee.notifications:
+                    ticketAssignedNotification(currentTicket, recipient)
 
+        # If priority has changed log an activity indicating so
         if oldPriority != currentTicket.PriorityID:
             recipient = currentTicket.creator.email
             oldPriorityName = db.session.scalar(sa.select(Priority.name).where(Priority.PriorityID == oldPriority))
@@ -528,8 +590,139 @@ def view_ticket(TicketID):
         return redirect(url_for('view_ticket', TicketID=TicketID))
 
     return render_template('ticketview.html', ticket_id=TicketID, ticket=currentTicket,
-                           comments=comments, commentForm=addCommentForm, updateTicketForm=updateTicketForm,
-                           ticketAge=ticketAge, show_confetti=request.args.get('confetti') == '1', activities=activities)
+                            comments=comments, commentForm=addCommentForm, updateTicketForm=updateTicketForm,
+                            ticketAge=ticketAge, show_confetti=request.args.get('confetti') == '1', activities=activities)
+
+@app.route('/profile/<int:user_id>', methods=['GET', 'POST'])
+@login_required
+def view_profile(user_id):
+    passwordForm = ChangePasswordForm()
+    profileForm = EditProfileForm()
+
+    # Gets the user. If the current user does not match the profile they are attempting to view then flash access denied message
+    user = db.session.scalars(sa.select(User).where(User.UserID == user_id)).first()
+    if user and user.UserID != current_user.UserID and not current_user.has_permission('view_profile'):
+        flash('Access denied. You do not have permission to view this profile.')
+        return redirect(url_for('index'))
+    if not user:
+        flash('User not found.')
+    
+    # Prepopulate the profile form with the current user data on page load
+    if request.method == 'GET':
+        profileForm.username.data = user.username
+        profileForm.email.data = user.email
+        profileForm.notifications.data = user.notifications
+
+    if profileForm.validate_on_submit():
+
+        # Checks for duplicate emails and usernames upon attempt to change email or username
+        duplicate_username = db.session.scalar(
+            sa.select(User).where(
+                sa.and_(User.username == profileForm.username.data, User.UserID != user.UserID)
+            )
+        )
+        duplicate_email = db.session.scalar(
+            sa.select(User).where(
+                sa.and_(User.email == profileForm.email.data, User.UserID != user.UserID)
+            )
+        )
+
+        # Flash Error message if duplicate
+        if duplicate_username:
+            flash('Username already exists.')
+            return redirect(url_for('view_profile', user_id=user_id))
+
+        if duplicate_email:
+            flash('Email already exists.')
+            return redirect(url_for('view_profile', user_id=user_id))
+
+        # Set user data to the form data and commit to database
+        user.username = profileForm.username.data
+        user.email = profileForm.email.data
+        user.notifications = profileForm.notifications.data
+        db.session.commit()
+        
+        flash('Profile updated.')
+        return redirect(url_for('view_profile', user_id=user_id))
+
+    if passwordForm.validate_on_submit():
+        # If the password hash generated from the current password does not match the password hash in the database, flash error message indicating password is incorrect
+        if not check_password_hash(user.password_hash, passwordForm.current_password.data):
+            flash('Current password is incorrect.')
+            return redirect(url_for('view_profile', user_id=user_id))
+        # Flash error message if passwords do not match
+        if passwordForm.new_password.data != passwordForm.confirm_new_password.data:
+            flash('New passwords do not match.')
+        # Generate new password hash and commit to database
+        user.password_hash = generate_password_hash(passwordForm.new_password.data)
+        db.session.commit()
+        flash('Password updated.')
+
+    # Gets number of tickets assigned to user
+    assigned_to_me_count = db.session.scalar(
+        sa.select(sa.func.count()).where(
+            sa.and_(
+                Ticket.AssignedTo == user.UserID,
+                Ticket.StatusID.notin_([5, 6])
+            )
+        )
+    )
+
+    # Get number of tickets that are unassigned
+    unassigned_count = db.session.scalar(
+        sa.select(sa.func.count()).where(
+            sa.and_(
+                Ticket.AssignedTo == None,
+                Ticket.StatusID.notin_([5, 6])
+            )
+        )
+    )
+
+    # Get number of tickets the user has resolved
+    resolved_count = db.session.scalar(
+        sa.select(sa.func.count()).where(
+            sa.and_(
+                Ticket.AssignedTo == user.UserID,
+                Ticket.StatusID == 5
+            )
+        )
+    )
+
+    # Get number of tickets the user has created
+    tickets_created_count = db.session.scalar(sa.select(sa.func.count()).where(Ticket.CreatedBy == user.UserID))
+
+    # Get number of tickets the user has created that is open
+    open_tickets_count = db.session.scalar(
+        sa.select(sa.func.count()).where(
+            sa.and_(
+                Ticket.CreatedBy == user.UserID,
+                Ticket.StatusID.notin_([5, 6])
+            )
+        )
+    )
+
+    # Get number of tickets the user has created that has been resolved
+    resolved_count_employee = db.session.scalar(
+        sa.select(sa.func.count()).where(
+            sa.and_(
+                Ticket.CreatedBy == user.UserID,
+                Ticket.StatusID == 5
+            )
+        )
+    )
+
+    # Get last 5 activities in the activity log associated with the user
+    activities = db.session.scalars(
+        sa.select(ActivityLog).where(
+            ActivityLog.UserID == user.UserID)
+            .order_by(ActivityLog.CreatedAt.desc())
+            .limit(5)
+        ).all()
+
+
+    return render_template('profile.html', user=user, passwordForm=passwordForm, profileForm=profileForm, can_view_profile=current_user.has_permission('view_profile'), can_change_settings=current_user.has_permission('change_settings')
+                            , assigned_to_me_count=assigned_to_me_count, unassigned_count = unassigned_count, resolved_count=resolved_count,
+                            tickets_created_count=tickets_created_count, open_tickets_count=open_tickets_count, resolved_count_employee=resolved_count_employee, activities=activities)
 
 
 @app.route('/admin')
