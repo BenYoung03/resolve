@@ -63,7 +63,7 @@
                 {% for value, label in role_form.role.choices %}
                 <option
                   value="{{ value }}"
-                  {% if value == "user.roleId" %} selected {%endif %}>
+                  {% if value == user.roleId %} selected {%endif %}>
                   {{ label }}
                 </option>
                 {% endfor %}
