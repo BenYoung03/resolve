@@ -102,11 +102,15 @@ You can now follow these steps to install Resolve locally:
     ```
    .\setup.ps1
    ```
-7. Run the application:
+    Note: If the setup script does not work, this is likely due to an error with the ExecutionPolicy. If this occurs, please run PowerShell as administrator and run the following command:
+   ```powershell
+   Set-ExecutionPolicy RemoteSigned
+   ```
+8. Run the application:
    ```
    flask --app resolve run
    ```
-8. Open Application in browser
+9. Open Application in browser
    ```
    http://127.0.0.1:5000
    ```
