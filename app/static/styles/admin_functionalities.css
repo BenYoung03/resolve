@@ -1,8 +1,4 @@
-/* =========================
-   Admin Panel - Minimal Buttons
-   ========================= */
 
-/* Base */
 * {
   box-sizing: border-box;
   margin: 0;
@@ -12,10 +8,10 @@
 body {
   font-family: Arial, sans-serif;
   color: #333;
-  background: #f5f7fa;
+  background: #f0f0f0; 
 }
 
-/* Wrapper */
+
 .admin-func-wrapper {
   max-width: 800px;
   margin: 40px auto;
@@ -26,26 +22,26 @@ body {
   text-align: center;
 }
 
-/* Title */
+
 .admin-func-wrapper h2 {
   font-size: 1.6rem;
   margin-bottom: 20px;
   font-weight: bold;
 }
 
-/* Button Grid */
+
 .admin-buttons {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
   gap: 10px;
 }
 
-/* Buttons */
+
 .admin-buttons a {
   display: block;
   padding: 10px;
   text-decoration: none;
-  background: #4f46e5;
+  background: #3f84e5;
   color: #fff;
   border-radius: 4px;
   font-weight: normal;
@@ -53,37 +49,22 @@ body {
 }
 
 .admin-buttons a:hover {
-  background: #4338ca;
+  background: #261bc4;
 }
 
-/* Logout button */
+
 .admin-buttons a[href*="logout"] {
-  background: #dc2626;
+  background: #b20d30;
 }
 
 .admin-buttons a[href*="logout"]:hover {
-  background: #b91c1c;
+  background: #941401;
 }
 
-/* Mobile */
+
 @media (max-width: 600px) {
   .admin-func-wrapper {
     margin: 20px 10px;
     padding: 15px;
   }
-}
-
-/* Preserved helper rules from updated functionality */
-.admin-func-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    padding: 40px;
-}
-
-.admin-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    width: 200px;
 }
