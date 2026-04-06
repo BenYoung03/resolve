@@ -190,3 +190,87 @@ form select {
         gap: 10px;
     }
 }
+
+
+/* Role Modal */
+
+.role-modal .modal-content {
+    width: 500px;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid var(--border-soft);
+}
+
+/* title */
+.role-modal h3 {
+    margin-top: 0;
+    color: var(--accent-dark);
+}
+
+/* SIDE-BY-SIDE GROUPS */
+.role-modal .permissions-grid {
+    display: flex;
+    gap: 20px;
+}
+
+/* each permission box */
+.role-modal .perm-group {
+    flex: 1;
+    padding: 10px;
+    background: var(--accent-soft);
+    border-radius: 6px;
+}
+
+/* checkbox list */
+.role-modal .perm-group label {
+    display: block;
+    font-weight: normal;
+    margin: 6px 0;
+}
+
+/* stop checkbox stretching */
+.role-modal input[type="checkbox"] {
+    width: auto;
+    margin-right: 6px;
+}
+
+/* buttons row */
+.role-modal .modal-actions-split {
+    margin-top: 15px;
+    display: flex;
+    justify-content: space-between;
+}
+
+
+
+/* Add Role Step 2 */
+.user-row {
+    display: flex;         
+    align-items: center;   
+    gap: 6px;               
+    margin-bottom: 4px;
+}
+
+.user-check input {
+    margin: 0;             
+}
+
+.user-info {
+    display: flex;
+    flex-direction: column; 
+}
+
+.user-name {
+    font-weight: bold;
+}
+
+.user-email {
+    font-size: 0.9em;
+    color: #555;
+}
+
+.users-list {
+    padding: 5px;
+    background: var(--accent-soft);
+}
+

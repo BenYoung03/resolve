@@ -52,8 +52,11 @@
 
 <!-- New Client Modal -->
 <div id="new-client-modal" class="modal">
-    <div class="modal-content">
-        <h2>Register a new client</h2>
+    <div class="modal-content"> 
+        <h2>Register a new client &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <button onclick="document.getElementById('new-client-modal').style.display='none'">X</button>
+
+        </h2>
         <form method="post" action="{{ url_for('admin_new_client') }}">
             {{ new_client_form.hidden_tag() }}
             {{ new_client_form.username(placeholder="Enter the client name here") }}
@@ -61,7 +64,6 @@
             {{ new_client_form.password(placeholder="Enter password") }}
             {{ new_client_form.submit() }}
         </form>
-        <button onclick="document.getElementById('new-client-modal').style.display='none'">X</button>
     </div>
 </div>
 

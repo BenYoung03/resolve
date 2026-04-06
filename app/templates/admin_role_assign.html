@@ -17,7 +17,7 @@
     <div class="panel-content">
         <h3>Assign Role to Users</h3>
 
-        <form method="post" action="{{ url_for('admin_create_role_step2') }}">
+        <form class="role-step2-form" method="post" action="{{ url_for('admin_create_role_step2') }}">
             {{ form.hidden_tag() }}
             <input type="hidden" name="role_name" value="{{ role_name }}">
 
