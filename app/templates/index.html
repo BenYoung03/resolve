@@ -19,7 +19,6 @@
                     <li><a href="/index/open">Open Tickets</a></li>
                     <li><a href="/index/closed">Closed Tickets</a></li>
                     <li><a href="/createticket">New Ticket</a></li>
-                    <!--TODO: Improve styling for this flashed message-->
                     {% with messages = get_flashed_messages() %}
                         {% if messages %}
                         <ul class="flashed-message-list">
@@ -72,7 +71,6 @@
                                         {{ ticket.status.name }}
                                     </div>
                                 </td>
-                                <!--TODO: Fix bug that makes this portion flip the column header styling. It is here to ensure that priorities are handled when filtering in the correct order-->
                                 <td data-order="
                                     {% if ticket.priority.name == 'Critical' %}5
                                     {% elif ticket.priority.name == 'Urgent' %}4
