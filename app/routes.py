@@ -841,7 +841,11 @@ def admin_clients():
         .where(
             sa.and_(
                 Role.name != "Admin",
-                Role.name != "Agent"
+                Role.name != "Agent",
+                sa.or_(
+                    Role.permissions.is_(None),
+                    sa.func.trim(Role.permissions) == ""
+                )
             )
         )
         .order_by(User.username.asc())
@@ -849,6 +853,21 @@ def admin_clients():
 
     new_client_form = AdminNewClientForm()
     return render_template('admin_clients.html', clients=clients, new_client_form=new_client_form)
+# def admin_clients():
+#     clients = db.session.scalars(
+#         sa.select(User)
+#         .join(Role)
+#         .where(
+#             sa.and_(
+#                 Role.name != "Admin",
+#                 Role.name != "Agent"
+#             )
+#         )
+#         .order_by(User.username.asc())
+#     ).all()
+
+#     new_client_form = AdminNewClientForm()
+#     return render_template('admin_clients.html', clients=clients, new_client_form=new_client_form)
 
 @app.route('/admin/roles')
 @login_required
