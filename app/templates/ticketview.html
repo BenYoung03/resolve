@@ -112,7 +112,7 @@
                                         <div class="activity-content">
                                             <div class="activity-author">{{ activity.user.username if activity.user and activity.user.username else (activity.user.email if activity.user else 'Unknown User') }}</div>
                                             <div class="activity-separator">|</div>
-                                            <div class="activity-meta activity-date">
+                                            <div class="activity-date">
                                                 {{ activity.CreatedAt.strftime('%b %d, %Y, %I:%M %p') if activity.CreatedAt else 'Unknown' }}
                                             </div>
                                             <div class="activity-separator">|</div>
@@ -244,7 +244,7 @@
                                         <div class="activity-content">
                                             <div class="activity-author">{{ activity.user.username if activity.user and activity.user.username else (activity.user.email if activity.user else 'Unknown User') }}</div>
                                             <div class="activity-separator">|</div>
-                                            <div class="activity-meta activity-date">
+                                            <div class="activity-date">
                                                 {{ activity.CreatedAt.strftime('%b %d, %Y, %I:%M %p') if activity.CreatedAt else 'Unknown' }}
                                             </div>
                                             <div class="activity-separator">|</div>

@@ -60,7 +60,7 @@
                         <div class="activity-content">
                             <div class="activity-author"><a href="{{ url_for('view_ticket', TicketID=activity.ticket.TicketID)}}" class="ticket-link">{{ activity.ticket.ticketNumber }}</a></div>
                             <div class="activity-separator">|</div>
-                            <div class="activity-meta activity-date">
+                            <div class="activity-date">
                                 {{ activity.CreatedAt.strftime('%b %d, %Y, %I:%M %p') if activity.CreatedAt else 'Unknown' }}
                             </div>
                             <div class="activity-text">{{ activity.action }}</div>
