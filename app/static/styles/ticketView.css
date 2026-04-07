@@ -135,6 +135,10 @@
     background: #f59e0b; 
 }
 
+.status-on-hold{
+    background: #eab308;
+}
+
 .status-pending{ 
     background: #eab308; 
 }

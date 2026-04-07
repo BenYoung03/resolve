@@ -179,6 +179,10 @@
     background: #f59e0b; 
 }
 
+#ticket-status.status-on-hold{
+    background: #eab308;
+}
+
 #ticket-status.status-pending{ 
     background: #eab308; 
 }
