@@ -302,7 +302,16 @@ If a custom role is disabled, any users assigned to it are moved back to the Emp
 <p align="center">
   <img src="README%20Images/admin-roles.png" alt="Roles Page" width="850" />
 </p>
+#### Settings Management
+The Settings page is used to manage the system email configuration directly through the admin panel. Instead of manually creating and editing the `.env` file, an authorized admin can configure the mail settings from the web interface.
 
+If a `.env` file already exists, the system reads the current values and displays the mail server, port, TLS setting, and username in the form. For security reasons, the stored mail password is never shown back to the user. If no `.env` file is present, filling in the settings form and saving will create the file automatically.
+
+This allows the email system to be configured more easily while still protecting sensitive credentials.
+
+<p align="center">
+  <img src="README%20Images/admin-settings.png" alt="Roles Page" width="850" />
+</p>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
