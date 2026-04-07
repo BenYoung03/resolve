@@ -1,38 +1,66 @@
-{% extends "base.html" %} {% block extra_head %}
+{% extends "base.html" %}
+{% block extra_head %}
 <link
   rel="stylesheet"
   type="text/css"
   href="{{ url_for('static', filename='styles/admin_panel.css') }}"
 />
-{% endblock %} {% block content %}
+{% endblock %}
+
+{% block content %}
 <div class="panel-wrapper">
   <div class="panel-sidebar">
     <p><strong>Admin</strong></p>
+
     {% if current_user.has_role(['Admin']) or current_user.has_permission('view_users') or current_user.has_permission('create_users') %}
     <a href="{{ url_for('admin_users') }}">Users</a>
     {% endif %}
+
     {% if current_user.has_role(['Admin']) or current_user.has_permission('view_clients') %}
     <a href="{{ url_for('admin_clients') }}">Clients</a>
     {% endif %}
+
     {% if current_user.has_role(['Admin']) or current_user.has_permission('view_roles') or current_user.has_permission('create_roles') %}
     <a href="{{ url_for('admin_roles') }}">Roles</a>
     {% endif %}
+
     {% if current_user.has_role(['Admin']) or current_user.has_permission('change_settings') %}
     <a href="{{ url_for('admin_settings') }}">Settings</a>
     {% endif %}
-    {% if current_user.has_role(['Admin']) or current_user.has_permission('view_profile') %}
-    <a href="{{ url_for('admin_profile') }}">Profile</a>
-    {% endif %}
+
     <a href="{{ url_for('logout') }}">Logout</a>
   </div>
+
   <div class="panel-content">
-    <div class="panel-title">Settings</div>
+    <div class="panel-title">Email Settings</div>
+
     <form method="post">
       {{ form.hidden_tag() }}
-      <label>Old Password:</label>
-      {{ form.old_password() }}
-      <label>New Password:</label>
-      {{ form.new_password() }} {{ form.submit() }}
+
+      <label>Mail Server:</label>
+      {{ form.mail_server(placeholder="smtp.gmail.com") }}
+
+      <label>Mail Port:</label>
+      {{ form.mail_port(placeholder="587") }}
+
+      <div class="tls-row">
+          <span class="tls-label">Use TLS:</span>
+
+          {% for subfield in form.mail_use_tls %}
+              <label class="tls-option">
+                  {{ subfield() }}
+                  <span>{{ subfield.label.text }}</span>
+              </label>
+          {% endfor %}
+      </div>
+
+      <label>Mail Username:</label>
+      {{ form.mail_username(placeholder="youremail@gmail.com") }}
+
+      <label>Mail Password:</label>
+      {{ form.mail_password(placeholder="Enter new app password") }}
+
+      {{ form.submit() }}
     </form>
   </div>
 </div>

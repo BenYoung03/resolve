@@ -22,10 +22,7 @@
     {% endif %} {% if current_user.has_role(['Admin']) or
     current_user.has_permission('change_settings') %}
     <a href="{{ url_for('admin_settings') }}">Settings</a>
-    {% endif %} {% if current_user.has_role(['Admin']) or
-    current_user.has_permission('view_profile') %}
-    <a href="{{ url_for('admin_profile') }}">Profile</a>
-    {% endif %}
+    {% endif %} 
     <a href="{{ url_for('logout') }}">Logout</a>
   </div>
   <div class="panel-content">

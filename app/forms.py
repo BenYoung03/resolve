@@ -1,5 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import SelectField, SelectMultipleField, StringField, PasswordField, BooleanField, SubmitField, TextAreaField
+from wtforms import RadioField, SelectField, SelectMultipleField, StringField, PasswordField, BooleanField, SubmitField, TextAreaField
 from wtforms.validators import DataRequired, Email, Length, EqualTo, InputRequired, ValidationError
 
 PERMISSION_CHOICES = [
@@ -133,17 +133,23 @@ class UpdateTicket(FlaskForm):
         if self.status.data in [5] and not field.data:
             raise ValidationError("Resolution reasoning is required when closing or resolving a ticket.")
         
-
 class AdminSettingsForm(FlaskForm):
-    old_password = PasswordField('Old Password', validators=[DataRequired()])
-    new_password = PasswordField('New Password', validators=[DataRequired()])
+    mail_server = StringField('Mail Server', validators=[DataRequired()])
+    mail_port = StringField('Mail Port', validators=[DataRequired()])
+    mail_use_tls = RadioField('Use TLS',choices=[('yes', 'Yes'), ('no', 'No')],default='yes',validators=[DataRequired()])
+    mail_username = StringField('Mail Username', validators=[DataRequired(), Email()])
+    mail_password = PasswordField('Mail Password', validators=[DataRequired()])
     submit = SubmitField('Save')
+# class AdminSettingsForm(FlaskForm):
+#     old_password = PasswordField('Old Password', validators=[DataRequired()])
+#     new_password = PasswordField('New Password', validators=[DataRequired()])
+#     submit = SubmitField('Save')
 
-class AdminProfileForm(FlaskForm):
-    username = StringField('Username', validators=[DataRequired()])
-    email = StringField('Email', validators=[DataRequired(), Email()])
-    language = SelectField('Language', choices=[('English', 'English')])
-    submit = SubmitField('Save')
+# class AdminProfileForm(FlaskForm):
+#     username = StringField('Username', validators=[DataRequired()])
+#     email = StringField('Email', validators=[DataRequired(), Email()])
+#     language = SelectField('Language', choices=[('English', 'English')])
+#     submit = SubmitField('Save')
 
 class AdminNewClientForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -171,7 +177,6 @@ class AdminRoleForm(FlaskForm):
         ('create_users', 'Create users'),
         ('view_clients', 'View clients'),
         ('change_settings', 'Change settings'),
-        ('view_profile', 'View profile'),
     ])
     submit = SubmitField('Save')
 

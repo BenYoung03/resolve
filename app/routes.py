@@ -1,10 +1,15 @@
+
+import os
+from pathlib import Path
+from dotenv import dotenv_values, set_key
+
 from app import app, db
 from flask import render_template, flash, redirect, url_for, request
 import sqlalchemy as sa
 # from app.forms import CommentForm, LoginForm, PasswordResetForm, RegistrationForm, CreateTicketForm, ResetPasswordForm, UpdateTicket
 from app.forms import (
     CommentForm, LoginForm, RegistrationForm, CreateTicketForm, UpdateTicket,
-    AdminSettingsForm, AdminProfileForm, AdminNewClientForm, AdminRoleForm,
+    AdminSettingsForm, AdminNewClientForm, AdminRoleForm,
     AdminResetPasswordForm, AdminNewUserForm, PasswordResetForm, ResetPasswordForm, EditProfileForm, ChangePasswordForm
 )
 from app.models import TicketComment, User, Role, Category, Status, Priority, Ticket, ActivityLog
@@ -74,6 +79,44 @@ def can_use_assigned_queue(user):
         user.has_role('Agent', 'Admin') or
         user.has_permission('assign_tickets', 'ticket_agent')
     )
+BASE_DIR = Path(app.root_path).parent
+ENV_PATH = BASE_DIR / '.env'
+
+
+def read_mail_env():
+    if not ENV_PATH.exists():
+        return {}
+
+    values = dotenv_values(ENV_PATH)
+
+    return {
+        'MAIL_SERVER': values.get('MAIL_SERVER', ''),
+        'MAIL_PORT': values.get('MAIL_PORT', ''),
+        'MAIL_USE_TLS': str(values.get('MAIL_USE_TLS', '')).strip() in ['1', 'true', 'True', 'yes', 'on'],
+        'MAIL_USERNAME': values.get('MAIL_USERNAME', ''),
+        'MAIL_PASSWORD': values.get('MAIL_PASSWORD', '')
+    }
+
+
+def write_mail_env(mail_server, mail_port, mail_use_tls, mail_username, mail_password):
+    if not ENV_PATH.exists():
+        ENV_PATH.touch()
+
+    set_key(str(ENV_PATH), 'MAIL_SERVER', str(mail_server))
+    set_key(str(ENV_PATH), 'MAIL_PORT', str(mail_port))
+    set_key(str(ENV_PATH), 'MAIL_USE_TLS', '1' if mail_use_tls else '0')
+    set_key(str(ENV_PATH), 'MAIL_USERNAME', str(mail_username))
+    set_key(str(ENV_PATH), 'MAIL_PASSWORD', str(mail_password))
+
+
+def apply_mail_config(mail_server, mail_port, mail_use_tls, mail_username, mail_password):
+    app.config['MAIL_SERVER'] = mail_server
+    app.config['MAIL_PORT'] = int(mail_port)
+    app.config['MAIL_USE_TLS'] = bool(mail_use_tls)
+    app.config['MAIL_USERNAME'] = mail_username
+    app.config['MAIL_PASSWORD'] = mail_password
+    app.config['MAIL_DEFAULT_SENDER'] = mail_username
+    app.config['MAIL_SUPPRESS_SEND'] = not (mail_server and mail_username and mail_password)
 
 @app.route('/')
 @app.route('/index')
@@ -819,7 +862,6 @@ def admin_roles():
     form.role.choices = []
     return render_template('admin_roles.html', roles=roles, form=form)
 
-
 @app.route('/admin/settings', methods=['GET', 'POST'])
 @login_required
 @role_or_permission_required(
@@ -828,58 +870,106 @@ def admin_roles():
 )
 def admin_settings():
     form = AdminSettingsForm()
-    if form.validate_on_submit():
-        if not check_password_hash(current_user.password_hash, form.old_password.data):
-            flash('Old password is incorrect.')
-            return redirect(url_for('admin_settings'))
-        current_user.password_hash = generate_password_hash(form.new_password.data)
-        db.session.commit()
-        flash('Password updated.')
-        return redirect(url_for('admin_settings'))
-    return render_template('admin_settings.html', form=form)
 
-
-@app.route('/admin/profile', methods=['GET', 'POST'])
-@login_required
-@role_or_permission_required(
-    roles=['Admin'],
-    permissions=['view_profile']
-)
-def admin_profile():
-    form = AdminProfileForm()
-
+    print("ENV PATH:", ENV_PATH)
+    print("ENV EXISTS:", ENV_PATH.exists())
+    print("MAIL VALUES:", read_mail_env())
     if request.method == 'GET':
-        form.username.data = current_user.username
-        form.email.data = current_user.email
-        form.language.data = 'English'
+        env_values = read_mail_env()
+        form.mail_server.data = env_values.get('MAIL_SERVER', '')
+        form.mail_port.data = env_values.get('MAIL_PORT', '')
+        form.mail_use_tls.data = 'yes' if env_values.get('MAIL_USE_TLS', False) else 'no'
+        form.mail_username.data = env_values.get('MAIL_USERNAME', '')
+        # do not prefill password for security
 
     if form.validate_on_submit():
-        duplicate_username = db.session.scalar(
-            sa.select(User).where(
-                sa.and_(User.username == form.username.data, User.UserID != current_user.UserID)
-            )
+        try:
+            mail_port = int(form.mail_port.data)
+        except ValueError:
+            flash('Mail port must be a number.')
+            return redirect(url_for('admin_settings'))
+
+        use_tls = form.mail_use_tls.data == 'yes'
+        write_mail_env(
+            mail_server=form.mail_server.data.strip(),
+            mail_port=mail_port,
+            mail_use_tls=use_tls,
+            mail_username=form.mail_username.data.strip(),
+            mail_password=form.mail_password.data
         )
-        duplicate_email = db.session.scalar(
-            sa.select(User).where(
-                sa.and_(User.email == form.email.data, User.UserID != current_user.UserID)
-            )
+
+        apply_mail_config(
+            mail_server=form.mail_server.data.strip(),
+            mail_port=mail_port,
+            mail_use_tls=use_tls,
+            mail_username=form.mail_username.data.strip(),
+            mail_password=form.mail_password.data
         )
 
-        if duplicate_username:
-            flash('Username already exists.')
-            return redirect(url_for('admin_profile'))
+        flash('Email settings saved successfully.')
+        return redirect(url_for('admin_settings'))
 
-        if duplicate_email:
-            flash('Email already exists.')
-            return redirect(url_for('admin_profile'))
+    return render_template('admin_settings.html', form=form)
+# @app.route('/admin/settings', methods=['GET', 'POST'])
+# @login_required
+# @role_or_permission_required(
+#     roles=['Admin'],
+#     permissions=['change_settings']
+# )
+# def admin_settings():
+#     form = AdminSettingsForm()
+#     if form.validate_on_submit():
+#         if not check_password_hash(current_user.password_hash, form.old_password.data):
+#             flash('Old password is incorrect.')
+#             return redirect(url_for('admin_settings'))
+#         current_user.password_hash = generate_password_hash(form.new_password.data)
+#         db.session.commit()
+#         flash('Password updated.')
+#         return redirect(url_for('admin_settings'))
+#     return render_template('admin_settings.html', form=form)
 
-        current_user.username = form.username.data
-        current_user.email = form.email.data
-        db.session.commit()
-        flash('Profile updated.')
-        return redirect(url_for('admin_profile'))
 
-    return render_template('admin_profile.html', form=form)
+# @app.route('/admin/profile', methods=['GET', 'POST'])
+# @login_required
+# @role_or_permission_required(
+#     roles=['Admin'],
+#     permissions=['view_profile']
+# )
+# def admin_profile():
+#     form = AdminProfileForm()
+
+#     if request.method == 'GET':
+#         form.username.data = current_user.username
+#         form.email.data = current_user.email
+#         form.language.data = 'English'
+
+#     if form.validate_on_submit():
+#         duplicate_username = db.session.scalar(
+#             sa.select(User).where(
+#                 sa.and_(User.username == form.username.data, User.UserID != current_user.UserID)
+#             )
+#         )
+#         duplicate_email = db.session.scalar(
+#             sa.select(User).where(
+#                 sa.and_(User.email == form.email.data, User.UserID != current_user.UserID)
+#             )
+#         )
+
+#         if duplicate_username:
+#             flash('Username already exists.')
+#             return redirect(url_for('admin_profile'))
+
+#         if duplicate_email:
+#             flash('Email already exists.')
+#             return redirect(url_for('admin_profile'))
+
+#         current_user.username = form.username.data
+#         current_user.email = form.email.data
+#         db.session.commit()
+#         flash('Profile updated.')
+#         return redirect(url_for('admin_profile'))
+
+#     return render_template('admin_profile.html', form=form)
 
 @app.route('/admin/change-role/<int:user_id>', methods=['POST'])
 @login_required
