@@ -276,9 +276,10 @@ The following is the HTML template code for the ticket overview. This is a great
 ```
 ### Admin Panel
 
-Resolve includes an admin panel protected by role-based and permission-based access control. Rather than giving every staff member full administrator access, the system allows access to specific admin pages based on the user's role or assigned permissions. The admin area currently includes Users, Clients, and Roles pages, and each section is only visible to users with the required access.
+Resolve includes an admin panel protected by role-based and permission-based access control. Rather than giving every staff member full administrator access, the system allows access to specific admin pages based on the user's role or assigned permissions. The admin area currently includes Users, Clients, Roles, and Settings pages, and each section is only visible to users with the required access.
 
 #### User Management
+
 The Users page allows authorized staff to manage internal user accounts. From this page, users with the correct permissions can view all users, create new internal users, change user roles, reset passwords, and delete accounts. The system validates submitted data, ensures the selected role exists and is active, securely stores passwords using hashing, and prevents invalid actions such as deleting your own account.
 
 <p align="center">
@@ -286,6 +287,7 @@ The Users page allows authorized staff to manage internal user accounts. From th
 </p>
 
 #### Client Management
+
 The Clients page is used to manage client accounts separately from internal support staff. It displays client users, includes a basic name filter, and allows authorized users to create new client accounts or delete existing ones. This keeps customer account management separate from staff account administration.
 
 <p align="center">
@@ -293,24 +295,27 @@ The Clients page is used to manage client accounts separately from internal supp
 </p>
 
 #### Role and Permission Management
+
 Resolve starts with three built-in roles: Admin, Agent, and Employee. These are the default system roles and cannot be deleted, renamed, disabled, or changed. Their default permissions are also fixed and cannot be modified. Only custom roles can be created, edited, enabled, disabled, or deleted. This protects the core access structure of the system and ensures the main roles always keep their intended behavior.
 
-The Roles page allows authorized users to manage custom roles and assign permissions for both ticket handling and admin access, such as viewing all tickets, assigning tickets, updating ticket priority or status, viewing users, creating users, viewing clients, viewing roles, and creating roles. Role creation is handled in two steps: permissions are selected first, then users can optionally be assigned to the new role.
+The Roles page allows authorized users to manage custom roles and assign permissions for both ticket handling and admin access, such as viewing all tickets, assigning tickets, updating ticket priority or status, viewing users, creating users, viewing clients, viewing roles, creating roles, and changing settings. Role creation is handled in two steps: permissions are selected first, then users can optionally be assigned to the new role.
 
 If a custom role is disabled, any users assigned to it are moved back to the Employee role. This allows the system to support more flexible staff access without affecting the required default roles.
 
 <p align="center">
   <img src="README%20Images/admin-roles.png" alt="Roles Page" width="850" />
 </p>
+
 #### Settings Management
-The Settings page is used to manage the system email configuration directly through the admin panel. Instead of manually creating and editing the `.env` file, an authorized admin can configure the mail settings from the web interface.
 
-If a `.env` file already exists, the system reads the current values and displays the mail server, port, TLS setting, and username in the form. For security reasons, the stored mail password is never shown back to the user. If no `.env` file is present, filling in the settings form and saving will create the file automatically.
+The Settings page allows authorized admins to manage the system email configuration directly through the admin panel. Instead of manually creating and editing a `.env` file, the mail settings can be configured from the web interface.
 
-This allows the email system to be configured more easily while still protecting sensitive credentials.
+If a `.env` file already exists, the system reads the current values and displays the mail server, port, TLS setting, and username in the form. For security reasons, the stored mail password is never displayed back to the user. If no `.env` file exists, completing the settings form and saving it will automatically create the file.
+
+This makes the email system easier to configure while still protecting sensitive credentials.
 
 <p align="center">
-  <img src="README%20Images/admin-settings.png" alt="Roles Page" width="850" />
+  <img src="README%20Images/admin-settings.png" alt="Settings Page" width="850" />
 </p>
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
