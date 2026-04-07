@@ -207,3 +207,12 @@
     padding: 16px;
 }
 
+.left-menu li.flashed-message-element:hover {
+    background-color: transparent;
+}
+
+.flashed-message-element{
+    margin-left: 8px;
+    color: #2f7de1; 
+}
+
