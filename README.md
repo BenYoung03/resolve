@@ -276,11 +276,31 @@ The following is the HTML template code for the ticket overview. This is a great
 ```
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
+### Admin Panel
+
+Resolve includes an admin panel protected by role-based and permission-based access control. Rather than giving every staff member full administrator access, the system allows access to specific admin pages based on the user's role or assigned permissions. The admin area currently includes Users, Clients, and Roles pages, and each section is only visible to users with the required access.
+
+#### User Management
+The Users page allows authorized staff to manage internal user accounts. From this page, users with the correct permissions can view all users, create new internal users, change user roles, reset passwords, and delete accounts. The system validates submitted data, ensures the selected role exists and is active, securely stores passwords using hashing, and prevents invalid actions such as deleting your own account.
+
+#### Client Management
+The Clients page is used to manage client accounts separately from internal support staff. It displays client users, includes a basic name filter, and allows authorized users to create new client accounts or delete existing ones. This keeps customer account management separate from staff account administration.
+
+#### Role and Permission Management
+Resolve starts with three built-in roles: Admin, Agent, and Employee. These are the default system roles and cannot be deleted, renamed, disabled, or edited. Their basic permissions are also fixed, meaning only custom roles can be changed or configured. This protects the core access structure of the system and ensures the main roles always keep their intended behavior.
+
+The Roles page allows authorized users to create, edit, enable, disable, and delete custom roles. Each custom role can be assigned specific permissions for both ticket handling and admin access, such as viewing all tickets, assigning tickets, updating ticket priority or status, viewing users, creating users, viewing clients, viewing roles, and creating roles. Role creation is handled in two steps: permissions are selected first, then users can optionally be assigned to the new role.
+
+If a custom role is disabled, any users assigned to it are moved back to the Employee role. This makes the admin system more flexible by allowing custom staff access without always requiring full administrator privileges, while still protecting the default roles that the system depends on.
+
 # Contact
 Benjamin Young - bryoung1@lakeheadu.ca
 
 LinkedIn: [Benjamin Young](https://www.linkedin.com/in/benjamin-young-2b5497282/)  
 GitHub: [BenYoung03](https://github.com/BenYoung03)
+
+
+Cameron McFayden - cmmcfayd@lakeheadu.ca
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
